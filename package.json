@@ -1,0 +1,19 @@
+{
+    "name": "@cap-js/alert-notification",
+    "version": "0.0.1",
+    "description": "CDS plugin providing integration to the SAP BTP Alert Notification Service.",
+    "repository": "cap-js/alert-notification",
+    "author": "SAP SE (https://www.sap.com)",
+    "homepage": "https://cap.cloud.sap/",
+    "license": "SEE LICENSE IN LICENSE",
+    "main": "cds-plugin.js",
+    "files": [
+      "lib",
+      "srv"
+    ],
+    "scripts": {
+      "lint": "npx eslint .",
+      "test": "npx jest --silent"
+    }
+  }
+  
