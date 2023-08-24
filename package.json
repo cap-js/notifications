@@ -8,12 +8,14 @@
     "license": "SEE LICENSE IN LICENSE",
     "main": "cds-plugin.js",
     "files": [
-      "lib",
-      "srv"
+        "lib",
+        "srv"
     ],
     "scripts": {
-      "lint": "npx eslint .",
-      "test": "npx jest --silent"
+        "lint": "npx eslint .",
+        "test": "npx jest --silent"
+    },
+    "dependencies": {
+        "@sap-cloud-sdk/core": "^1.54.2"
     }
-  }
-  
+}
