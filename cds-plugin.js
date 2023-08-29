@@ -18,9 +18,9 @@ cds.once("served", () => {
   /**
    * TODO: Decide the properties to be added in the alerts section for notificationtype files.
    */
-  if (cds.requires?.notifications?.notificationTypes) {
+  if (cds.requires?.notifications?.types) {
     let notificationTypes = readFileContent(
-      cds.requires.alerts.notificationTypes
+      cds.requires.notifications.types
     );
     if (validateNotificationTypes(notificationTypes)) {
       notificationTypes.forEach((oNotificationType) => {
