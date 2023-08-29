@@ -11,11 +11,11 @@
         "lib",
         "srv"
     ],
+    "dependencies": {
+        "@sap-cloud-sdk/core": "^1.54.2"
+    },
     "scripts": {
         "lint": "npx eslint .",
         "test": "npx jest --silent"
-    },
-    "dependencies": {
-        "@sap-cloud-sdk/core": "^1.54.2"
     }
 }

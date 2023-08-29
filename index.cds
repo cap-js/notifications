@@ -1,4 +1,4 @@
-namespace sap.alert;
+namespace sap.notifications;
 
 service AlertNotificationService {
   /**

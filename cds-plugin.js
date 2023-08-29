@@ -1,24 +1,16 @@
 const cds = require("@sap/cds");
-const fs = require("fs").promises;
-const notifier = require("./srv/notify");
+const notifier = require("./srv/service");
+const {
+  messages,
+  validateNotificationTypes,
+  readFileContent,
+} = require("./lib/utils");
 
 global.alert = {
   notify: notifier.postNotification,
 };
 
-const oErrorMessages = {
-  INVALID_NOTIFICATION_TYPES:
-    "Failed to create Notification Types as they are not valid.",
-};
-
-let fAreNotificationTypesValid = async (aNotificationtypes) => {
-  /**
-   * TODO: write a logic to check all the required fields.
-   */
-  return true;
-};
-
-cds.once("served", async () => {
+cds.once("served", () => {
   /**
    * For local testing initialise VCAP_SERVICES variables for the application
    * process.env.VCAP_SERVICES = Strigified VCAP_SERVICES variable
@@ -26,16 +18,22 @@ cds.once("served", async () => {
   /**
    * TODO: Decide the properties to be added in the alerts section for notificationtype files.
    */
-  if (cds.requires.alerts && cds.requires.alerts.notificationTypes) {
-    let notificationTypes = JSON.parse(
-      await fs.readFile(cds.requires.alerts.notificationTypes)
+  if (cds.requires?.notifications?.notificationTypes) {
+    let notificationTypes = readFileContent(
+      cds.requires.alerts.notificationTypes
     );
-    if (fAreNotificationTypesValid) {
+    if (validateNotificationTypes(notificationTypes)) {
       notificationTypes.forEach((oNotificationType) => {
         notifier.postNotificationType(oNotificationType);
       });
     } else {
-      console.log(oErrorMessages.INVALID_NOTIFICATION_TYPES);
+      /**
+       * TODO: Move this message inside the validation function
+       * ? Should we throw error message or warning for the specific invalid NotificationType?
+       * ? e.g., If we have 5 notificationTypes and 1 out of the 5 is invalid type, we should
+       * ? go ahead and create the valid ones and display INFO/Warning for the invalid type
+       */
+      console.log(messages.INVALID_NOTIFICATION_TYPES);
     }
   }
 });
