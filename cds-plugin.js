@@ -1,5 +1,5 @@
 const cds = require("@sap/cds");
-const notifier = require("./srv/service");
+const notifier = require("./lib/notifications");
 const {
   messages,
   validateNotificationTypes,
