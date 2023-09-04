@@ -14,6 +14,9 @@
     "dependencies": {
         "@sap-cloud-sdk/core": "^1.54.2"
     },
+    "devDependencies": {
+      "jest": "^29.6.4"
+    },
     "scripts": {
         "lint": "npx eslint .",
         "test": "npx jest --silent"
