@@ -17,5 +17,20 @@
     "scripts": {
         "lint": "npx eslint .",
         "test": "npx jest --silent"
-    }
+    },
+    "cds": {
+        "requires": {
+          "kinds": {
+            "notifications": {
+              "[development]": {
+                "kind": "alert-to-console"
+              }
+            },
+            "alert-to-console": {
+              "impl": "@cap-js/alert-notification/srv/log2console",
+              "outbox": false
+            }
+          }
+        }
+      }
 }
