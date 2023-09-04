@@ -17,5 +17,8 @@
     "scripts": {
         "lint": "npx eslint .",
         "test": "npx jest --silent"
+    },
+    "devDependencies": {
+        "jest": "^29.6.4"
     }
 }
