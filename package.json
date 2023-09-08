@@ -23,11 +23,11 @@
           "kinds": {
             "notifications": {
               "[development]": {
-                "kind": "alert-to-console"
+                "kind": "notify-to-console"
               }
             },
-            "alert-to-console": {
-              "impl": "@cap-js/alert-notification/srv/log2console",
+            "notify-to-console": {
+              "impl": "@cap-js/alert-notification/srv/notify2console",
               "outbox": false
             }
           }
