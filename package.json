@@ -12,13 +12,28 @@
         "srv"
     ],
     "dependencies": {
-        "@sap-cloud-sdk/core": "^1.54.2"
+      "@sap-cloud-sdk/core": "^1.54.2"
+    },
+    "devDependencies": {
+        "jest": "^29.6.4"
     },
     "scripts": {
         "lint": "npx eslint .",
         "test": "npx jest --silent"
     },
-    "devDependencies": {
-        "jest": "^29.6.4"
-    }
+    "cds": {
+        "requires": {
+          "kinds": {
+            "notifications": {
+              "[development]": {
+                "kind": "notify-to-console"
+              }
+            },
+            "notify-to-console": {
+              "impl": "@cap-js/alert-notification/srv/notifyToConsole",
+              "outbox": false
+            }
+          }
+        }
+      }
 }

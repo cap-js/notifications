@@ -6,10 +6,6 @@ const {
   readFileContent,
 } = require("./lib/utils");
 
-global.alert = {
-  notify: notifier.postNotification,
-};
-
 cds.once("served", () => {
   /**
    * For local testing initialise VCAP_SERVICES variables for the application
@@ -38,4 +34,3 @@ cds.once("served", () => {
   }
 });
 
-module.exports = { alert: alert };
