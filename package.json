@@ -1,43 +1,46 @@
 {
-    "name": "@cap-js/alert-notification",
-    "version": "0.0.1",
-    "description": "CDS plugin providing integration to the SAP BTP Alert Notification Service.",
-    "repository": "cap-js/alert-notification",
-    "author": "SAP SE (https://www.sap.com)",
-    "homepage": "https://cap.cloud.sap/",
-    "license": "SEE LICENSE IN LICENSE",
-    "main": "cds-plugin.js",
-    "files": [
-        "lib",
-        "srv"
-    ],
-    "dependencies": {
-      "@sap-cloud-sdk/core": "^1.54.2"
-    },
-    "devDependencies": {
-        "jest": "^29.6.4"
-    },
-    "scripts": {
-        "lint": "npx eslint .",
-        "test": "npx jest --silent"
-    },
-    "cds": {
-        "requires": {
-          "kinds": {
-            "notifications": {
-              "[development]": {
-                "kind": "notify-to-console"
-              }
-            },
-            "notify-to-console": {
-              "impl": "@cap-js/alert-notification/srv/notifyToConsole",
-              "outbox": false
-            },
-            "alert-to-rest": {
-              "impl": "@cap-js/alert-notification/srv/alert2rest",
-              "outbox": true
-            }
+  "name": "@cap-js/alert-notification",
+  "version": "0.0.1",
+  "description": "CDS plugin providing integration to the SAP BTP Alert Notification Service.",
+  "repository": "cap-js/alert-notification",
+  "author": "SAP SE (https://www.sap.com)",
+  "homepage": "https://cap.cloud.sap/",
+  "license": "SEE LICENSE IN LICENSE",
+  "main": "cds-plugin.js",
+  "files": [
+    "lib",
+    "srv"
+  ],
+  "dependencies": {
+    "@sap-cloud-sdk/core": "^1.54.2"
+  },
+  "devDependencies": {
+    "jest": "^29.6.4"
+  },
+  "scripts": {
+    "lint": "npx eslint .",
+    "test": "npx jest --silent"
+  },
+  "cds": {
+    "requires": {
+      "kinds": {
+        "notifications": {
+          "[development]": {
+            "kind": "notify-to-console"
+          },
+          "[production]": {
+            "kind": "notify-to-rest"
           }
+        },
+        "notify-to-console": {
+          "impl": "@cap-js/alert-notification/srv/notifyToConsole",
+          "outbox": false
+        },
+        "notify-to-rest": {
+          "impl": "@cap-js/alert-notification/srv/notifyToRest",
+          "outbox": true
         }
       }
+    }
+  }
 }

@@ -16,10 +16,10 @@ cds.once("served", () => {
    */
   const profiles = cds.env.profiles ?? [];
   const production = profiles.includes('production');
-  if (production && cds.requires?.notifications?.types) {
+  if (production && cds.env.requires?.notifications?.types) {
 
     let notificationTypes = readFileContent(
-      cds.requires.notifications.types
+      cds.env.requires.notifications.types
     );
     if (validateNotificationTypes(notificationTypes)) {
       notificationTypes.forEach((oNotificationType) => {
