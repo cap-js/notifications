@@ -14,7 +14,10 @@ cds.once("served", () => {
   /**
    * TODO: Decide the properties to be added in the alerts section for notificationtype files.
    */
-  if (cds.requires?.notifications?.types) {
+  const profiles = cds.env.profiles ?? [];
+  const production = profiles.includes('production');
+  if (production && cds.requires?.notifications?.types) {
+
     let notificationTypes = readFileContent(
       cds.requires.notifications.types
     );

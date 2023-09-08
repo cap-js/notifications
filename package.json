@@ -32,6 +32,10 @@
             "notify-to-console": {
               "impl": "@cap-js/alert-notification/srv/notifyToConsole",
               "outbox": false
+            },
+            "alert-to-rest": {
+              "impl": "@cap-js/alert-notification/srv/log2rest",
+              "outbox": true
             }
           }
         }
