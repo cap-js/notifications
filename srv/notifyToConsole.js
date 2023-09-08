@@ -3,13 +3,11 @@ const AlertNotificationService = require('./service')
 module.exports = class NotifyToConsole extends AlertNotificationService {
   async init() {
 
-    this.notify = this._postNotification;
-
     // call AlertNotificationService's init
     await super.init()
   }
 
-  _postNotification(
+  notify (
     recipients,
     notificationTypeKey,
     notificationTypeVersion,
