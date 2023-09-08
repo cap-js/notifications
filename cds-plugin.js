@@ -6,6 +6,12 @@ const {
   readFileContent,
 } = require("./lib/utils");
 
+
+global.alert = {
+  notifyDefaultTemplate: notifier.postNotificationDefaultTemplate,
+  notifyCustomTemplate: notifier.postNotificationCustomTemplate
+};
+
 cds.once("served", () => {
   /**
    * For local testing initialise VCAP_SERVICES variables for the application
