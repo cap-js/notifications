@@ -30,7 +30,7 @@
               }
             },
             "notify-to-console": {
-              "impl": "@cap-js/alert-notification/srv/notify2console",
+              "impl": "@cap-js/alert-notification/srv/notifyToConsole",
               "outbox": false
             }
           }
