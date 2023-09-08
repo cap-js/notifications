@@ -1,6 +1,6 @@
 const AlertNotificationService = require('./service')
 
-module.exports = class Alert2Console extends AlertNotificationService {
+module.exports = class NotifyToConsole extends AlertNotificationService {
   async init() {
 
     // call AlertNotificationService's init
