@@ -3,7 +3,7 @@ const notifier = require("./lib/notifications");
 const {
   messages,
   validateNotificationTypes,
-  readFileContent,
+  readFile,
 } = require("./lib/utils");
 
 cds.once("served", () => {
@@ -17,10 +17,8 @@ cds.once("served", () => {
   const profiles = cds.env.profiles ?? [];
   const production = profiles.includes('production');
   if (production && cds.env.requires?.notifications?.types) {
+    const notificationTypes = readFile(cds.env.requires.notifications.types);
 
-    let notificationTypes = readFileContent(
-      cds.env.requires.notifications.types
-    );
     if (validateNotificationTypes(notificationTypes)) {
       notificationTypes.forEach((oNotificationType) => {
         notifier.postNotificationType(oNotificationType);
