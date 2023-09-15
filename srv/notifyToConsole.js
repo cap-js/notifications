@@ -1,7 +1,7 @@
 const NotificationService = require('./service')
 
 const cds = require("@sap/cds");
-const notifier = require("./lib/notifications");
+const notifier = require("../lib/notifications");
 const { validateNotificationTypes, readFile, messages } = require("../lib/utils");
 
 module.exports = class NotifyToConsole extends NotificationService {
@@ -9,13 +9,13 @@ module.exports = class NotifyToConsole extends NotificationService {
 
     const notificationTypes = readFile(cds.env.requires.notifications.types);
 
-    this.types = {};
+    this._types = {};
     notificationTypes.forEach((oNotificationType) => {
-      if(types[oNotificationType.NotificationTypeKey] === undefined) {
-        this.types[oNotificationType.NotificationTypeKey] = {};
+      if(this._types[oNotificationType.NotificationTypeKey] === undefined) {
+        this._types[oNotificationType.NotificationTypeKey] = {};
       }
 
-      this.types[oNotificationType.NotificationTypeKey][oNotificationType.NotificationTypeVersion] = oNotificationType;
+      this._types[oNotificationType.NotificationTypeKey][oNotificationType.NotificationTypeVersion] = oNotificationType;
     });
 
     // call NotificationService's init
@@ -30,13 +30,13 @@ module.exports = class NotifyToConsole extends NotificationService {
     language = "en"
   ) {
 
-    if(this.types[notificationTypeKey] === undefined) {
+    if(this._types[notificationTypeKey] === undefined) {
       console.log(`Invalid Notification Type Key: ${notificationTypeKey}`);
       return;
     }
 
-    if(this.types[notificationTypeKey][notificationTypeVersion] === undefined) {
-      console.log(`Invalid Notification Type Version: ${notificationTypeVersion}`)
+    if(this._types[notificationTypeKey][notificationTypeVersion] === undefined) {
+      console.log(`Invalid Notification Type Version for Key ${notificationTypeKey}: ${notificationTypeVersion}`);
       return;
     }
 
