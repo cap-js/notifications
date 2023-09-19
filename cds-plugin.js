@@ -15,7 +15,6 @@ cds.once("served", () => {
    */
   const profiles = cds.env.profiles ?? [];
   const production = profiles.includes('production');
-  cds.notifications = { local: { types: {} }};
   if(cds.env.requires?.notifications?.types) {
     // read notification types
     const notificationTypes = readFile(cds.env.requires.notifications.types);
@@ -38,8 +37,10 @@ cds.once("served", () => {
         types[oNotificationType.NotificationTypeKey][oNotificationType.NotificationTypeVersion] = oNotificationType;
       });
 
-      cds.notifications.local.types = types;
+      cds.notifications = { local: { types }};
     }
+  } else if (!production) {
+    cds.notifications = { local: { types: {} }};
   }
 });
 
