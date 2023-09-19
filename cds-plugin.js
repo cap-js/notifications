@@ -1,7 +1,6 @@
 const cds = require("@sap/cds");
 const notifier = require("./lib/notifications");
 const {
-  messages,
   validateNotificationTypes,
   readFile,
 } = require("./lib/utils");
@@ -16,6 +15,7 @@ cds.once("served", () => {
    */
   const profiles = cds.env.profiles ?? [];
   const production = profiles.includes('production');
+  cds.notifications = { local: { types: {} }};
   if(cds.env.requires?.notifications?.types) {
     // read notification types
     const notificationTypes = readFile(cds.env.requires.notifications.types);
@@ -37,9 +37,7 @@ cds.once("served", () => {
   
         types[oNotificationType.NotificationTypeKey][oNotificationType.NotificationTypeVersion] = oNotificationType;
       });
-      
-      cds.notifications = {};
-      cds.notifications.local = {};
+
       cds.notifications.local.types = types;
     }
   }
