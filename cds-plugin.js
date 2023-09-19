@@ -16,21 +16,31 @@ cds.once("served", () => {
    */
   const profiles = cds.env.profiles ?? [];
   const production = profiles.includes('production');
-  if (production && cds.env.requires?.notifications?.types) {
+  if(cds.env.requires?.notifications?.types) {
+    // read notification types
     const notificationTypes = readFile(cds.env.requires.notifications.types);
 
-    if (validateNotificationTypes(notificationTypes)) {
+    // validate notification types
+    validateNotificationTypes(notificationTypes);
+
+    // create notification types
+    if(production) {
       notificationTypes.forEach((oNotificationType) => {
         notifier.postNotificationType(oNotificationType);
       });
     } else {
-      /**
-       * TODO: Move this message inside the validation function
-       * ? Should we throw error message or warning for the specific invalid NotificationType?
-       * ? e.g., If we have 5 notificationTypes and 1 out of the 5 is invalid type, we should
-       * ? go ahead and create the valid ones and display INFO/Warning for the invalid type
-       */
-      console.log(messages.INVALID_NOTIFICATION_TYPES);
+      const types = {}
+      notificationTypes.forEach((oNotificationType) => {
+        if(types[oNotificationType.NotificationTypeKey] === undefined) {
+          types[oNotificationType.NotificationTypeKey] = {};
+        }
+  
+        types[oNotificationType.NotificationTypeKey][oNotificationType.NotificationTypeVersion] = oNotificationType;
+      });
+      
+      cds.notifications = {};
+      cds.notifications.local = {};
+      cds.notifications.local.types = types;
     }
   }
 });
