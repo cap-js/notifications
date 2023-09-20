@@ -3,7 +3,7 @@ const notifier = require("./lib/notifications");
 const {
   validateNotificationTypes,
   readFile,
-  presentInObject
+  doesKeyExist
 } = require("./lib/utils");
 
 cds.once("served", () => {
@@ -31,7 +31,7 @@ cds.once("served", () => {
     } else {
       const types = {}
       notificationTypes.forEach((oNotificationType) => {
-        if(!presentInObject(types, oNotificationType.NotificationTypeKey)) {
+        if(!doesKeyExist(types, oNotificationType.NotificationTypeKey)) {
           types[oNotificationType.NotificationTypeKey] = {}; 
         }
   

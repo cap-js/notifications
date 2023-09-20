@@ -2,7 +2,7 @@ const NotificationService = require('./service')
 
 const cds = require("@sap/cds");
 const notifier = require("../lib/notifications");
-const { presentInObject } = require('../lib/utils');
+const { doesKeyExist } = require('../lib/utils');
 
 module.exports = class NotifyToConsole extends NotificationService {
   async init() {
@@ -19,11 +19,11 @@ module.exports = class NotifyToConsole extends NotificationService {
   ) {
 
     const types = cds.notifications.local.types;
-    if(!presentInObject(types, notificationTypeKey)) {
+    if(!doesKeyExist(types, notificationTypeKey)) {
       throw new Error(`Invalid Notification Type Key: ${notificationTypeKey}`);
     }
 
-    if(!presentInObject(types[notificationTypeKey], notificationTypeVersion)) {
+    if(!doesKeyExist(types[notificationTypeKey], notificationTypeVersion)) {
       throw new Error(`Invalid Notification Type Version for Key ${notificationTypeKey}: ${notificationTypeVersion}`);
     }
 
