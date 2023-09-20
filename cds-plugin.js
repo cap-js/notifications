@@ -1,9 +1,9 @@
 const cds = require("@sap/cds");
 const notifier = require("./lib/notifications");
 const {
-  messages,
   validateNotificationTypes,
-  readFileContent,
+  readFile,
+  doesKeyExist
 } = require("./lib/utils");
 
 cds.once("served", () => {
@@ -14,23 +14,33 @@ cds.once("served", () => {
   /**
    * TODO: Decide the properties to be added in the alerts section for notificationtype files.
    */
-  if (cds.requires?.notifications?.types) {
-    let notificationTypes = readFileContent(
-      cds.requires.notifications.types
-    );
-    if (validateNotificationTypes(notificationTypes)) {
+  const profiles = cds.env.profiles ?? [];
+  const production = profiles.includes('production');
+  if (cds.env.requires?.notifications?.types) {
+    // read notification types
+    const notificationTypes = readFile(cds.env.requires.notifications.types);
+
+    // validate notification types
+    validateNotificationTypes(notificationTypes);
+
+    // create notification types
+    if (production) {
       notificationTypes.forEach((oNotificationType) => {
         notifier.postNotificationType(oNotificationType);
       });
     } else {
-      /**
-       * TODO: Move this message inside the validation function
-       * ? Should we throw error message or warning for the specific invalid NotificationType?
-       * ? e.g., If we have 5 notificationTypes and 1 out of the 5 is invalid type, we should
-       * ? go ahead and create the valid ones and display INFO/Warning for the invalid type
-       */
-      console.log(messages.INVALID_NOTIFICATION_TYPES);
+      const types = {};
+      notificationTypes.forEach((oNotificationType) => {
+        if (!doesKeyExist(types, oNotificationType.NotificationTypeKey)) {
+          types[oNotificationType.NotificationTypeKey] = {};
+        }
+
+        types[oNotificationType.NotificationTypeKey][oNotificationType.NotificationTypeVersion] = oNotificationType;
+      });
+
+      cds.notifications = { local: { types }};
     }
+  } else if (!production) {
+    cds.notifications = { local: { types: {} }};
   }
 });
-

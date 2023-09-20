@@ -3,18 +3,13 @@
  * We will branch out for development and production profile here
  */
 
-const cds = require('@sap/cds')
-const notifier = require("../lib/notifications");
-
 // REVISIT: cds.OutboxService or technique to avoid extending OutboxService
-const OutboxService = require('@sap/cds/libx/_runtime/messaging/Outbox')
+const OutboxService = require('@sap/cds/libx/_runtime/messaging/Outbox');
 
-module.exports = class AlertNotificationService extends OutboxService {
+module.exports = class NotificationService extends OutboxService {
   async init() {
-    
-    // call OutboxService's init
-    await super.init()
 
-    this.notify = notifier.postNotification
+    // call OutboxService's init
+    await super.init();
   }
 }
