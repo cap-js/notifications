@@ -8,8 +8,7 @@ const {
 
 
 global.alert = {
-  notifyDefaultTemplate: notifier.postNotificationDefaultTemplate,
-  notifyCustomTemplate: notifier.postNotificationCustomTemplate
+  notify: notifier.postNotification
 };
 
 cds.once("served", () => {

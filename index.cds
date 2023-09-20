@@ -4,6 +4,5 @@ service AlertNotificationService {
   /**
    * TODO : connect action to notify api.
    */
-  action notifyDefaultTemplate();
-  action notifyCustomTemplate();
+  action notify();
 }
