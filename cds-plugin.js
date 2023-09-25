@@ -1,21 +1,12 @@
 const cds = require("@sap/cds");
-const notifier = require("./lib/notifications");
-const {
-  validateNotificationTypes,
-  readFile,
-  doesKeyExist
-} = require("./lib/utils");
+const { validateNotificationTypes, readFile } = require("./lib/utils");
+const { createNotificationTypesMap, processNotificationTypes} = require("./lib/notificationTypes");
 
-cds.once("served", () => {
-  /**
-   * For local testing initialise VCAP_SERVICES variables for the application
-   * process.env.VCAP_SERVICES = Strigified VCAP_SERVICES variable
-   */
-  /**
-   * TODO: Decide the properties to be added in the alerts section for notificationtype files.
-   */
+cds.once("served", async () => {
   const profiles = cds.env.profiles ?? [];
   const production = profiles.includes('production');
+  const destination = cds.env.requires.notifications?.destination ?? "SAP_Notifications";
+
   if (cds.env.requires?.notifications?.types) {
     // read notification types
     const notificationTypes = readFile(cds.env.requires.notifications.types);
@@ -23,22 +14,13 @@ cds.once("served", () => {
     // validate notification types
     validateNotificationTypes(notificationTypes);
 
+    const notificationTypesMap = createNotificationTypesMap(notificationTypes);
+
     // create notification types
     if (production) {
-      notificationTypes.forEach((oNotificationType) => {
-        notifier.postNotificationType(oNotificationType);
-      });
+      await processNotificationTypes(notificationTypesMap, destination);
     } else {
-      const types = {};
-      notificationTypes.forEach((oNotificationType) => {
-        if (!doesKeyExist(types, oNotificationType.NotificationTypeKey)) {
-          types[oNotificationType.NotificationTypeKey] = {};
-        }
-
-        types[oNotificationType.NotificationTypeKey][oNotificationType.NotificationTypeVersion] = oNotificationType;
-      });
-
-      cds.notifications = { local: { types }};
+      cds.notifications = { local: { types: notificationTypesMap }};
     }
   } else if (!production) {
     cds.notifications = { local: { types: {} }};
