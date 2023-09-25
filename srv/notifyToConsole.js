@@ -1,7 +1,6 @@
 const NotificationService = require('./service');
 const cds = require("@sap/cds");
 const notifier = require("../lib/notifications");
-const { doesKeyExist, getNotificationTypesKeyWithPrefix } = require('../lib/utils');
 
 module.exports = class NotifyToConsole extends NotificationService {
   async init() {
@@ -10,6 +9,6 @@ module.exports = class NotifyToConsole extends NotificationService {
   }
 
   notify() {
-    console.log(`[ans] - ${arguments}:`);
+    console.log(JSON.stringify(arguments, null, 2));
   }
 }
