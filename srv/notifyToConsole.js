@@ -1,7 +1,7 @@
 const NotificationService = require('./service');
 const cds = require("@sap/cds");
-const notifier = require("../lib/notifications");
-const { doesKeyExist, getNotificationTypesKeyWithPrefix } = require('../lib/utils');
+const { createNotificationObject } = require("../lib/notifications");
+const { doesKeyExist } = require('../lib/utils');
 
 module.exports = class NotifyToConsole extends NotificationService {
   async init() {
@@ -9,32 +9,19 @@ module.exports = class NotifyToConsole extends NotificationService {
     await super.init();
   }
 
-  notify (
-    recipients,
-    notificationTypeKey,
-    notificationTypeVersion,
-    notificationData,
-    language = "en"
-  ) {
+  notify (recipients, notificationData, priority = "LOW") {
+    const notification = createNotificationObject(recipients, notificationData, priority);
+    if(!(typeof notificationData === 'string')) {
+      const types = cds.notifications.local.types;
+      if (!doesKeyExist(types, notification.NotificationTypeKey)) {
+        throw new Error(`Invalid Notification Type Key: ${notification.NotificationTypeKey}`);
+      }
 
-    const key = getNotificationTypesKeyWithPrefix(notificationTypeKey);
-    const types = cds.notifications.local.types;
-    if (!doesKeyExist(types, key)) {
-      throw new Error(`Invalid Notification Type Key: ${notificationTypeKey}`);
+      if (!doesKeyExist(types[notification.NotificationTypeKey], notification.NotificationTypeVersion)) {
+        throw new Error(`Invalid Notification Type Version for Key ${notification.NotificationTypeKey}: ${notification.NotificationTypeVersion}`);
+      }      
     }
 
-    if (!doesKeyExist(types[key], notificationTypeVersion)) {
-      throw new Error(`Invalid Notification Type Version for Key ${notificationTypeKey}: ${notificationTypeVersion}`);
-    }
-
-    const notification = notifier.createNotificationObject(
-      recipients,
-      notificationTypeKey,
-      notificationTypeVersion,
-      notificationData,
-      language
-    );
-
-    console.log(`[ans] - ${notificationTypeKey} - ${notificationTypeVersion}:`, notification);
+    console.log(`[ans] - ${notification.NotificationTypeKey} - ${notification.NotificationTypeVersion}:`, notification);
   }
 }
