@@ -1,7 +1,6 @@
 const NotificationService = require('./service');
-const cds = require("@sap/cds");
-const notifier = require("../lib/notifications");
-const { doesKeyExist, getNotificationTypesKeyWithPrefix } = require('../lib/utils');
+const { buildNotification, readFile, doesKeyExist } = require("./../lib/utils");
+const { createNotificationTypesMap } = require("./../lib/notificationTypes");
 
 module.exports = class NotifyToConsole extends NotificationService {
   async init() {
@@ -9,32 +8,23 @@ module.exports = class NotifyToConsole extends NotificationService {
     await super.init();
   }
 
-  notify (
-    recipients,
-    notificationTypeKey,
-    notificationTypeVersion,
-    notificationData,
-    language = "en"
-  ) {
+  notify() {
 
-    const key = getNotificationTypesKeyWithPrefix(notificationTypeKey);
-    const types = cds.notifications.local.types;
-    if (!doesKeyExist(types, key)) {
-      throw new Error(`Invalid Notification Type Key: ${notificationTypeKey}`);
+    const notification = buildNotification(arguments);
+
+    if (notification) {
+      console.log(`SAP Alert Notification service notification: ${JSON.stringify(notification, null, 2)}`);
+
+      const existingTypes = cds.notifications.local.types;
+  
+      if (!doesKeyExist(existingTypes, notification["NotificationTypeKey"])) {
+        console.log(`Notification Type ${notification["NotificationTypeKey"]} is not in the notification types file`);
+      }
+  
+      if (!doesKeyExist(existingTypes[notification["NotificationTypeKey"]], notification["NotificationTypeVersion"])) {
+        console.log(`Notification Type Version ${notification["NotificationTypeVersion"]} for type ${notification["NotificationTypeKey"]} is not in the notification types file`);
+      }
     }
-
-    if (!doesKeyExist(types[key], notificationTypeVersion)) {
-      throw new Error(`Invalid Notification Type Version for Key ${notificationTypeKey}: ${notificationTypeVersion}`);
-    }
-
-    const notification = notifier.createNotificationObject(
-      recipients,
-      notificationTypeKey,
-      notificationTypeVersion,
-      notificationData,
-      language
-    );
-
-    console.log(`[ans] - ${notificationTypeKey} - ${notificationTypeVersion}:`, notification);
+    
   }
 }
