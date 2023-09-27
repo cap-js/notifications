@@ -1,7 +1,7 @@
 const NotificationService = require('./service');
 const cds = require("@sap/cds");
-const { createNotificationObject } = require("../lib/notifications");
-const { doesKeyExist } = require('../lib/utils');
+const { buildNotification, readFile, doesKeyExist } = require("./../lib/utils");
+const { createNotificationTypesMap } = require("./../lib/notificationTypes");
 
 module.exports = class NotifyToConsole extends NotificationService {
   async init() {
@@ -9,19 +9,23 @@ module.exports = class NotifyToConsole extends NotificationService {
     await super.init();
   }
 
-  notify (recipients, notificationData, priority = "LOW") {
-    const notification = createNotificationObject(recipients, notificationData, priority);
-    if(!(typeof notificationData === 'string')) {
-      const types = cds.notifications.local.types;
-      if (!doesKeyExist(types, notification.NotificationTypeKey)) {
-        throw new Error(`Invalid Notification Type Key: ${notification.NotificationTypeKey}`);
+  notify() {
+
+    const notification = buildNotification(arguments);
+
+    if (notification) {
+      console.log(`SAP Alert Notification service notification: ${JSON.stringify(notification, null, 2)}`);
+
+      const existingTypes = cds.notifications.local.types;
+  
+      if (!doesKeyExist(existingTypes, notification["NotificationTypeKey"])) {
+        console.log(`Notification Type ${notification["NotificationTypeKey"]} is not in the notification types file`);
       }
-
-      if (!doesKeyExist(types[notification.NotificationTypeKey], notification.NotificationTypeVersion)) {
-        throw new Error(`Invalid Notification Type Version for Key ${notification.NotificationTypeKey}: ${notification.NotificationTypeVersion}`);
-      }      
+  
+      if (!doesKeyExist(existingTypes[notification["NotificationTypeKey"]], notification["NotificationTypeVersion"])) {
+        console.log(`Notification Type Version ${notification["NotificationTypeVersion"]} for type ${notification["NotificationTypeKey"]} is not in the notification types file`);
+      }
     }
-
-    console.log(`[ans] - ${notification.NotificationTypeKey} - ${notification.NotificationTypeVersion}:`, notification);
+    
   }
 }
