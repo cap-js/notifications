@@ -7,7 +7,7 @@ cds.once("served", async () => {
   const production = profiles.includes('production');
 
   // read notification types
-  const notificationTypes = readFile(cds.env.requires.notifications.types);
+  const notificationTypes = readFile(cds.env.requires?.notifications?.types);
 
   if(validateNotificationTypes(notificationTypes)) {
     if (production) {
