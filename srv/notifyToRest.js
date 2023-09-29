@@ -1,12 +1,10 @@
 const NotificationService = require('./service');
-
-const notifier = require("../lib/notifications");
+const { postNotification } = require("../lib/notifications");
 
 module.exports = class NotifyToRest extends NotificationService {
   async init() {
 
-    this.notify = notifier.postNotification;
-
+    this.notify = postNotification;
     // call NotificationService's init
     await super.init();
   }

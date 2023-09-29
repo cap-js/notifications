@@ -1,6 +1,6 @@
 const NotificationService = require('./service');
-const { buildNotification, readFile, doesKeyExist } = require("./../lib/utils");
-const { createNotificationTypesMap } = require("./../lib/notificationTypes");
+const cds = require("@sap/cds");
+const { buildNotification, doesKeyExist } = require("./../lib/utils");
 
 module.exports = class NotifyToConsole extends NotificationService {
   async init() {
@@ -19,6 +19,7 @@ module.exports = class NotifyToConsole extends NotificationService {
   
       if (!doesKeyExist(existingTypes, notification["NotificationTypeKey"])) {
         console.log(`Notification Type ${notification["NotificationTypeKey"]} is not in the notification types file`);
+        return;
       }
   
       if (!doesKeyExist(existingTypes[notification["NotificationTypeKey"]], notification["NotificationTypeVersion"])) {

@@ -5,24 +5,16 @@ const { createNotificationTypesMap, processNotificationTypes} = require("./lib/n
 cds.once("served", async () => {
   const profiles = cds.env.profiles ?? [];
   const production = profiles.includes('production');
-  const destination = cds.env.requires.notifications?.destination ?? "SAP_Notifications";
 
-  if (cds.env.requires?.notifications?.types) {
-    // read notification types
-    const notificationTypes = readFile(cds.env.requires.notifications.types);
+  // read notification types
+  const notificationTypes = readFile(cds.env.requires.notifications.types);
 
-    // validate notification types
-    validateNotificationTypes(notificationTypes);
-
-    const notificationTypesMap = createNotificationTypesMap(notificationTypes);
-
-    // create notification types
+  if(validateNotificationTypes(notificationTypes)) {
     if (production) {
-      await processNotificationTypes(notificationTypesMap, destination);
+      await processNotificationTypes(notificationTypes);
     } else {
+      const notificationTypesMap = createNotificationTypesMap(notificationTypes, true);
       cds.notifications = { local: { types: notificationTypesMap }};
     }
-  } else if (!production) {
-    cds.notifications = { local: { types: {} }};
   }
 });
