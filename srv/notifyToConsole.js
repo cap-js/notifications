@@ -1,6 +1,5 @@
 const NotificationService = require('./service');
-const { buildNotification, readFile, doesKeyExist } = require("./../lib/utils");
-const { createNotificationTypesMap } = require("./../lib/notificationTypes");
+const { buildNotification, doesKeyExist } = require("./../lib/utils");
 
 module.exports = class NotifyToConsole extends NotificationService {
   async init() {
@@ -17,11 +16,11 @@ module.exports = class NotifyToConsole extends NotificationService {
 
       const existingTypes = cds.notifications.local.types;
   
-      if (!doesKeyExist(existingTypes, notification["NotificationTypeKey"])) {
+      if (!doesKeyExist(existingTypes, notification["NotificationTypeKey"]) && notification["NotificationTypeKey"] !== "Default") {
         console.log(`Notification Type ${notification["NotificationTypeKey"]} is not in the notification types file`);
       }
   
-      if (!doesKeyExist(existingTypes[notification["NotificationTypeKey"]], notification["NotificationTypeVersion"])) {
+      if (!doesKeyExist(existingTypes[notification["NotificationTypeKey"]], notification["NotificationTypeVersion"]) && notification["NotificationTypeKey"] !== "Default") {
         console.log(`Notification Type Version ${notification["NotificationTypeVersion"]} for type ${notification["NotificationTypeKey"]} is not in the notification types file`);
       }
     }
