@@ -10,7 +10,7 @@ module.exports = class NotifyToConsole extends NotificationService {
 
   notify() {
 
-    const notification = buildNotification(arguments);
+    const notification = buildNotification(arguments[0]);
 
     if (notification) {
       console.log(`SAP Alert Notification service notification: ${JSON.stringify(notification, null, 2)}`);
