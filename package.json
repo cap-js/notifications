@@ -15,6 +15,7 @@
     "@sap-cloud-sdk/connectivity": "3.5.0",
     "@sap-cloud-sdk/http-client": "3.5.0",
     "@sap-cloud-sdk/util": "3.5.0",
+    "@sap/cds": ">=7",
     "lodash": "4.17.21"
   },
   "devDependencies": {
