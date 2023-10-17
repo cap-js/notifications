@@ -11,7 +11,7 @@ module.exports = class NotifyToRest extends NotificationService {
     // call NotificationService's init
     await super.init();
 
-    this.on('postNotoficationEvent', async function(req) {
+    this.on('postNotificationEvent', async function(req) {
       const { data } = req
       const notificationDestination = await getNotificationDestination();
       const csrfHeaders = await buildHeadersForDestination(notificationDestination, {
@@ -42,7 +42,7 @@ module.exports = class NotifyToRest extends NotificationService {
     const notification = buildNotification(notificationData);
 
     if (notification) {
-      await this.emit({ event: 'postNotoficationEvent', data: notification});
+      await this.emit({ event: 'postNotificationEvent', data: notification });
     }
   }
 }
