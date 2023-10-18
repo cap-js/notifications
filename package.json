@@ -19,11 +19,13 @@
     "lodash": "4.17.21"
   },
   "devDependencies": {
-    "jest": "^29.6.4"
+    "jest": "^29.6.4",
+    "chai": "^4.3.10"
   },
   "scripts": {
     "lint": "npx eslint .",
-    "test": "npx jest --silent"
+    "test": "npx jest",
+    "test-with-coverage": "npx jest --coverage"
   },
   "cds": {
     "requires": {
