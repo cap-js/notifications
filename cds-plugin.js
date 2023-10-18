@@ -1,7 +1,11 @@
 const cds = require("@sap/cds");
+const build = require('@sap/cds-dk/lib/build')
 const { validateNotificationTypes, readFile } = require("./lib/utils");
 const { createNotificationTypesMap } = require("./lib/notificationTypes");
 const { setGlobalLogLevel } = require("@sap-cloud-sdk/util");
+
+// register build plugin
+build.register('notifications', { impl: '@cap-js/notifications/lib/build', description: 'Notifications build plugin', taskDefaults: { src: cds.env.folders.srv } });
 
 cds.once("served", async () => {
   setGlobalLogLevel("error");
