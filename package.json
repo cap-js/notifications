@@ -23,7 +23,8 @@
   },
   "scripts": {
     "lint": "npx eslint .",
-    "test": "npx jest --silent"
+    "test": "npx jest --silent",
+    "test-with-coverage": "npx jest --coverage"
   },
   "cds": {
     "requires": {
