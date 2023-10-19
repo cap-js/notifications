@@ -154,7 +154,7 @@ describe ("Test post notification", () => {
     test("When passed recipients, priority, title, description to postNotification", () => {
         const expectedNotification = {
             NotificationTypeId: "01234567-89ab-cdef-0123-456789abcdef",
-            NotificationTypeKey: "alert-notification/TestNotificationType",
+            NotificationTypeKey: "notifications/TestNotificationType",
             NotificationTypeVersion: "1",
             NavigationTargetAction: "TestTargetAction",
             NavigationTargetObject: "TestTargetObject",
