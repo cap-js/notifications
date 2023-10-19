@@ -19,6 +19,7 @@ module.exports = class NotifyToRest extends NotificationService {
       });
 
       try {
+        console.log(`Sending notification of key: ${data.NotificationTypeKey} and version: ${data.NotificationTypeVersion}`)
         await executeHttpRequest(notificationDestination, {
           url: `${NOTIFICATIONS_API_ENDPOINT}/Notifications`,
           method: "post",
