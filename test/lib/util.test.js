@@ -102,7 +102,7 @@ describe("Test buildNotification functionality", () => {
 
     test("When recipients, type, properties are passed to buildNotification", () => {
         const expectedNotification = {
-            NotificationTypeKey: "notification/TestNotificationType",
+            NotificationTypeKey: "notifications/TestNotificationType",
             NotificationTypeVersion: "1",
             Priority: "NEUTRAL", 
             Properties: [
@@ -139,7 +139,7 @@ describe("Test buildNotification functionality", () => {
 
     test("When recipients, type, properties, navigation are passed to buildNotification", () => {
         const expectedNotification = {
-            NotificationTypeKey: "notification/TestNotificationType",
+            NotificationTypeKey: "notifications/TestNotificationType",
             NotificationTypeVersion: "1",
             NavigationTargetAction: "TestTargetAction",
             NavigationTargetObject: "TestTargetObject",
@@ -182,7 +182,7 @@ describe("Test buildNotification functionality", () => {
 
     test("When recipients, type, properties, navigation, priority are passed to buildNotification", () => {
         const expectedNotification = {
-            NotificationTypeKey: "notification/TestNotificationType",
+            NotificationTypeKey: "notifications/TestNotificationType",
             NotificationTypeVersion: "1",
             NavigationTargetAction: "TestTargetAction",
             NavigationTargetObject: "TestTargetObject",
@@ -229,7 +229,7 @@ describe("Test buildNotification functionality", () => {
             Id: "01234567-89ab-cdef-0123-456789abcdef",
             OriginId: "01234567-89ab-cdef-0123-456789abcdef",
             NotificationTypeId: "01234567-89ab-cdef-0123-456789abcdef",
-            NotificationTypeKey: "notification/TestNotificationType",
+            NotificationTypeKey: "notifications/TestNotificationType",
             NotificationTypeVersion: "1",
             NavigationTargetAction: "TestTargetAction",
             NavigationTargetObject: "TestTargetObject",
@@ -301,7 +301,7 @@ describe("Test buildNotification functionality", () => {
     test("When recipients, type, properties, navigation, priority, but with not all the payload are passed to buildNotification", () => {
         const expectedNotification = {
             NotificationTypeId: "01234567-89ab-cdef-0123-456789abcdef",
-            NotificationTypeKey: "notification/TestNotificationType",
+            NotificationTypeKey: "notifications/TestNotificationType",
             NotificationTypeVersion: "1",
             NavigationTargetAction: "TestTargetAction",
             NavigationTargetObject: "TestTargetObject",
@@ -370,7 +370,7 @@ describe("Test buildNotification functionality", () => {
 
     test("When whole notification object is passed to buildNotification", () => {
         const expectedNotification = {
-            NotificationTypeKey: "notification/TestNotificationType",
+            NotificationTypeKey: "notifications/TestNotificationType",
             NotificationTypeVersion: "1",
             Priority: "NEUTRAL", 
             Properties: [
