@@ -22,9 +22,7 @@ describe("Managing of Notification Types", () => {
 
     notificationTypes.processNotificationTypes([copy(notificationTypeWithAllProperties), copy(notificationTypeWithoutVersion)]).then(() => {
       const getAllNotificationTypesRequest = httpClient.executeHttpRequest.mock.calls[0][1];
-      assert
-        .expect(getAllNotificationTypesRequest.url)
-        .to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
+      assert.expect(getAllNotificationTypesRequest.url).to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
       assert.expect(getAllNotificationTypesRequest.method).to.be.equal("get");
 
       const createDefaultNotificationType = httpClient.executeHttpRequest.mock.calls[1][1];
@@ -40,9 +38,7 @@ describe("Managing of Notification Types", () => {
       const createSecondNotificationType = httpClient.executeHttpRequest.mock.calls[3][1];
       assert.expect(createSecondNotificationType.url).to.be.equal("v2/NotificationType.svc/NotificationTypes");
       assert.expect(createSecondNotificationType.method).to.be.equal("post");
-      assert
-        .expect(createSecondNotificationType.data)
-        .to.be.deep.eql(toNTypeWithPrefixedKey(toNTypeWithDefaultVersion(notificationTypeWithoutVersion)));
+      assert.expect(createSecondNotificationType.data).to.be.deep.eql(toNTypeWithPrefixedKey(toNTypeWithDefaultVersion(notificationTypeWithoutVersion)));
 
       assert.expect(httpClient.executeHttpRequest.mock.calls[4]).to.be.equal(undefined);
     });
@@ -57,9 +53,7 @@ describe("Managing of Notification Types", () => {
 
     notificationTypes.processNotificationTypes([copy(notificationTypeWithAllProperties), copy(notificationTypeWithoutVersion)]).then(() => {
       const getAllNotificationTypesRequest = httpClient.executeHttpRequest.mock.calls[0][1];
-      assert
-        .expect(getAllNotificationTypesRequest.url)
-        .to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
+      assert.expect(getAllNotificationTypesRequest.url).to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
       assert.expect(getAllNotificationTypesRequest.method).to.equal("get");
 
       assert.expect(httpClient.executeHttpRequest.mock.calls[1]).to.be.equal(undefined);
@@ -75,15 +69,11 @@ describe("Managing of Notification Types", () => {
 
     notificationTypes.processNotificationTypes([copy(notificationTypeWithAllProperties)]).then(() => {
       const getAllNotificationTypesRequest = httpClient.executeHttpRequest.mock.calls[0][1];
-      assert
-        .expect(getAllNotificationTypesRequest.url)
-        .to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
+      assert.expect(getAllNotificationTypesRequest.url).to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
       assert.expect(getAllNotificationTypesRequest.method).to.equal("get");
 
       const deleteSecondNotificationType = httpClient.executeHttpRequest.mock.calls[1][1];
-      assert
-        .expect(deleteSecondNotificationType.url)
-        .to.be.equal("v2/NotificationType.svc/NotificationTypes(guid'719d8f6a-1e07-4981-b2be-07197cec7492')");
+      assert.expect(deleteSecondNotificationType.url).to.be.equal("v2/NotificationType.svc/NotificationTypes(guid'719d8f6a-1e07-4981-b2be-07197cec7492')");
       assert.expect(deleteSecondNotificationType.method).to.be.equal("delete");
 
       assert.expect(httpClient.executeHttpRequest.mock.calls[2]).to.be.equal(undefined);
@@ -102,33 +92,23 @@ describe("Managing of Notification Types", () => {
     const updatedNotificationTypeWithoutVersion = copy(notificationTypeWithoutVersion);
     updatedNotificationTypeWithoutVersion.Templates[0].Description = "New Description";
 
-    notificationTypes
-      .processNotificationTypes([copy(updatedNotificationTypeWithAllProperties), copy(updatedNotificationTypeWithoutVersion)])
-      .then(() => {
-        const getAllNotificationTypesRequest = httpClient.executeHttpRequest.mock.calls[0][1];
-        assert
-          .expect(getAllNotificationTypesRequest.url)
-          .to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
-        assert.expect(getAllNotificationTypesRequest.method).to.equal("get");
+    notificationTypes.processNotificationTypes([copy(updatedNotificationTypeWithAllProperties), copy(updatedNotificationTypeWithoutVersion)]).then(() => {
+      const getAllNotificationTypesRequest = httpClient.executeHttpRequest.mock.calls[0][1];
+      assert.expect(getAllNotificationTypesRequest.url).to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
+      assert.expect(getAllNotificationTypesRequest.method).to.equal("get");
 
-        const updateFirstNotificationType = httpClient.executeHttpRequest.mock.calls[1][1];
-        assert
-          .expect(updateFirstNotificationType.url)
-          .to.be.equal("v2/NotificationType.svc/NotificationTypes(guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')");
-        assert.expect(updateFirstNotificationType.method).to.be.equal("patch");
-        assert.expect(updateFirstNotificationType.data).to.be.deep.equal(toNTypeWithPrefixedKey(updatedNotificationTypeWithAllProperties));
+      const updateFirstNotificationType = httpClient.executeHttpRequest.mock.calls[1][1];
+      assert.expect(updateFirstNotificationType.url).to.be.equal("v2/NotificationType.svc/NotificationTypes(guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')");
+      assert.expect(updateFirstNotificationType.method).to.be.equal("patch");
+      assert.expect(updateFirstNotificationType.data).to.be.deep.equal(toNTypeWithPrefixedKey(updatedNotificationTypeWithAllProperties));
 
-        const updateSecondNotificationType = httpClient.executeHttpRequest.mock.calls[2][1];
-        assert
-          .expect(updateSecondNotificationType.url)
-          .to.be.equal("v2/NotificationType.svc/NotificationTypes(guid'719d8f6a-1e07-4981-b2be-07197cec7492')");
-        assert.expect(updateSecondNotificationType.method).to.be.equal("patch");
-        assert
-          .expect(updateSecondNotificationType.data)
-          .to.be.deep.eql(toNTypeWithPrefixedKey(toNTypeWithDefaultVersion(updatedNotificationTypeWithoutVersion)));
+      const updateSecondNotificationType = httpClient.executeHttpRequest.mock.calls[2][1];
+      assert.expect(updateSecondNotificationType.url).to.be.equal("v2/NotificationType.svc/NotificationTypes(guid'719d8f6a-1e07-4981-b2be-07197cec7492')");
+      assert.expect(updateSecondNotificationType.method).to.be.equal("patch");
+      assert.expect(updateSecondNotificationType.data).to.be.deep.eql(toNTypeWithPrefixedKey(toNTypeWithDefaultVersion(updatedNotificationTypeWithoutVersion)));
 
-        assert.expect(httpClient.executeHttpRequest.mock.calls[3]).to.be.equal(undefined);
-      });
+      assert.expect(httpClient.executeHttpRequest.mock.calls[3]).to.be.equal(undefined);
+    });
   });
 
   test("Given NType with additional Template | When process is called | Than notification type is updated", () => {
@@ -144,15 +124,11 @@ describe("Managing of Notification Types", () => {
 
     notificationTypes.processNotificationTypes([copy(updatedNotificationTypeWithAllProperties), copy(notificationTypeWithoutVersion)]).then(() => {
       const getAllNotificationTypesRequest = httpClient.executeHttpRequest.mock.calls[0][1];
-      assert
-        .expect(getAllNotificationTypesRequest.url)
-        .to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
+      assert.expect(getAllNotificationTypesRequest.url).to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
       assert.expect(getAllNotificationTypesRequest.method).to.equal("get");
 
       const updateFirstNotificationType = httpClient.executeHttpRequest.mock.calls[1][1];
-      assert
-        .expect(updateFirstNotificationType.url)
-        .to.be.equal("v2/NotificationType.svc/NotificationTypes(guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')");
+      assert.expect(updateFirstNotificationType.url).to.be.equal("v2/NotificationType.svc/NotificationTypes(guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')");
       assert.expect(updateFirstNotificationType.method).to.be.equal("patch");
       assert.expect(updateFirstNotificationType.data).to.be.deep.equal(toNTypeWithPrefixedKey(updatedNotificationTypeWithAllProperties));
 
@@ -173,15 +149,11 @@ describe("Managing of Notification Types", () => {
 
     notificationTypes.processNotificationTypes([copy(updatedNotificationTypeWithAllProperties), copy(notificationTypeWithoutVersion)]).then(() => {
       const getAllNotificationTypesRequest = httpClient.executeHttpRequest.mock.calls[0][1];
-      assert
-        .expect(getAllNotificationTypesRequest.url)
-        .to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
+      assert.expect(getAllNotificationTypesRequest.url).to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
       assert.expect(getAllNotificationTypesRequest.method).to.equal("get");
 
       const updateFirstNotificationType = httpClient.executeHttpRequest.mock.calls[1][1];
-      assert
-        .expect(updateFirstNotificationType.url)
-        .to.be.equal("v2/NotificationType.svc/NotificationTypes(guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')");
+      assert.expect(updateFirstNotificationType.url).to.be.equal("v2/NotificationType.svc/NotificationTypes(guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')");
       assert.expect(updateFirstNotificationType.method).to.be.equal("patch");
       assert.expect(updateFirstNotificationType.data).to.be.deep.equal(toNTypeWithPrefixedKey(updatedNotificationTypeWithAllProperties));
 
@@ -202,15 +174,11 @@ describe("Managing of Notification Types", () => {
 
     notificationTypes.processNotificationTypes([copy(updatedNotificationTypeWithAllProperties), copy(notificationTypeWithoutVersion)]).then(() => {
       const getAllNotificationTypesRequest = httpClient.executeHttpRequest.mock.calls[0][1];
-      assert
-        .expect(getAllNotificationTypesRequest.url)
-        .to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
+      assert.expect(getAllNotificationTypesRequest.url).to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
       assert.expect(getAllNotificationTypesRequest.method).to.equal("get");
 
       const updateFirstNotificationType = httpClient.executeHttpRequest.mock.calls[1][1];
-      assert
-        .expect(updateFirstNotificationType.url)
-        .to.be.equal("v2/NotificationType.svc/NotificationTypes(guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')");
+      assert.expect(updateFirstNotificationType.url).to.be.equal("v2/NotificationType.svc/NotificationTypes(guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')");
       assert.expect(updateFirstNotificationType.method).to.be.equal("patch");
       assert.expect(updateFirstNotificationType.data).to.be.deep.equal(toNTypeWithPrefixedKey(updatedNotificationTypeWithAllProperties));
 
@@ -232,9 +200,7 @@ describe("Managing of Notification Types", () => {
 
     notificationTypes.processNotificationTypes([copy(changedNotificationTypeWithAllProperties), copy(notificationTypeWithoutVersion)]).then(() => {
       const getAllNotificationTypesRequest = httpClient.executeHttpRequest.mock.calls[0][1];
-      assert
-        .expect(getAllNotificationTypesRequest.url)
-        .to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
+      assert.expect(getAllNotificationTypesRequest.url).to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
       assert.expect(getAllNotificationTypesRequest.method).to.equal("get");
 
       assert.expect(httpClient.executeHttpRequest.mock.calls[1]).to.be.equal(undefined);
@@ -252,9 +218,7 @@ describe("Managing of Notification Types", () => {
     changedNotificationTypeWithAllProperties.IsGroupable = undefined;
     notificationTypes.processNotificationTypes([copy(changedNotificationTypeWithAllProperties), copy(notificationTypeWithoutVersion)]).then(() => {
       const getAllNotificationTypesRequest = httpClient.executeHttpRequest.mock.calls[0][1];
-      assert
-        .expect(getAllNotificationTypesRequest.url)
-        .to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
+      assert.expect(getAllNotificationTypesRequest.url).to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
       assert.expect(getAllNotificationTypesRequest.method).to.equal("get");
 
       assert.expect(httpClient.executeHttpRequest.mock.calls[1]).to.be.equal(undefined);
@@ -274,9 +238,7 @@ describe("Managing of Notification Types", () => {
 
     notificationTypes.processNotificationTypes([copy(changedNotificationTypeWithAllProperties), copy(notificationTypeWithoutVersion)]).then(() => {
       const getAllNotificationTypesRequest = httpClient.executeHttpRequest.mock.calls[0][1];
-      assert
-        .expect(getAllNotificationTypesRequest.url)
-        .to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
+      assert.expect(getAllNotificationTypesRequest.url).to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
       assert.expect(getAllNotificationTypesRequest.method).to.equal("get");
 
       assert.expect(httpClient.executeHttpRequest.mock.calls[1]).to.be.equal(undefined);
@@ -291,14 +253,11 @@ describe("Managing of Notification Types", () => {
     utils.getPrefix.mockReturnValue(testPrefix);
 
     const changedNotificationTypeWithAllProperties = copy(notificationTypeWithAllProperties);
-    changedNotificationTypeWithAllProperties.Templates[0].TemplateLanguage =
-      notificationTypeWithAllProperties.Templates[0].TemplateLanguage.toLowerCase();
+    changedNotificationTypeWithAllProperties.Templates[0].TemplateLanguage = notificationTypeWithAllProperties.Templates[0].TemplateLanguage.toLowerCase();
 
     notificationTypes.processNotificationTypes([copy(changedNotificationTypeWithAllProperties), copy(notificationTypeWithoutVersion)]).then(() => {
       const getAllNotificationTypesRequest = httpClient.executeHttpRequest.mock.calls[0][1];
-      assert
-        .expect(getAllNotificationTypesRequest.url)
-        .to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
+      assert.expect(getAllNotificationTypesRequest.url).to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
       assert.expect(getAllNotificationTypesRequest.method).to.equal("get");
 
       assert.expect(httpClient.executeHttpRequest.mock.calls[1]).to.be.equal(undefined);
@@ -314,9 +273,7 @@ describe("Managing of Notification Types", () => {
 
     notificationTypes.processNotificationTypes([copy(notificationTypeWithNullTemplatesActionsAndDeliveryChannels)]).then(() => {
       const getAllNotificationTypesRequest = httpClient.executeHttpRequest.mock.calls[0][1];
-      assert
-        .expect(getAllNotificationTypesRequest.url)
-        .to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
+      assert.expect(getAllNotificationTypesRequest.url).to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
       assert.expect(getAllNotificationTypesRequest.method).to.equal("get");
 
       assert.expect(httpClient.executeHttpRequest.mock.calls[1]).to.be.equal(undefined);
@@ -347,24 +304,18 @@ describe("Managing of Notification Types", () => {
       } else {
         continue;
       }
-      await notificationTypes
-        .processNotificationTypes([copy(changedNotificationTypeWithAllProperties), copy(notificationTypeWithoutVersion)])
-        .then(() => {
-          const getAllNotificationTypesRequest = httpClient.executeHttpRequest.mock.calls[0][1];
-          assert
-            .expect(getAllNotificationTypesRequest.url)
-            .to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
-          assert.expect(getAllNotificationTypesRequest.method).to.equal("get");
+      await notificationTypes.processNotificationTypes([copy(changedNotificationTypeWithAllProperties), copy(notificationTypeWithoutVersion)]).then(() => {
+        const getAllNotificationTypesRequest = httpClient.executeHttpRequest.mock.calls[0][1];
+        assert.expect(getAllNotificationTypesRequest.url).to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
+        assert.expect(getAllNotificationTypesRequest.method).to.equal("get");
 
-          const updateFirstNotificationType = httpClient.executeHttpRequest.mock.calls[1][1];
-          assert
-            .expect(updateFirstNotificationType.url)
-            .to.equal("v2/NotificationType.svc/NotificationTypes(guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')");
-          assert.expect(updateFirstNotificationType.method).to.equal("patch");
-          assert.expect(updateFirstNotificationType.data).to.be.deep.equal(toNTypeWithPrefixedKey(changedNotificationTypeWithAllProperties));
+        const updateFirstNotificationType = httpClient.executeHttpRequest.mock.calls[1][1];
+        assert.expect(updateFirstNotificationType.url).to.equal("v2/NotificationType.svc/NotificationTypes(guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')");
+        assert.expect(updateFirstNotificationType.method).to.equal("patch");
+        assert.expect(updateFirstNotificationType.data).to.be.deep.equal(toNTypeWithPrefixedKey(changedNotificationTypeWithAllProperties));
 
-          assert.expect(httpClient.executeHttpRequest.mock.calls[2]).to.be.equal(undefined);
-        });
+        assert.expect(httpClient.executeHttpRequest.mock.calls[2]).to.be.equal(undefined);
+      });
       jest.clearAllMocks();
     }
 
@@ -381,24 +332,18 @@ describe("Managing of Notification Types", () => {
       } else {
         continue;
       }
-      await notificationTypes
-        .processNotificationTypes([copy(changedNotificationTypeWithAllProperties), copy(notificationTypeWithoutVersion)])
-        .then(() => {
-          const getAllNotificationTypesRequest = httpClient.executeHttpRequest.mock.calls[0][1];
-          assert
-            .expect(getAllNotificationTypesRequest.url)
-            .to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
-          assert.expect(getAllNotificationTypesRequest.method).to.equal("get");
+      await notificationTypes.processNotificationTypes([copy(changedNotificationTypeWithAllProperties), copy(notificationTypeWithoutVersion)]).then(() => {
+        const getAllNotificationTypesRequest = httpClient.executeHttpRequest.mock.calls[0][1];
+        assert.expect(getAllNotificationTypesRequest.url).to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
+        assert.expect(getAllNotificationTypesRequest.method).to.equal("get");
 
-          const updateFirstNotificationType = httpClient.executeHttpRequest.mock.calls[1][1];
-          assert
-            .expect(updateFirstNotificationType.url)
-            .to.equal("v2/NotificationType.svc/NotificationTypes(guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')");
-          assert.expect(updateFirstNotificationType.method).to.equal("patch");
-          assert.expect(updateFirstNotificationType.data).to.be.deep.equal(toNTypeWithPrefixedKey(changedNotificationTypeWithAllProperties));
+        const updateFirstNotificationType = httpClient.executeHttpRequest.mock.calls[1][1];
+        assert.expect(updateFirstNotificationType.url).to.equal("v2/NotificationType.svc/NotificationTypes(guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')");
+        assert.expect(updateFirstNotificationType.method).to.equal("patch");
+        assert.expect(updateFirstNotificationType.data).to.be.deep.equal(toNTypeWithPrefixedKey(changedNotificationTypeWithAllProperties));
 
-          assert.expect(httpClient.executeHttpRequest.mock.calls[2]).to.be.equal(undefined);
-        });
+        assert.expect(httpClient.executeHttpRequest.mock.calls[2]).to.be.equal(undefined);
+      });
       jest.clearAllMocks();
     }
 
@@ -415,24 +360,18 @@ describe("Managing of Notification Types", () => {
       } else {
         continue;
       }
-      await notificationTypes
-        .processNotificationTypes([copy(changedNotificationTypeWithAllProperties), copy(notificationTypeWithoutVersion)])
-        .then(() => {
-          const getAllNotificationTypesRequest = httpClient.executeHttpRequest.mock.calls[0][1];
-          assert
-            .expect(getAllNotificationTypesRequest.url)
-            .to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
-          assert.expect(getAllNotificationTypesRequest.method).to.equal("get");
+      await notificationTypes.processNotificationTypes([copy(changedNotificationTypeWithAllProperties), copy(notificationTypeWithoutVersion)]).then(() => {
+        const getAllNotificationTypesRequest = httpClient.executeHttpRequest.mock.calls[0][1];
+        assert.expect(getAllNotificationTypesRequest.url).to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
+        assert.expect(getAllNotificationTypesRequest.method).to.equal("get");
 
-          const updateFirstNotificationType = httpClient.executeHttpRequest.mock.calls[1][1];
-          assert
-            .expect(updateFirstNotificationType.url)
-            .to.equal("v2/NotificationType.svc/NotificationTypes(guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')");
-          assert.expect(updateFirstNotificationType.method).to.equal("patch");
-          assert.expect(updateFirstNotificationType.data).to.be.deep.equal(toNTypeWithPrefixedKey(changedNotificationTypeWithAllProperties));
+        const updateFirstNotificationType = httpClient.executeHttpRequest.mock.calls[1][1];
+        assert.expect(updateFirstNotificationType.url).to.equal("v2/NotificationType.svc/NotificationTypes(guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')");
+        assert.expect(updateFirstNotificationType.method).to.equal("patch");
+        assert.expect(updateFirstNotificationType.data).to.be.deep.equal(toNTypeWithPrefixedKey(changedNotificationTypeWithAllProperties));
 
-          assert.expect(httpClient.executeHttpRequest.mock.calls[2]).to.be.equal(undefined);
-        });
+        assert.expect(httpClient.executeHttpRequest.mock.calls[2]).to.be.equal(undefined);
+      });
       jest.clearAllMocks();
     }
 
@@ -449,24 +388,18 @@ describe("Managing of Notification Types", () => {
       } else {
         continue;
       }
-      await notificationTypes
-        .processNotificationTypes([copy(changedNotificationTypeWithAllProperties), copy(notificationTypeWithoutVersion)])
-        .then(() => {
-          const getAllNotificationTypesRequest = httpClient.executeHttpRequest.mock.calls[0][1];
-          assert
-            .expect(getAllNotificationTypesRequest.url)
-            .to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
-          assert.expect(getAllNotificationTypesRequest.method).to.equal("get");
+      await notificationTypes.processNotificationTypes([copy(changedNotificationTypeWithAllProperties), copy(notificationTypeWithoutVersion)]).then(() => {
+        const getAllNotificationTypesRequest = httpClient.executeHttpRequest.mock.calls[0][1];
+        assert.expect(getAllNotificationTypesRequest.url).to.equal("v2/NotificationType.svc/NotificationTypes?$format=json&$expand=Templates,Actions,DeliveryChannels");
+        assert.expect(getAllNotificationTypesRequest.method).to.equal("get");
 
-          const updateFirstNotificationType = httpClient.executeHttpRequest.mock.calls[1][1];
-          assert
-            .expect(updateFirstNotificationType.url)
-            .to.equal("v2/NotificationType.svc/NotificationTypes(guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')");
-          assert.expect(updateFirstNotificationType.method).to.equal("patch");
-          assert.expect(updateFirstNotificationType.data).to.be.deep.equal(toNTypeWithPrefixedKey(changedNotificationTypeWithAllProperties));
+        const updateFirstNotificationType = httpClient.executeHttpRequest.mock.calls[1][1];
+        assert.expect(updateFirstNotificationType.url).to.equal("v2/NotificationType.svc/NotificationTypes(guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')");
+        assert.expect(updateFirstNotificationType.method).to.equal("patch");
+        assert.expect(updateFirstNotificationType.data).to.be.deep.equal(toNTypeWithPrefixedKey(changedNotificationTypeWithAllProperties));
 
-          assert.expect(httpClient.executeHttpRequest.mock.calls[2]).to.be.equal(undefined);
-        });
+        assert.expect(httpClient.executeHttpRequest.mock.calls[2]).to.be.equal(undefined);
+      });
       jest.clearAllMocks();
     }
   });
@@ -499,9 +432,9 @@ const defaultNotificationType = {
       TemplateSensitive: "{{title}}",
       TemplateGrouped: "Other Notifications",
       TemplateLanguage: "mustache",
-      Subtitle: "{{description}}",
-    },
-  ],
+      Subtitle: "{{description}}"
+    }
+  ]
 };
 
 const notificationTypeWithAllProperties = {
@@ -519,8 +452,8 @@ const notificationTypeWithAllProperties = {
       Subtitle: "Subtitle",
       EmailSubject: "EmailSubject",
       EmailText: "EmailText",
-      EmailHtml: "EmailHtml",
-    },
+      EmailHtml: "EmailHtml"
+    }
   ],
   Actions: [
     {
@@ -528,17 +461,17 @@ const notificationTypeWithAllProperties = {
       Language: "EN",
       ActionText: "Accept",
       GroupActionText: "Accept All",
-      Nature: "POSITIVE",
-    },
+      Nature: "POSITIVE"
+    }
   ],
   DeliveryChannels: [
     {
       Type: "WEB",
       Enabled: true,
       DefaultPreference: false,
-      EditablePreference: true,
-    },
-  ],
+      EditablePreference: true
+    }
+  ]
 };
 
 const notificationTypeWithoutVersion = {
@@ -555,8 +488,8 @@ const notificationTypeWithoutVersion = {
       Subtitle: "Subtitle",
       EmailSubject: "EmailSubject",
       EmailText: "EmailText",
-      EmailHtml: "EmailHtml",
-    },
+      EmailHtml: "EmailHtml"
+    }
   ],
   Actions: [
     {
@@ -564,17 +497,17 @@ const notificationTypeWithoutVersion = {
       Language: "EN",
       ActionText: "Accept",
       GroupActionText: "Accept All",
-      Nature: "POSITIVE",
-    },
+      Nature: "POSITIVE"
+    }
   ],
   DeliveryChannels: [
     {
       Type: "WEB",
       Enabled: true,
       DefaultPreference: false,
-      EditablePreference: true,
-    },
-  ],
+      EditablePreference: true
+    }
+  ]
 };
 
 const notificationTypeWithNullTemplatesActionsAndDeliveryChannels = {
@@ -583,7 +516,7 @@ const notificationTypeWithNullTemplatesActionsAndDeliveryChannels = {
   IsGroupable: true,
   Templates: null,
   Actions: null,
-  DeliveryChannels: null,
+  DeliveryChannels: null
 };
 
 const testPrefix = "test-prefix";
@@ -598,7 +531,7 @@ const allExistingResponseBody = {
           __metadata: {
             id: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/NotificationTypes(guid'a6771115-42f4-4ac3-9c85-49a819927b9c')",
             uri: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/NotificationTypes(guid'a6771115-42f4-4ac3-9c85-49a819927b9c')",
-            type: "com.SAP.OData.V2.NotificationTypeService.NotificationType",
+            type: "com.SAP.OData.V2.NotificationTypeService.NotificationType"
           },
           NotificationTypeId: "a6771115-42f4-4ac3-9c85-49a819927b9c",
           NotificationTypeKey: "Default",
@@ -610,7 +543,7 @@ const allExistingResponseBody = {
                 __metadata: {
                   id: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/Templates(NotificationTypeId=guid'a6771115-42f4-4ac3-9c85-49a819927b9c',Language='EN')",
                   uri: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/Templates(NotificationTypeId=guid'a6771115-42f4-4ac3-9c85-49a819927b9c',Language='EN')",
-                  type: "com.SAP.OData.V2.NotificationTypeService.Template",
+                  type: "com.SAP.OData.V2.NotificationTypeService.Template"
                 },
                 NotificationTypeId: "a6771115-42f4-4ac3-9c85-49a819927b9c",
                 Language: "EN",
@@ -622,22 +555,22 @@ const allExistingResponseBody = {
                 Subtitle: "{{description}}",
                 EmailSubject: null,
                 EmailText: null,
-                EmailHtml: null,
-              },
-            ],
+                EmailHtml: null
+              }
+            ]
           },
           Actions: {
-            results: [],
+            results: []
           },
           DeliveryChannels: {
-            results: [],
-          },
+            results: []
+          }
         },
         {
           __metadata: {
             id: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/NotificationTypes(guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')",
             uri: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/NotificationTypes(guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')",
-            type: "com.SAP.OData.V2.NotificationTypeService.NotificationType",
+            type: "com.SAP.OData.V2.NotificationTypeService.NotificationType"
           },
           NotificationTypeId: "26f1fad0-de4c-4869-9b4e-62f445c8a7a8",
           NotificationTypeKey: "test-prefix/notificationTypeWithAllProperties",
@@ -649,7 +582,7 @@ const allExistingResponseBody = {
                 __metadata: {
                   id: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/Templates(NotificationTypeId=guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8',Language='EN')",
                   uri: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/Templates(NotificationTypeId=guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8',Language='EN')",
-                  type: "com.SAP.OData.V2.NotificationTypeService.Template",
+                  type: "com.SAP.OData.V2.NotificationTypeService.Template"
                 },
                 NotificationTypeId: "26f1fad0-de4c-4869-9b4e-62f445c8a7a8",
                 Language: "EN",
@@ -661,9 +594,9 @@ const allExistingResponseBody = {
                 Subtitle: "Subtitle",
                 EmailSubject: "EmailSubject",
                 EmailText: "EmailText",
-                EmailHtml: "EmailHtml",
-              },
-            ],
+                EmailHtml: "EmailHtml"
+              }
+            ]
           },
           Actions: {
             results: [
@@ -671,16 +604,16 @@ const allExistingResponseBody = {
                 __metadata: {
                   id: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/Actions(ActionId='Accept',Language='EN',NotificationTypeId=guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')",
                   uri: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/Actions(ActionId='Accept',Language='EN',NotificationTypeId=guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')",
-                  type: "com.SAP.OData.V2.NotificationTypeService.Action",
+                  type: "com.SAP.OData.V2.NotificationTypeService.Action"
                 },
                 NotificationTypeId: "26f1fad0-de4c-4869-9b4e-62f445c8a7a8",
                 ActionId: "Accept",
                 ActionText: "Accept",
                 GroupActionText: "Accept All",
                 Language: "EN",
-                Nature: "POSITIVE",
-              },
-            ],
+                Nature: "POSITIVE"
+              }
+            ]
           },
           DeliveryChannels: {
             results: [
@@ -688,21 +621,21 @@ const allExistingResponseBody = {
                 __metadata: {
                   id: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/DeliveryChannels('WEB')",
                   uri: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/DeliveryChannels('WEB')",
-                  type: "com.SAP.OData.V2.NotificationTypeService.DeliveryChannel",
+                  type: "com.SAP.OData.V2.NotificationTypeService.DeliveryChannel"
                 },
                 Type: "WEB",
                 Enabled: true,
                 DefaultPreference: false,
-                EditablePreference: true,
-              },
-            ],
-          },
+                EditablePreference: true
+              }
+            ]
+          }
         },
         {
           __metadata: {
             id: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/NotificationTypes(guid'5b641f19-7c05-404b-b9a3-f6326f8b23ad')",
             uri: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/NotificationTypes(guid'5b641f19-7c05-404b-b9a3-f6326f8b23ad')",
-            type: "com.SAP.OData.V2.NotificationTypeService.NotificationType",
+            type: "com.SAP.OData.V2.NotificationTypeService.NotificationType"
           },
           NotificationTypeId: "5b641f19-7c05-404b-b9a3-f6326f8b23ad",
           NotificationTypeKey: "test-prefix-2/notificationTypeWithAllProperties",
@@ -714,7 +647,7 @@ const allExistingResponseBody = {
                 __metadata: {
                   id: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/Templates(NotificationTypeId=guid'5b641f19-7c05-404b-b9a3-f6326f8b23ad',Language='EN')",
                   uri: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/Templates(NotificationTypeId=guid'5b641f19-7c05-404b-b9a3-f6326f8b23ad',Language='EN')",
-                  type: "com.SAP.OData.V2.NotificationTypeService.Template",
+                  type: "com.SAP.OData.V2.NotificationTypeService.Template"
                 },
                 NotificationTypeId: "5b641f19-7c05-404b-b9a3-f6326f8b23ad",
                 Language: "EN",
@@ -726,9 +659,9 @@ const allExistingResponseBody = {
                 Subtitle: "Subtitle",
                 EmailSubject: "EmailSubject",
                 EmailText: "EmailText",
-                EmailHtml: "EmailHtml",
-              },
-            ],
+                EmailHtml: "EmailHtml"
+              }
+            ]
           },
           Actions: {
             results: [
@@ -736,16 +669,16 @@ const allExistingResponseBody = {
                 __metadata: {
                   id: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/Actions(ActionId='Accept',Language='EN',NotificationTypeId=guid'5b641f19-7c05-404b-b9a3-f6326f8b23ad')",
                   uri: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/Actions(ActionId='Accept',Language='EN',NotificationTypeId=guid'5b641f19-7c05-404b-b9a3-f6326f8b23ad')",
-                  type: "com.SAP.OData.V2.NotificationTypeService.Action",
+                  type: "com.SAP.OData.V2.NotificationTypeService.Action"
                 },
                 NotificationTypeId: "5b641f19-7c05-404b-b9a3-f6326f8b23ad",
                 ActionId: "Accept",
                 ActionText: "Accept",
                 GroupActionText: "Accept All",
                 Language: "EN",
-                Nature: "POSITIVE",
-              },
-            ],
+                Nature: "POSITIVE"
+              }
+            ]
           },
           DeliveryChannels: {
             results: [
@@ -753,21 +686,21 @@ const allExistingResponseBody = {
                 __metadata: {
                   id: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/DeliveryChannels('WEB')",
                   uri: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/DeliveryChannels('WEB')",
-                  type: "com.SAP.OData.V2.NotificationTypeService.DeliveryChannel",
+                  type: "com.SAP.OData.V2.NotificationTypeService.DeliveryChannel"
                 },
                 Type: "WEB",
                 Enabled: true,
                 DefaultPreference: false,
-                EditablePreference: true,
-              },
-            ],
-          },
+                EditablePreference: true
+              }
+            ]
+          }
         },
         {
           __metadata: {
             id: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/NotificationTypes(guid'719d8f6a-1e07-4981-b2be-07197cec7492')",
             uri: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/NotificationTypes(guid'719d8f6a-1e07-4981-b2be-07197cec7492')",
-            type: "com.SAP.OData.V2.NotificationTypeService.NotificationType",
+            type: "com.SAP.OData.V2.NotificationTypeService.NotificationType"
           },
           NotificationTypeId: "719d8f6a-1e07-4981-b2be-07197cec7492",
           NotificationTypeKey: "test-prefix/notificationTypeWithoutVersion",
@@ -779,7 +712,7 @@ const allExistingResponseBody = {
                 __metadata: {
                   id: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/Templates(NotificationTypeId=guid'719d8f6a-1e07-4981-b2be-07197cec7492',Language='EN')",
                   uri: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/Templates(NotificationTypeId=guid'719d8f6a-1e07-4981-b2be-07197cec7492',Language='EN')",
-                  type: "com.SAP.OData.V2.NotificationTypeService.Template",
+                  type: "com.SAP.OData.V2.NotificationTypeService.Template"
                 },
                 NotificationTypeId: "719d8f6a-1e07-4981-b2be-07197cec7492",
                 Language: "EN",
@@ -791,9 +724,9 @@ const allExistingResponseBody = {
                 Subtitle: "Subtitle",
                 EmailSubject: "EmailSubject",
                 EmailText: "EmailText",
-                EmailHtml: "EmailHtml",
-              },
-            ],
+                EmailHtml: "EmailHtml"
+              }
+            ]
           },
           Actions: {
             results: [
@@ -801,16 +734,16 @@ const allExistingResponseBody = {
                 __metadata: {
                   id: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/Actions(ActionId='Accept',Language='EN',NotificationTypeId=guid'719d8f6a-1e07-4981-b2be-07197cec7492')",
                   uri: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/Actions(ActionId='Accept',Language='EN',NotificationTypeId=guid'719d8f6a-1e07-4981-b2be-07197cec7492')",
-                  type: "com.SAP.OData.V2.NotificationTypeService.Action",
+                  type: "com.SAP.OData.V2.NotificationTypeService.Action"
                 },
                 NotificationTypeId: "719d8f6a-1e07-4981-b2be-07197cec7492",
                 ActionId: "Accept",
                 ActionText: "Accept",
                 GroupActionText: "Accept All",
                 Language: "EN",
-                Nature: "POSITIVE",
-              },
-            ],
+                Nature: "POSITIVE"
+              }
+            ]
           },
           DeliveryChannels: {
             results: [
@@ -818,19 +751,19 @@ const allExistingResponseBody = {
                 __metadata: {
                   id: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/DeliveryChannels('WEB')",
                   uri: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/DeliveryChannels('WEB')",
-                  type: "com.SAP.OData.V2.NotificationTypeService.DeliveryChannel",
+                  type: "com.SAP.OData.V2.NotificationTypeService.DeliveryChannel"
                 },
                 Type: "WEB",
                 Enabled: true,
                 DefaultPreference: false,
-                EditablePreference: true,
-              },
-            ],
-          },
-        },
-      ],
-    },
-  },
+                EditablePreference: true
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
 };
 
 const allExistingWithUndefinedTemplatesActionsAndDeliveryChannelsResponseBody = {
@@ -841,7 +774,7 @@ const allExistingWithUndefinedTemplatesActionsAndDeliveryChannelsResponseBody = 
           __metadata: {
             id: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/NotificationTypes(guid'a6771115-42f4-4ac3-9c85-49a819927b9c')",
             uri: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/NotificationTypes(guid'a6771115-42f4-4ac3-9c85-49a819927b9c')",
-            type: "com.SAP.OData.V2.NotificationTypeService.NotificationType",
+            type: "com.SAP.OData.V2.NotificationTypeService.NotificationType"
           },
           NotificationTypeId: "a6771115-42f4-4ac3-9c85-49a819927b9c",
           NotificationTypeKey: "Default",
@@ -853,7 +786,7 @@ const allExistingWithUndefinedTemplatesActionsAndDeliveryChannelsResponseBody = 
                 __metadata: {
                   id: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/Templates(NotificationTypeId=guid'a6771115-42f4-4ac3-9c85-49a819927b9c',Language='EN')",
                   uri: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/Templates(NotificationTypeId=guid'a6771115-42f4-4ac3-9c85-49a819927b9c',Language='EN')",
-                  type: "com.SAP.OData.V2.NotificationTypeService.Template",
+                  type: "com.SAP.OData.V2.NotificationTypeService.Template"
                 },
                 NotificationTypeId: "a6771115-42f4-4ac3-9c85-49a819927b9c",
                 Language: "EN",
@@ -865,27 +798,27 @@ const allExistingWithUndefinedTemplatesActionsAndDeliveryChannelsResponseBody = 
                 Subtitle: "{{description}}",
                 EmailSubject: null,
                 EmailText: null,
-                EmailHtml: null,
-              },
-            ],
+                EmailHtml: null
+              }
+            ]
           },
           Actions: {
-            results: null,
+            results: null
           },
-          DeliveryChannels: {},
+          DeliveryChannels: {}
         },
         {
           __metadata: {
             id: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/NotificationTypes(guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')",
             uri: "https://notifications.cfapps.eu12.hana.ondemand.com:443/v2/NotificationType.svc/NotificationTypes(guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')",
-            type: "com.SAP.OData.V2.NotificationTypeService.NotificationType",
+            type: "com.SAP.OData.V2.NotificationTypeService.NotificationType"
           },
           NotificationTypeId: "26f1fad0-de4c-4869-9b4e-62f445c8a7a8",
           NotificationTypeKey: "test-prefix/notificationTypeWithAllProperties",
           NotificationTypeVersion: "1",
-          IsGroupable: true,
-        },
-      ],
-    },
-  },
+          IsGroupable: true
+        }
+      ]
+    }
+  }
 };

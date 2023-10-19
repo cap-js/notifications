@@ -25,7 +25,7 @@ describe("contentDeployment", () => {
 
     await contentDeployment.deployNotificationTypes();
 
-    console.log(setGlobalLogLevel.mock.calls)
+    console.log(setGlobalLogLevel.mock.calls);
     assert.expect(setGlobalLogLevel.mock.calls[0][0]).to.be.equal("error");
     assert.expect(readFile.mock.calls[0][0]).to.be.equal(cds.env?.requires?.notifications?.types);
     assert.expect(validateNotificationTypes.mock.calls[0][0]).to.be.deep.equal([]);
@@ -40,7 +40,7 @@ describe("contentDeployment", () => {
 
     await contentDeployment.deployNotificationTypes();
 
-    console.log(setGlobalLogLevel.mock.calls)
+    console.log(setGlobalLogLevel.mock.calls);
     assert.expect(setGlobalLogLevel.mock.calls[0][0]).to.be.equal("error");
     assert.expect(readFile.mock.calls[0][0]).to.be.equal(cds.env?.requires?.notifications?.types);
     assert.expect(validateNotificationTypes.mock.calls[0][0]).to.be.deep.equal([]);
