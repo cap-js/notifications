@@ -143,6 +143,8 @@ In local environment, when you publish notification, it is mocked to publish the
 
 Once application is deployed and integrated with SAP Build Work Zone, you can see the notification under fiori notifications icon!
 
+<img width="1300" alt="Sample Application Demo" style="border-radius:0.5rem;" src="_assets/sampleApplicationDemo.gif">
+
 ## Contributing
 
 This project is open to feature requests/suggestions, bug reports etc. via [GitHub issues](https://github.com/cap-js/change-tracking/issues). Contribution and feedback are encouraged and always welcome. For more information about how to contribute, the project structure, as well as additional contribution information, see our [Contribution Guidelines](CONTRIBUTING.md).
