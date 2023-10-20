@@ -8,6 +8,7 @@ The `@cap-js/notifications` package is a [CDS plugin](https://cap.cloud.sap/docs
   - [Update Notification Configuration](#update-notification-configuration)
     - [Notification Destination](#notification-destination)
     - [Notification Types Path](#notification-types-path)
+    - [Notification Type Prefix](#notification-type-prefix)
   - [Add Notification Types](#add-notification-types)
   - [Update handlers to publish notification](#update-handlers-to-publish-notification)
     - [Simple Notificaiton with title](#simple-notificaiton-with-title)
@@ -20,7 +21,7 @@ The `@cap-js/notifications` package is a [CDS plugin](https://cap.cloud.sap/docs
   - [Code of Conduct](#code-of-conduct)
 - [Licensing](#licensing)
 
-## **Setup**
+## Setup
 
 To enable notifications, simply add this self-configuring plugin package to your project:
 
@@ -30,11 +31,11 @@ To enable notifications, simply add this self-configuring plugin package to your
 
 <img width="1300" alt="cds add notifications" style="border-radius:0.5rem" src="_assets/cdsAddNotifications.gif">
 
-## **Usage**
+## Usage
 
 In this guide, we use the [Incidents Management reference sample app](https://github.com/cap-js/incidents-app) as the base, to publish notifications.
 
-### **Update Notification Configuration**
+### Update Notification Configuration
 
 `cds add notifications` will add default configurations for notifications in the `package.json` file.
 
@@ -42,7 +43,7 @@ In this guide, we use the [Incidents Management reference sample app](https://gi
 
 #### **Notification Destination**
 
-As a pre-requisite to publish the notification, you need to have a destination configured with ANS to publish the notification. In the `package.json` by default destination name `SAP_Notification` is added, you can modify the destination name that you are configuring.
+As a pre-requisite to publish the notification, you need to have a [destination](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/enabling-notifications-for-custom-apps-on-sap-btp-cloud-foundry#configure-the-destination-to-the-notifications-service) configured to publish the notification. In the `package.json` by default destination name `SAP_Notification` is added, you can modify the destination name that you are configuring.
 
 #### **Notification Types Path**
 
@@ -52,7 +53,7 @@ When you run `cds add notifications`, it will add `notificationstype.json` file 
 
 To make notification types unique to the application, prefix is added to the type key. By default, `application name` is added as the prefix. You can update the `prefix` if required.
 
-### **Add Notification Types**
+### Add Notification Types
 
 If you want to send custom notifications in your application, you can add the notification types in the `notificationtype.json` file.
 
