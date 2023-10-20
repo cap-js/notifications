@@ -18,7 +18,9 @@ module.exports = class NotifyToConsole extends NotificationService {
       const existingTypes = cds.notifications.local.types;
   
       if (!doesKeyExist(existingTypes, notification["NotificationTypeKey"])) {
-        LOG._warn && LOG.warn(`Notification Type ${notification["NotificationTypeKey"]} is not in the notification types file`);
+        LOG._warn && LOG.warn(
+          `Notification Type ${notification["NotificationTypeKey"]} is not in the notification types file`
+        );
         return;
       }
 
