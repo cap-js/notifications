@@ -143,7 +143,7 @@ In local environment, when you publish notification, it is mocked to publish the
 
 Once application is deployed and integrated with SAP Build Work Zone, you can see the notification under fiori notifications icon!
 
-<img width="1300" alt="Sample Application Demo" style="border-radius:0.5rem;" src="_assets/sampleApplicationDemo.gif">
+<img width="1300" alt="Sample Application Demo" style="border-radius:0.5rem;" src="_assets/incidentsNotificationDemo.gif">
 
 ## Contributing
 
