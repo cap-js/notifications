@@ -1,4 +1,5 @@
-const cds = require('@sap/cds')
+const cds = require('@sap/cds');
+const LOG = cds.log('notifications');
 const NotificationService = require('./service');
 const NOTIFICATIONS_API_ENDPOINT = "v2/Notification.svc";
 const { executeHttpRequest } = require("@sap-cloud-sdk/http-client");
@@ -12,14 +13,16 @@ module.exports = class NotifyToRest extends NotificationService {
     await super.init();
 
     this.on('postNotificationEvent', async function(req) {
-      const { data } = req
+      const { data } = req;
       const notificationDestination = await getNotificationDestination();
       const csrfHeaders = await buildHeadersForDestination(notificationDestination, {
         url: NOTIFICATIONS_API_ENDPOINT,
       });
 
       try {
-        console.log(`Sending notification of key: ${data.NotificationTypeKey} and version: ${data.NotificationTypeVersion}`)
+        LOG._info && LOG.info(
+          `Sending notification of key: ${data.NotificationTypeKey} and version: ${data.NotificationTypeVersion}`
+        );
         await executeHttpRequest(notificationDestination, {
           url: `${NOTIFICATIONS_API_ENDPOINT}/Notifications`,
           method: "post",
@@ -36,7 +39,7 @@ module.exports = class NotifyToRest extends NotificationService {
 
         throw error;
       }
-    })
+    });
   }
 
   async notify(notificationData) {
