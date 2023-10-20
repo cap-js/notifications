@@ -1,5 +1,6 @@
 const NotificationService = require('./service');
 const cds = require("@sap/cds");
+const LOG = cds.log('notifications');
 const { buildNotification, doesKeyExist } = require("./../lib/utils");
 
 module.exports = class NotifyToConsole extends NotificationService {
@@ -13,19 +14,21 @@ module.exports = class NotifyToConsole extends NotificationService {
     const notification = buildNotification(arguments[0]);
 
     if (notification) {
-      console.log(`SAP Alert Notification service notification: ${JSON.stringify(notification, null, 2)}`);
-
+      LOG._info && LOG.info(`SAP Alert Notification Service notification: ${JSON.stringify(notification, null, 2)}`);
       const existingTypes = cds.notifications.local.types;
   
       if (!doesKeyExist(existingTypes, notification["NotificationTypeKey"])) {
-        console.log(`Notification Type ${notification["NotificationTypeKey"]} is not in the notification types file`);
+        LOG._warn && LOG.warn(
+          `Notification Type ${notification["NotificationTypeKey"]} is not in the notification types file`
+        );
         return;
       }
-  
+
       if (!doesKeyExist(existingTypes[notification["NotificationTypeKey"]], notification["NotificationTypeVersion"])) {
-        console.log(`Notification Type Version ${notification["NotificationTypeVersion"]} for type ${notification["NotificationTypeKey"]} is not in the notification types file`);
+        LOG._warn && LOG.warn(
+          `Notification Type Version ${notification["NotificationTypeVersion"]} for type ${notification["NotificationTypeKey"]} is not in the notification types file`
+        );
       }
     }
-    
   }
 }
