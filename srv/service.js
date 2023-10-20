@@ -12,4 +12,8 @@ module.exports = class NotificationService extends OutboxService {
     // call OutboxService's init
     await super.init();
   }
+
+  notify() {
+    // Abstract function
+  }
 }
