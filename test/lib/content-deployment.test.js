@@ -5,7 +5,6 @@ const { processNotificationTypes } = require("../../lib/notificationTypes");
 const { setGlobalLogLevel } = require("@sap-cloud-sdk/util");
 const assert = require("chai");
 
-jest.mock("@sap/cds");
 jest.mock("../../lib/utils");
 jest.mock("../../lib/notificationTypes");
 jest.mock("@sap-cloud-sdk/util");
