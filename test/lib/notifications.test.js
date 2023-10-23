@@ -1,55 +1,30 @@
-const {getNotificationDestination, buildNotification, executeRequest} = require("./../../lib/utils");
-const {buildHeadersForDestination} = require("@sap-cloud-sdk/connectivity");
-const {postNotification} = require("./../../lib/notifications");
+const { getNotificationDestination } = require("./../../lib/utils");
+const { buildHeadersForDestination } = require("@sap-cloud-sdk/connectivity");
+const { postNotification } = require("./../../lib/notifications");
+const { executeHttpRequest } = require("@sap-cloud-sdk/http-client");
 
 jest.mock("./../../lib/utils");
 jest.mock("@sap-cloud-sdk/connectivity");
+jest.mock("@sap-cloud-sdk/http-client")
 
-const expectedDefaultNotificationWithoutDescription = {
-    NotificationTypeKey: "Default",
+const expectedCustomNotification = {
+    NotificationTypeKey: "Custom",
     NotificationTypeVersion: "1",
-    Priority: "HIGH", 
-    Properties: [
-      {
-        Key:"title",
-        IsSensitive:false,
-        Language :"en",
-        Value :"Some Test Title",
-        Type :"String"
-      },
-      {
-        Key:"description",
-        IsSensitive:false,
-        Language :"en",
-        Value :"",
-        Type :"String"
-      }
-    ],
-    Recipients: [
-      {
-        RecipientId: "test.mail@mail.com"
-      }
-    ]
-  };
-
-const expectedDefaultNotificationWithDescription = {
-    NotificationTypeKey: "Default",
-    NotificationTypeVersion: "1",
-    Priority: "HIGH", 
+    Priority: "HIGH",
     Properties: [
         {
-            Key:"title",
-            IsSensitive:false,
-            Language :"en",
-            Value :"Some Test Title",
-            Type :"String"
+            Key: "title",
+            IsSensitive: false,
+            Language: "en",
+            Value: "Some Text Title",
+            Type: "String"
         },
         {
-            Key:"description",
-            IsSensitive:false,
-            Language :"en",
-            Value :"Some Test Description",
-            Type :"String"
+            Key: "description",
+            IsSensitive: false,
+            Language: "en",
+            Value: "Some Text Description",
+            Type: "String"
         }
     ],
     Recipients: [
@@ -59,169 +34,113 @@ const expectedDefaultNotificationWithDescription = {
     ]
 };
 
-describe ("Test post notification", () => {
-    test("When passed arguments are incorrect to postNotification", () => {
+describe("Test post notification", () => {
+
+    test("When passed whole notification object to postNotification", async () => {
+        const infoSpy = jest.spyOn(global.console, 'info');
         getNotificationDestination.mockReturnValue(undefined);
         buildHeadersForDestination.mockReturnValue(undefined);
-        buildNotification.mockReturnValue(undefined);
+        executeHttpRequest.mockReturnValue(expectedCustomNotification);
 
-        expect(postNotification({})).toMatchObject({});
+        // call post notification
+        await postNotification(expectedCustomNotification)
+
+        // check if console.info was called
+        expect(infoSpy).toHaveBeenCalled();
+        expect(infoSpy).toHaveBeenCalledWith("[notifications] -", "Sending notification of key: Custom and version: 1");
+
+        // check if execute http request was called
+        expect(executeHttpRequest).toHaveBeenCalled();
+        infoSpy.mockClear();
     })
 
-    test("When passed whole notification object to postNotification", () => {
-        const expectedCustomNotification = {
-            NotificationTypeKey: "Custom",
-            NotificationTypeVersion: "1",
-            Priority: "HIGH", 
-            Properties: [
-                {
-                    Key:"title",
-                    IsSensitive:false,
-                    Language :"en",
-                    Value :"Some Text Title",
-                    Type :"String"
-                },
-                {
-                    Key:"description",
-                    IsSensitive:false,
-                    Language :"en",
-                    Value :"Some Text Description",
-                    Type :"String"
-                }
-            ],
-            Recipients: [
-                {
-                    RecipientId: "test.mail@mail.com"
-                }
-            ]
+    test("When execute http request throws error with status code 500", async () => {
+        const error = new Error();
+        error.response = {
+            message: "mocked error",
+            status: 500
         };
 
+        const infoSpy = jest.spyOn(global.console, 'info');
         getNotificationDestination.mockReturnValue(undefined);
         buildHeadersForDestination.mockReturnValue(undefined);
-        buildNotification.mockReturnValue(expectedCustomNotification);
-        executeRequest.mockReturnValue(Promise.resolve(expectedCustomNotification));
+        executeHttpRequest.mockImplementation(() => {
+            throw error;
+        });
 
-        expect(postNotification(expectedCustomNotification)).toMatchObject(Promise.resolve(expectedCustomNotification));
+        // call post notification
+        try {
+            await postNotification(expectedCustomNotification);
+        } catch (err) {
+            expect(err.unrecoverable).toBeFalsy();
+        }
+
+        // check if console.info was called
+        expect(infoSpy).toHaveBeenCalled();
+        expect(infoSpy).toHaveBeenCalledWith("[notifications] -", "Sending notification of key: Custom and version: 1");
+
+        // check if execute http request was called
+        expect(executeHttpRequest).toHaveBeenCalled();
+        infoSpy.mockClear();
     })
 
-    test("When passed recipients, priority, title to postNotification", () => {
-        getNotificationDestination.mockReturnValue(undefined);
-        buildHeadersForDestination.mockReturnValue(undefined);
-        buildNotification.mockReturnValue(expectedDefaultNotificationWithoutDescription);
-        executeRequest.mockReturnValue(Promise.resolve(expectedDefaultNotificationWithoutDescription));
-
-        expect(postNotification( 
-            {
-                recipients: ["test.mail@mail.com"],
-                title: "Some Test Title",
-                priority: "HIGH"
-            })
-            ).toMatchObject(Promise.resolve(expectedDefaultNotificationWithoutDescription));
-    })
-
-    test("When passed recipients, priority, title, description to postNotification", () => {
-        getNotificationDestination.mockReturnValue(undefined);
-        buildHeadersForDestination.mockReturnValue(undefined);
-        buildNotification.mockReturnValue(expectedDefaultNotificationWithoutDescription);
-        executeRequest.mockReturnValue(Promise.resolve(expectedDefaultNotificationWithoutDescription));
-
-        expect(postNotification( 
-            {
-                recipients: ["test.mail@mail.com"],
-                title: "Some Test Title",
-                priority: "HIGH",
-                description: "Some Test Description"
-            })
-            ).toMatchObject(Promise.resolve(expectedDefaultNotificationWithDescription));
-    })
-
-    test("When passed recipients, priority, title, description to postNotification", () => {
-        getNotificationDestination.mockReturnValue(undefined);
-        buildHeadersForDestination.mockReturnValue(undefined);
-        buildNotification.mockReturnValue(expectedDefaultNotificationWithoutDescription);
-        executeRequest.mockReturnValue(Promise.resolve(expectedDefaultNotificationWithoutDescription));
-
-        expect(postNotification( 
-            {
-                recipients: ["test.mail@mail.com"],
-                title: "Some Test Title",
-                priority: "HIGH",
-                description: "Some Test Description"
-            })
-            ).toMatchObject(Promise.resolve(expectedDefaultNotificationWithDescription));
-    })
-
-    test("When passed recipients, priority, title, description to postNotification", () => {
-        const expectedNotification = {
-            NotificationTypeId: "01234567-89ab-cdef-0123-456789abcdef",
-            NotificationTypeKey: "notifications/TestNotificationType",
-            NotificationTypeVersion: "1",
-            NavigationTargetAction: "TestTargetAction",
-            NavigationTargetObject: "TestTargetObject",
-            Priority: "HIGH", 
-            ProviderId: "SAMPLEPROVIDER",
-            ActorId: "BACKENDACTORID",
-            ActorDisplayText: "ActorName",
-            ActorImageURL: "https://some-url",
-            NotificationTypeTimestamp: "2022-03-15T09:58:42.807Z",
-            Properties: [
-                {
-                    Key:"title",
-                    IsSensitive:false,
-                    Language :"en",
-                    Value :"Some Test Title",
-                    Type :"String"
-                }
-            ],
-            Recipients: [
-                {
-                    RecipientId: "test.mail@mail.com"
-                }
-            ],
-            TargetParameters: [
-                {
-                   "Key": "string",
-                   "Value": "string"
-                }
-             ]
+    test("When execute http request throws error with status code 404", async () => {
+        const error = new Error();
+        error.response = {
+            message: "mocked error",
+            status: 404
         };
-        
+
+        const infoSpy = jest.spyOn(global.console, 'info');
         getNotificationDestination.mockReturnValue(undefined);
         buildHeadersForDestination.mockReturnValue(undefined);
-        buildNotification.mockReturnValue(expectedNotification);
-        executeRequest.mockReturnValue(Promise.resolve(expectedNotification));
+        executeHttpRequest.mockImplementation(() => {
+            throw error;
+        });
 
-        expect(postNotification( 
-            {
-                recipients: ["test.mail@mail.com"],
-                type: "TestNotificationType",
-                properties: [{
-                    Key:"title",
-                    IsSensitive:false,
-                    Language :"en",
-                    Value :"Some Test Title",
-                    Type :"String"
-                }],
-                navigation: {
-                    NavigationTargetAction: "TestTargetAction",
-                    NavigationTargetObject: "TestTargetObject"
-                },
-                priority: "HIGH",
-                payload: {
-                    NotificationTypeId: "01234567-89ab-cdef-0123-456789abcdef",
-                    ProviderId: "SAMPLEPROVIDER",
-                    ActorId: "BACKENDACTORID",
-                    ActorDisplayText: "ActorName",
-                    ActorImageURL: "https://some-url",
-                    NotificationTypeTimestamp: "2022-03-15T09:58:42.807Z",
-                    TargetParameters: [
-                        {
-                           "Key": "string",
-                           "Value": "string"
-                        }
-                     ]
-                }
-            })
-            ).toMatchObject(Promise.resolve(expectedNotification));
+        // call post notification
+        try {
+            await postNotification(expectedCustomNotification);
+        } catch (err) {
+            expect(err.unrecoverable).toEqual(true);
+        }
+
+        // check if console.info was called
+        expect(infoSpy).toHaveBeenCalled();
+        expect(infoSpy).toHaveBeenCalledWith("[notifications] -", "Sending notification of key: Custom and version: 1");
+
+        // check if execute http request was called
+        expect(executeHttpRequest).toHaveBeenCalled();
+        infoSpy.mockClear();
+    })
+
+    test("When execute http request throws error with status code 429", async () => {
+        const error = new Error();
+        error.response = {
+            message: "mocked error",
+            status: 429
+        };
+
+        const infoSpy = jest.spyOn(global.console, 'info');
+        getNotificationDestination.mockReturnValue(undefined);
+        buildHeadersForDestination.mockReturnValue(undefined);
+        executeHttpRequest.mockImplementation(() => {
+            throw error;
+        });
+
+        // call post notification
+        try {
+            await postNotification(expectedCustomNotification);
+        } catch (err) {
+            expect(err.unrecoverable).toBeFalsy();
+        }
+
+        // check if console.info was called
+        expect(infoSpy).toHaveBeenCalled();
+        expect(infoSpy).toHaveBeenCalledWith("[notifications] -", "Sending notification of key: Custom and version: 1");
+
+        // check if execute http request was called
+        expect(executeHttpRequest).toHaveBeenCalled();
+        infoSpy.mockClear();
     })
 })
