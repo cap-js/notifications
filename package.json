@@ -1,19 +1,53 @@
 {
-    "name": "@cap-js/alert-notification",
-    "version": "0.0.1",
-    "description": "CDS plugin providing integration to the SAP BTP Alert Notification Service.",
-    "repository": "cap-js/alert-notification",
-    "author": "SAP SE (https://www.sap.com)",
-    "homepage": "https://cap.cloud.sap/",
-    "license": "SEE LICENSE IN LICENSE",
-    "main": "cds-plugin.js",
-    "files": [
-      "lib",
-      "srv"
-    ],
-    "scripts": {
-      "lint": "npx eslint .",
-      "test": "npx jest --silent"
+  "name": "@cap-js/notifications",
+  "version": "0.0.1",
+  "description": "CDS plugin providing integration to the SAP BTP Alert Notification Service.",
+  "repository": "cap-js/notifications",
+  "author": "SAP SE (https://www.sap.com)",
+  "homepage": "https://cap.cloud.sap/",
+  "license": "SEE LICENSE IN LICENSE",
+  "main": "cds-plugin.js",
+  "files": [
+    "lib",
+    "srv"
+  ],
+  "dependencies": {
+    "@sap-cloud-sdk/connectivity": "3.5.0",
+    "@sap-cloud-sdk/http-client": "3.5.0",
+    "@sap-cloud-sdk/util": "3.5.0",
+    "@sap/cds": "7.3.0",
+    "@sap/cds-dk": "7.3.1",
+    "lodash": "4.17.21"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "chai": "^4.3.10"
+  },
+  "scripts": {
+    "lint": "npx eslint .",
+    "test": "npx jest",
+    "test-with-coverage": "npx jest --coverage"
+  },
+  "cds": {
+    "requires": {
+      "kinds": {
+        "notifications": {
+          "[development]": {
+            "kind": "notify-to-console"
+          },
+          "[production]": {
+            "kind": "notify-to-rest"
+          }
+        },
+        "notify-to-console": {
+          "impl": "@cap-js/notifications/srv/notifyToConsole",
+          "outbox": false
+        },
+        "notify-to-rest": {
+          "impl": "@cap-js/notifications/srv/notifyToRest",
+          "outbox": true
+        }
+      }
     }
   }
-  
+}
