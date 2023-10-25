@@ -15,8 +15,8 @@ The `@cap-js/notifications` package is a [CDS plugin](https://cap.cloud.sap/docs
     - [Custom Notifications](#custom-notifications)
   - [Sample Application with notifications](#sample-application-with-notifications)
     - [In Local Environment](#in-local-environment)
-    - [**In Production Environment**](#in-production-environment)
-      - [**Notification Destination**](#notification-destination)
+    - [In Production Environment](#in-production-environment)
+      - [Notification Destination](#notification-destination)
       - [Integrate with SAP Build Work Zone](#integrate-with-sap-build-work-zone)
 - [Contributing](#contributing)
   - [Code of Conduct](#code-of-conduct)
@@ -136,9 +136,9 @@ In local environment, when you publish notification, it is mocked to publish the
 
 <img width="1300" alt="Notify to console" style="border-radius:0.5rem;padding:1rem;background:rgb(24 24 24)" src="_assets/notifyToConsole.png">
 
-#### **In Production Environment**
+#### In Production Environment
 
-##### **Notification Destination**
+##### Notification Destination
 
 As a pre-requisite to publish the notification, you need to have a [destination](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/enabling-notifications-for-custom-apps-on-sap-btp-cloud-foundry#configure-the-destination-to-the-notifications-service) configured to publish the notification. In the `package.json` by default destination name `SAP_Notification` is added, you can modify the destination name that you are configuring.
 
