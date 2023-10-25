@@ -34,7 +34,7 @@ async function postNotification(notificationData) {
     const message = err.response.data?.error?.message?.value ?? err.response.message;
     const error = new cds.error(message);
 
-    if (String(err.response?.status).match(/^4\d\d$/) && err.response?.status !== 429) {
+    if (/^4\d\d$/.test(err.response?.status) && err.response?.status != 429) {
       error.unrecoverable = true;
     }
 
