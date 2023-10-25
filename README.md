@@ -125,7 +125,7 @@ alert.notify({
       Type: 'String'
     }
   ],
-  Recipients: recipients
+  Recipients: ["admin1@test.com","admin2@test.com"]
 });
 ```
 
