@@ -1,23 +1,23 @@
 
-The `@cap-js/notifications` package is a [CDS plugin](https://cap.cloud.sap/docs/node.js/cds-plugins#cds-plugin-packages) providing out-of-the box support for publishing business notifications.
+The `@cap-js/notifications` package is a [CDS plugin](https://cap.cloud.sap/docs/node.js/cds-plugins#cds-plugin-packages) that provides support for publishing business notifications.
 
 ### Table of Contents
 
 - [Setup](#setup)
 - [Usage](#usage)
   - [Update Notification Configuration](#update-notification-configuration)
-    - [Notification Types Path](#notification-types-path)
-    - [Notification Type Prefix](#notification-type-prefix)
+    - [**Notification Types Path**](#notification-types-path)
+    - [**Notification Type Prefix**](#notification-type-prefix)
   - [Add Notification Types](#add-notification-types)
   - [Add code to send notifications](#add-code-to-send-notifications)
-    - [Simple Notification with title](#simple-notification-with-title)
-    - [Simple Notification with title and description](#simple-notification-with-title-and-description)
-    - [Custom Notifications](#custom-notifications)
+    - [**Simple Notification with title**](#simple-notification-with-title)
+    - [**Simple Notification with title and description**](#simple-notification-with-title-and-description)
+    - [**Custom Notifications**](#custom-notifications)
   - [Sample Application with notifications](#sample-application-with-notifications)
-    - [In Local Environment](#in-local-environment)
-    - [In Production Environment](#in-production-environment)
-      - [Notification Destination](#notification-destination)
-      - [Integrate with SAP Build Work Zone](#integrate-with-sap-build-work-zone)
+    - [**In Local Environment**](#in-local-environment)
+    - [**In Production Environment**](#in-production-environment)
+      - [**Notification Destination**](#notification-destination)
+      - [**Integrate with SAP Build Work Zone**](#integrate-with-sap-build-work-zone)
 - [Contributing](#contributing)
   - [Code of Conduct](#code-of-conduct)
 - [Licensing](#licensing)
