@@ -144,7 +144,7 @@ As a pre-requisite to publish the notification, you need to have a [destination]
 
 ##### **Integrate with SAP Build Work Zone**
 
-Once application is deployed and integrated with SAP Build Work Zone, you can see the notification under fiori notifications icon!
+Once application is deployed and [integrated with SAP Build Work Zone](https://github.com/cap-js/calesi/tree/main/samples/notifications), you can see the notification under fiori notifications icon!
 
 <img width="1300" alt="Sample Application Demo" style="border-radius:0.5rem;" src="_assets/incidentsNotificationDemo.gif">
 
