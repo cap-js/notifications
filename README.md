@@ -106,10 +106,10 @@ alert.notify({
 });
 ```
 
-#### **Custom Notifications**
+#### Custom Notifications
 You can use these two signature to send the custom notification with pre-defined notification types.
 
-##### **Passing the whole notification object**
+#### Passing the whole notification object
 By using this approach you need to pass the whole notification object as described in the API documentation
 ```js
 alert.notify({
@@ -136,11 +136,11 @@ alert.notify({
 });
 ```
 
-##### **Passing the notification object in parts**
+#### Passing the notification object in parts
 By using this approach you can post a notification by providing different parts of the notification object grouped in related units 
 ```js
 alert.notify({
-  recipients: recipients,
+  recipients: ["admin1@test.com","admin2@test.com"],
   type: "IncidentCreated"
   priority: 'NEUTRAL',
   properties: [
@@ -184,12 +184,12 @@ alert.notify({
 ```
 
 Possible parameters:
-* **recipients** - List of the recipients
-* **type** - Notification type key
-* **priority** - Priority of the notification
-* **properties** - A key-value pair that is used to fill a placeholder of the notification type template
-* **navigation** - All navigation related parameters
-* **payload** - The rest parameters that can be passed
+* **recipients** - List of the recipients, this argument is mandatory
+* **type** - Notification type key, this argument is mandatory
+* **priority** - Priority of the notification, this argument is optional, it defaults to NEUTRAL
+* **properties** - A key-value pair that is used to fill a placeholder of the notification type template, this argument is optional
+* **navigation** - All navigation related parameters, this argument is optional
+* **payload** - The rest parameters that can be passed, this argument is optional
 
 ### Sample Application with notifications
 
