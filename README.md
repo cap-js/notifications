@@ -6,18 +6,18 @@ The `@cap-js/notifications` package is a [CDS plugin](https://cap.cloud.sap/docs
 - [Setup](#setup)
 - [Usage](#usage)
   - [Update Notification Configuration](#update-notification-configuration)
-    - [**Notification Types Path**](#notification-types-path)
-    - [**Notification Type Prefix**](#notification-type-prefix)
+    - [Notification Types Path](#notification-types-path)
+    - [Notification Type Prefix](#notification-type-prefix)
   - [Add Notification Types](#add-notification-types)
   - [Add code to send notifications](#add-code-to-send-notifications)
-    - [**Simple Notification with title**](#simple-notification-with-title)
-    - [**Simple Notification with title and description**](#simple-notification-with-title-and-description)
-    - [**Custom Notifications**](#custom-notifications)
+    - [Simple Notification with title](#simple-notification-with-title)
+    - [Simple Notification with title and description](#simple-notification-with-title-and-description)
+    - [Custom Notifications](#custom-notifications)
   - [Sample Application with notifications](#sample-application-with-notifications)
-    - [**In Local Environment**](#in-local-environment)
+    - [In Local Environment](#in-local-environment)
     - [**In Production Environment**](#in-production-environment)
       - [**Notification Destination**](#notification-destination)
-      - [**Integrate with SAP Build Work Zone**](#integrate-with-sap-build-work-zone)
+      - [Integrate with SAP Build Work Zone](#integrate-with-sap-build-work-zone)
 - [Contributing](#contributing)
   - [Code of Conduct](#code-of-conduct)
 - [Licensing](#licensing)
@@ -42,11 +42,11 @@ In this guide, we use the [Incidents Management reference sample app](https://gi
 
 <img width="1300" alt="Default Notification config" style="border-radius:0.5rem" src="_assets/packageJsonConfig.gif">
 
-#### **Notification Types Path**
+#### Notification Types Path
 
 When you run `cds add notifications`, it will add `notificationstype.json` file with template for a notification type in the project root folder.  You can add the notification types in the `notificationtype.json` file for sending the custom notification types.
 
-#### **Notification Type Prefix**
+#### Notification Type Prefix
 
 To make notification types unique to the application, prefix is added to the type key. By default, `application name` is added as the prefix. You can update the `prefix` if required.
 
@@ -83,7 +83,7 @@ In the handler files, connect to the notifications plugin by:
 const alert = await cds.connect.to('notifications');
 ```
 
-#### **Simple Notification with title**
+#### Simple Notification with title
 You can use the following signature to send the simple notification with title
 ```js
 alert.notify({
@@ -92,7 +92,7 @@ alert.notify({
   title: "New incident is reported!"
 });
 ```
-#### **Simple Notification with title and description**
+#### Simple Notification with title and description
 You can use the following signature to send the simple notification with title and description
 ```js
 alert.notify({
@@ -102,7 +102,7 @@ alert.notify({
   description: "Incident titled 'Engine overheating' created by 'customer X' with priority high is assigned to you!"
 });
 ```
-#### **Custom Notifications**
+#### Custom Notifications
 You can use the following signature to send the custom notification with pre-defined notification types.
 ```js
 alert.notify({
@@ -131,7 +131,7 @@ alert.notify({
 
 ### Sample Application with notifications
 
-#### **In Local Environment**
+#### In Local Environment
 In local environment, when you publish notification, it is mocked to publish the nofication to the console.
 
 <img width="1300" alt="Notify to console" style="border-radius:0.5rem;padding:1rem;background:rgb(24 24 24)" src="_assets/notifyToConsole.png">
@@ -142,7 +142,7 @@ In local environment, when you publish notification, it is mocked to publish the
 
 As a pre-requisite to publish the notification, you need to have a [destination](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/enabling-notifications-for-custom-apps-on-sap-btp-cloud-foundry#configure-the-destination-to-the-notifications-service) configured to publish the notification. In the `package.json` by default destination name `SAP_Notification` is added, you can modify the destination name that you are configuring.
 
-##### **Integrate with SAP Build Work Zone**
+##### Integrate with SAP Build Work Zone
 
 Once application is deployed and [integrated with SAP Build Work Zone](https://github.com/cap-js/calesi/tree/main/samples/notifications), you can see the notification under fiori notifications icon!
 
