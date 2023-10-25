@@ -1,6 +1,6 @@
 const { getNotificationDestination } = require("./../../lib/utils");
 const { buildHeadersForDestination } = require("@sap-cloud-sdk/connectivity");
-const { postNotification } = require("./../../lib/notifications");
+const { postNotification } = require("./../../srv/notifyToRest");
 const { executeHttpRequest } = require("@sap-cloud-sdk/http-client");
 
 jest.mock("./../../lib/utils");

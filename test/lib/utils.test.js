@@ -1,4 +1,4 @@
-const { buildNotification, validateNotificationTypes, doesKeyExist, readFile, getNotificationDestination } = require("../../lib/utils");
+const { buildNotification, validateNotificationTypes, readFile, getNotificationDestination } = require("../../lib/utils");
 const { existsSync, readFileSync } = require("fs");
 const { getDestination } = require("@sap-cloud-sdk/connectivity");
 
@@ -576,20 +576,6 @@ describe("Test utils", () => {
   test("Given valid NTypes | When validateNotificationTypes is called | Then true is returned", () => {
     expect(validateNotificationTypes([])).toEqual(true);
     expect(validateNotificationTypes([{ NotificationTypeKey: "Test" }, { NotificationTypeKey: "Test2" }])).toEqual(true);
-  });
-
-  test("Given invalid inputs | When doesKeyExist is called | Then false is returned", () => {
-    expect(doesKeyExist({ test: "test1" }, {})).toEqual(false);
-    expect(doesKeyExist([{ test: "test1" }], "test")).toEqual(false);
-  });
-
-  test("Given that key does not exist | When doesKeyExist is called | Then false is returned", () => {
-    expect(doesKeyExist({ test: "test1" }, "doesnotexist")).toEqual(false);
-    expect(doesKeyExist({ test: "test1" }, "test1")).toEqual(false);
-  });
-
-  test("Given that key does exist | When doesKeyExist is called | Then true is returned", () => {
-    expect(doesKeyExist({ test: "test1" }, "test")).toEqual(true);
   });
 
   test("Given that file does not exist | When readFile is called | Then empty array is returned", () => {
