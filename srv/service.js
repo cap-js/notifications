@@ -1,8 +1,9 @@
-// REVISIT: cds.OutboxService or technique to avoid extending OutboxService
-const OutboxService = require('@sap/cds/libx/_runtime/messaging/Outbox');
 const { buildNotification } = require("./../lib/utils");
 
-module.exports = class NotificationService extends OutboxService {
+const cds = require('@sap/cds');
+const Base = cds.outboxed ? cds.Service : require('@sap/cds/libx/_runtime/messaging/Outbox');
+
+module.exports = class NotificationService extends Base {
   notify (message) {
     // Subclasses simply register handlers for 'notification' events
     // App code could plugin own before / after handlers
