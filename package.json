@@ -41,8 +41,8 @@
           "destination": "SAP_Notifications",
           "kind": "notify-to-rest"
         },
-        "prefix": "alert-notification-sample",
-        "types": "srv/notifications.json",
+        "prefix": "$app-name",
+        "types": "srv/notification-types.json",
         "outbox": true
       },
       "kinds": {
