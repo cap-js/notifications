@@ -125,7 +125,7 @@ describe("Test utils", () => {
       buildNotification({
         recipients: ["test.mail@mail.com"],
         type: "TestNotificationType",
-        properties: [
+        Properties: [
           {
             Key: "title",
             IsSensitive: false,
@@ -165,7 +165,7 @@ describe("Test utils", () => {
       buildNotification({
         recipients: ["test.mail@mail.com"],
         type: "TestNotificationType",
-        properties: [
+        Properties: [
           {
             Key: "title",
             IsSensitive: false,
@@ -174,10 +174,8 @@ describe("Test utils", () => {
             Type: "String"
           }
         ],
-        navigation: {
-          NavigationTargetAction: "TestTargetAction",
-          NavigationTargetObject: "TestTargetObject"
-        }
+        NavigationTargetAction: "TestTargetAction",
+        NavigationTargetObject: "TestTargetObject",
       })
     ).toMatchObject(expectedNotification);
   });
@@ -209,7 +207,7 @@ describe("Test utils", () => {
       buildNotification({
         recipients: ["test.mail@mail.com"],
         type: "TestNotificationType",
-        properties: [
+        Properties: [
           {
             Key: "title",
             IsSensitive: false,
@@ -218,10 +216,8 @@ describe("Test utils", () => {
             Type: "String"
           }
         ],
-        navigation: {
-          NavigationTargetAction: "TestTargetAction",
-          NavigationTargetObject: "TestTargetObject"
-        },
+        NavigationTargetAction: "TestTargetAction",
+        NavigationTargetObject: "TestTargetObject",
         priority: "HIGH"
       })
     ).toMatchObject(expectedNotification);
@@ -268,7 +264,7 @@ describe("Test utils", () => {
       buildNotification({
         recipients: ["test.mail@mail.com"],
         type: "TestNotificationType",
-        properties: [
+        Properties: [
           {
             Key: "title",
             IsSensitive: false,
@@ -277,27 +273,23 @@ describe("Test utils", () => {
             Type: "String"
           }
         ],
-        navigation: {
-          NavigationTargetAction: "TestTargetAction",
-          NavigationTargetObject: "TestTargetObject"
-        },
+        NavigationTargetAction: "TestTargetAction",
+        NavigationTargetObject: "TestTargetObject",
         priority: "HIGH",
-        payload: {
-          Id: "01234567-89ab-cdef-0123-456789abcdef",
-          OriginId: "01234567-89ab-cdef-0123-456789abcdef",
-          NotificationTypeId: "01234567-89ab-cdef-0123-456789abcdef",
-          ProviderId: "SAMPLEPROVIDER",
-          ActorId: "BACKENDACTORID",
-          ActorDisplayText: "ActorName",
-          ActorImageURL: "https://some-url",
-          NotificationTypeTimestamp: "2022-03-15T09:58:42.807Z",
-          TargetParameters: [
-            {
-              Key: "string",
-              Value: "string"
-            }
-          ]
-        }
+        Id: "01234567-89ab-cdef-0123-456789abcdef",
+        OriginId: "01234567-89ab-cdef-0123-456789abcdef",
+        NotificationTypeId: "01234567-89ab-cdef-0123-456789abcdef",
+        ProviderId: "SAMPLEPROVIDER",
+        ActorId: "BACKENDACTORID",
+        ActorDisplayText: "ActorName",
+        ActorImageURL: "https://some-url",
+        NotificationTypeTimestamp: "2022-03-15T09:58:42.807Z",
+        TargetParameters: [
+          {
+            Key: "string",
+            Value: "string"
+          }
+        ]
       })
     ).toMatchObject(expectedNotification);
   });
@@ -341,7 +333,7 @@ describe("Test utils", () => {
       buildNotification({
         recipients: ["test.mail@mail.com"],
         type: "TestNotificationType",
-        properties: [
+        Properties: [
           {
             Key: "title",
             IsSensitive: false,
@@ -350,25 +342,21 @@ describe("Test utils", () => {
             Type: "String"
           }
         ],
-        navigation: {
-          NavigationTargetAction: "TestTargetAction",
-          NavigationTargetObject: "TestTargetObject"
-        },
+        NavigationTargetAction: "TestTargetAction",
+        NavigationTargetObject: "TestTargetObject",
         priority: "HIGH",
-        payload: {
-          NotificationTypeId: "01234567-89ab-cdef-0123-456789abcdef",
-          ProviderId: "SAMPLEPROVIDER",
-          ActorId: "BACKENDACTORID",
-          ActorDisplayText: "ActorName",
-          ActorImageURL: "https://some-url",
-          NotificationTypeTimestamp: "2022-03-15T09:58:42.807Z",
-          TargetParameters: [
-            {
-              Key: "string",
-              Value: "string"
-            }
-          ]
-        }
+        NotificationTypeId: "01234567-89ab-cdef-0123-456789abcdef",
+        ProviderId: "SAMPLEPROVIDER",
+        ActorId: "BACKENDACTORID",
+        ActorDisplayText: "ActorName",
+        ActorImageURL: "https://some-url",
+        NotificationTypeTimestamp: "2022-03-15T09:58:42.807Z",
+        TargetParameters: [
+          {
+            Key: "string",
+            Value: "string"
+          }
+        ]
       })
     ).toMatchObject(expectedNotification);
   });
@@ -553,16 +541,17 @@ describe("Test utils", () => {
     ).toBeFalsy();
   });
 
-  test("When invalid payload for custom notification is passed to buildNotification", () => {
-    expect(
-      buildNotification({
-        recipients: ["test.mail@mail.com"],
-        type: "TestNotificationType",
-        priority: "NEUTRAL",
-        payload: "invalid"
-      })
-    ).toBeFalsy();
-  });
+  // .payload not used anymore
+  // test("When invalid payload for custom notification is passed to buildNotification", () => {
+  //   expect(
+  //     buildNotification({
+  //       recipients: ["test.mail@mail.com"],
+  //       type: "TestNotificationType",
+  //       priority: "NEUTRAL",
+  //       payload: "invalid"
+  //     })
+  //   ).toBeFalsy();
+  // });
 
   test("When no notification data for custom notification is passed to buildNotification", () => {
     expect(buildNotification(undefined)).toBeFalsy();
