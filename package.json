@@ -34,11 +34,15 @@
     "requires": {
       "destinations": true,
       "notifications": {
-        "[development]": { "kind": "notify-to-console" },
-        "[production]": { "kind": "notify-to-rest" },
-        "destination": "SAP_Notifications",
+        "[development]": {
+          "kind": "notify-to-console"
+        },
+        "[production]": {
+          "destination": "SAP_Notifications",
+          "kind": "notify-to-rest"
+        },
         "prefix": "alert-notification-sample",
-        "types": "notificationtypes.json",
+        "types": "srv/notifications.json",
         "outbox": true
       },
       "kinds": {
