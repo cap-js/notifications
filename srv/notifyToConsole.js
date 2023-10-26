@@ -4,10 +4,15 @@ const LOG = cds.log('notifications');
 
 module.exports = class NotifyToConsole extends NotificationService {
   async init() {
-    await super.init()
+
     this.on("notification", req => {
       const notification = req.data; if (!notification) return
-      LOG.info(notification)
+      console.log (
+        '\n---------------------------------------------------------------\n' +
+        'Notification:',
+         notification,
+        '\n---------------------------------------------------------------\n',
+      )
 
       const { NotificationTypeKey, NotificationTypeVersion } = notification
       const types = cds.notifications.local.types // REVISIT: what is this?
@@ -25,5 +30,7 @@ module.exports = class NotifyToConsole extends NotificationService {
         );
       }
     })
+
+    return super.init()
   }
 }

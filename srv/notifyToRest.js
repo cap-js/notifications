@@ -2,8 +2,8 @@ const NotificationService = require("./service")
 
 module.exports = exports = class NotifyToRest extends NotificationService {
   async init() {
-    await super.init()
     this.on("notification", req => postNotification(req.data))
+    return super.init()
   }
 }
 exports.postNotification = postNotification
