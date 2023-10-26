@@ -1,6 +1,6 @@
 const { getNotificationDestination } = require("./../../lib/utils");
 const { buildHeadersForDestination } = require("@sap-cloud-sdk/connectivity");
-const { postNotification } = require("./../../srv/notifyToRest");
+const NotifyToRest = require("./../../srv/notifyToRest");
 const { executeHttpRequest } = require("@sap-cloud-sdk/http-client");
 
 jest.mock("./../../lib/utils");
@@ -37,13 +37,14 @@ const expectedCustomNotification = {
 describe("Test post notification", () => {
 
     test("When passed whole notification object to postNotification", async () => {
+        const alert = new NotifyToRest
         const infoSpy = jest.spyOn(global.console, 'info');
         getNotificationDestination.mockReturnValue(undefined);
         buildHeadersForDestination.mockReturnValue(undefined);
         executeHttpRequest.mockReturnValue(expectedCustomNotification);
 
         // call post notification
-        await postNotification(expectedCustomNotification)
+        await alert.postNotification(expectedCustomNotification)
 
         // check if console.info was called
         expect(infoSpy).toHaveBeenCalled();
@@ -55,6 +56,7 @@ describe("Test post notification", () => {
     })
 
     test("When execute http request throws error with status code 500", async () => {
+        const alert = new NotifyToRest
         const error = new Error();
         error.response = {
             message: "mocked error",
@@ -70,7 +72,7 @@ describe("Test post notification", () => {
 
         // call post notification
         try {
-            await postNotification(expectedCustomNotification);
+            await alert.postNotification(expectedCustomNotification);
         } catch (err) {
             expect(err.unrecoverable).toBeFalsy();
         }
@@ -85,6 +87,7 @@ describe("Test post notification", () => {
     })
 
     test("When execute http request throws error with status code 404", async () => {
+        const alert = new NotifyToRest
         const error = new Error();
         error.response = {
             message: "mocked error",
@@ -100,7 +103,7 @@ describe("Test post notification", () => {
 
         // call post notification
         try {
-            await postNotification(expectedCustomNotification);
+            await alert.postNotification(expectedCustomNotification);
         } catch (err) {
             expect(err.unrecoverable).toEqual(true);
         }
@@ -115,6 +118,7 @@ describe("Test post notification", () => {
     })
 
     test("When execute http request throws error with status code 429", async () => {
+        const alert = new NotifyToRest
         const error = new Error();
         error.response = {
             message: "mocked error",
@@ -130,7 +134,7 @@ describe("Test post notification", () => {
 
         // call post notification
         try {
-            await postNotification(expectedCustomNotification);
+            await alert.postNotification(expectedCustomNotification);
         } catch (err) {
             expect(err.unrecoverable).toBeFalsy();
         }
