@@ -16,6 +16,8 @@ The `@cap-js/notifications` package is a [CDS plugin](https://cap.cloud.sap/docs
     - [Simple Notification with title](#simple-notification-with-title)
     - [Simple Notification with title and description](#simple-notification-with-title-and-description)
     - [Custom Notifications](#custom-notifications)
+      - [With standard parameters](#with-standard-parameters)
+      - [Passing the whole notification object](#passing-the-whole-notification-object)
   - [Sample Application with notifications](#sample-application-with-notifications)
     - [In Local Environment](#in-local-environment)
     - [In Production Environment](#in-production-environment)
@@ -105,8 +107,69 @@ alert.notify({
   description: "Incident titled 'Engine overheating' created by 'customer X' with priority high is assigned to you!"
 });
 ```
+
 #### Custom Notifications
-You can use the following signature to send the custom notification with pre-defined notification types.
+You can use these two signature to send the custom notification with pre-defined notification types.
+
+##### With standard parameters
+
+By using this approach you can post a notification by providing different parts of the notification object grouped in related units 
+```js
+alert.notify({
+  recipients: ["admin1@test.com","admin2@test.com"],
+  type: "IncidentCreated"
+  priority: 'NEUTRAL',
+  properties: [
+    {
+      Key: 'name',
+      IsSensitive: false,
+      Language: 'en',
+      Value: 'Engine overheating',
+      Type: 'String'
+    },
+    {
+      Key: 'customer',
+      IsSensitive: false,
+      Language: 'en',
+      Value: 'John',
+      Type: 'String'
+    }
+  ],
+  navigation: {
+    NavigationTargetAction: "displayInbox",
+    NavigationTargetObject: "WorkflowTask",
+  }
+  payload: {
+    Id: "01234567-89ab-cdef-0123-456789abcdef",
+    OriginId: "Example Origin Id",
+    NotificationTypeId: "01234567-89ab-cdef-0123-456789abcdef",
+    NotificationTypeVersion: "1",
+    ProviderId: "/SAMPLEPROVIDER",
+    ActorId: "BACKENDACTORID",
+    ActorDisplayText: "ActorName",
+    ActorImageURL: "https://some-url",
+    NotificationTypeTimestamp: "2022-03-15T09:58:42.807Z",
+    TargetParameters: [
+      {
+        "Key": "string",
+        "Value": "string"
+      }
+   ]
+  }
+});
+```
+
+Possible parameters:
+* **recipients** - List of the recipients, this argument is mandatory
+* **type** - Notification type key, this argument is mandatory
+* **priority** - Priority of the notification, this argument is optional, it defaults to NEUTRAL
+* **properties** - A key-value pair that is used to fill a placeholder of the notification type template, this argument is optional
+* **navigation** - All navigation related parameters, this argument is optional
+* **payload** - The rest parameters that can be passed, this argument is optional
+
+##### Passing the whole notification object
+
+By using this approach you need to pass the whole notification object as described in the API documentation
 ```js
 alert.notify({
   NotificationTypeKey: 'IncidentCreated',
