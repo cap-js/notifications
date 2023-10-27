@@ -46,6 +46,9 @@ alert.notify({
 });
 ```
 
+* **priority** - Priority of the notification, this argument is optional, it defaults to NEUTRAL
+* **description** - Subtitle for the notification, this argument is optional
+
 ## Use Notification Types
 
 ### 1. Add notification types
@@ -102,7 +105,7 @@ In local environment, when you publish notification, it is mocked to publish the
 
 #### Notification Destination
 
-As a pre-requisite to publish the notification, you need to have a [destination](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/enabling-notifications-for-custom-apps-on-sap-btp-cloud-foundry#configure-the-destination-to-the-notifications-service) configured to publish the notification. In the `package.json` by default destination name `SAP_Notification` is added, you can modify the destination name that you are configuring.
+As a pre-requisite to publish the notification, you need to have a [destination](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/enabling-notifications-for-custom-apps-on-sap-btp-cloud-foundry#configure-the-destination-to-the-notifications-service) configured to publish the notification. In the `package.json` by default destination name `SAP_Notifications` is added, you can modify the destination name that you are configuring.
 
 #### Integrate with SAP Build Work Zone
 
@@ -128,12 +131,12 @@ You can use these two signature to send the custom notification with pre-defined
 
 #### With pre-defined parameters
 
-By using this approach you can post a notification by providing different parts of the notification object grouped in related units 
+By using this approach you can send notifications with the predefined parameters - recipients, data, priority, type and other parameters listed in the [API documentation](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/developing-cloud-foundry-applications-with-notifications) 
 
 ```js
 alert.notify({
   recipients: [...supporters()],
-  type: "IncidentResolved"
+  type: "IncidentResolved",
   priority: 'NEUTRAL',
   data: {
     customer: customer.info,

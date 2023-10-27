@@ -1,8 +1,6 @@
 const { messages, buildNotification } = require("../../lib/utils");
 const NotifyToRest = require("../../srv/notifyToRest");
 
-// jest.mock("../../srv/notifyToRest");
-
 describe("notify to rest", () => {
   it("when no object is passed", async () => {
     const notifyToRest = new NotifyToRest();

@@ -539,18 +539,6 @@ describe("Test utils", () => {
     ).toBeFalsy();
   });
 
-  // .payload not used anymore
-  // test("When invalid payload for custom notification is passed to buildNotification", () => {
-  //   expect(
-  //     buildNotification({
-  //       recipients: ["test.mail@mail.com"],
-  //       type: "TestNotificationType",
-  //       priority: "NEUTRAL",
-  //       payload: "invalid"
-  //     })
-  //   ).toBeFalsy();
-  // });
-
   test("Given invalid NTypes | When validateNotificationTypes is called | Then false is returned", () => {
     expect(validateNotificationTypes([{ NotificationTypeKey: "Test" }, { blabla: "Test2" }])).toEqual(false);
   });
