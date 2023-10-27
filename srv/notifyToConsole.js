@@ -10,7 +10,7 @@ module.exports = class NotifyToConsole extends NotificationService {
       const notification = req.data; if (!notification) return
       console.log (
         '\n---------------------------------------------------------------\n' +
-        'Notification:',
+        'Notification:', req.event,
          notification,
         '\n---------------------------------------------------------------\n',
       )
