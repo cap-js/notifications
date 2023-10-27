@@ -225,7 +225,6 @@ describe("Test utils", () => {
 
   test("When recipients, type, properties, navigation, priority, payload are passed to buildNotification", () => {
     const expectedNotification = {
-      Id: "01234567-89ab-cdef-0123-456789abcdef",
       OriginId: "01234567-89ab-cdef-0123-456789abcdef",
       NotificationTypeId: "01234567-89ab-cdef-0123-456789abcdef",
       NotificationTypeKey: "notifications/TestNotificationType",
@@ -276,7 +275,6 @@ describe("Test utils", () => {
         NavigationTargetAction: "TestTargetAction",
         NavigationTargetObject: "TestTargetObject",
         priority: "HIGH",
-        Id: "01234567-89ab-cdef-0123-456789abcdef",
         OriginId: "01234567-89ab-cdef-0123-456789abcdef",
         NotificationTypeId: "01234567-89ab-cdef-0123-456789abcdef",
         ProviderId: "SAMPLEPROVIDER",
