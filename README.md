@@ -7,7 +7,7 @@ The `@cap-js/notifications` package is a [CDS plugin](https://cap.cloud.sap/docs
 ### Table of Contents
 
 - [Setup](#setup)
-- [Send Notifications](#add-code-to-send-notifications)
+- [Send Notifications](#send-notifications)
 - [Use Notification Types](#use-notification-types)
 - [API Reference](#api-reference)
 - [Test-drive Locally](#test-drive-locally)
@@ -16,8 +16,6 @@ The `@cap-js/notifications` package is a [CDS plugin](https://cap.cloud.sap/docs
 - [Contributing](#contributing)
 - [Code of Conduct](#code-of-conduct)
 - [Licensing](#licensing)
-
-
 
 ## Setup
 
@@ -28,8 +26,6 @@ To enable notifications, simply add this self-configuring plugin package to your
 ```
 
 In this guide, we use the [Incidents Management reference sample app](https://github.com/cap-js/incidents-app) as the base, to publish notifications.
-
-
 
 ## Send Notifications
 
@@ -50,62 +46,52 @@ alert.notify({
 });
 ```
 
-
-
 ## Use Notification Types
 
 ### 1. Add notification types
 
-If you want to send custom notifications in your application, you can add the notification types in the `notificationtype.json` file.
+If you want to send custom notifications in your application, you can add the notification types in the `srv/notification-types.json` file.
 
-Sample: If you want to send the notification when the new incident is reported, you can modify the `notificationtypes.json` as below:
+Sample: If you want to send the notification when the incident is resolved, you can modify the `srv/notification-types.json` as below:
 
-```jsonc
-[
-  {
-    "NotificationTypeKey": "IncidentResolved",
-    "NotificationTypeVersion": "1",
-    "Templates": [
-      {
-        "Language": "en",
-        "TemplatePublic": "Incident Resolved",
-        "TemplateSensitive": "Incident '{{title}}' Resolved",
-        "TemplateGrouped": "Incident Status Update",
-        "TemplateLanguage": "mustache",
-        "Subtitle": "Incident from '{{customer}}' resolved by {{user}}."
-      }
-    ]
-  }
-]
+```json
+  [
+    {
+      "NotificationTypeKey": "IncidentResolved",
+      "NotificationTypeVersion": "1",
+      "Templates": [
+        {
+          "Language": "en",
+          "TemplatePublic": "Incident Resolved",
+          "TemplateSensitive": "Incident '{{title}}' Resolved",
+          "TemplateGrouped": "Incident Status Update",
+          "TemplateLanguage": "mustache",
+          "Subtitle": "Incident from '{{customer}}' resolved by {{user}}."
+        }
+      ]
+    }
+  ]
 ```
 
 ### 2. Use pre-defined types in your code like that:
 
-
-
 ```js
-        await alert.notify ('IncidentResolved', {
-          recipients: [ customer.id ],
-          data: {
-            customer: customer.info,
-            title: incident.title,
-            user: cds.context.user.id,
-          }
-        })
+  await alert.notify ('IncidentResolved', {
+    recipients: [ customer.id ],
+    data: {
+      customer: customer.info,
+      title: incident.title,
+      user: cds.context.user.id,
+    }
+  })
 ```
 
-
-
 ## API Reference
-
-
 
 * **recipients** - List of the recipients, this argument is mandatory
 * **type** - Notification type key, this argument is mandatory
 * **priority** - Priority of the notification, this argument is optional, it defaults to NEUTRAL
 * **data** - A key-value pair that is used to fill a placeholder of the notification type template, this argument is optional
-
-
 
 ## Test-drive Locally
 In local environment, when you publish notification, it is mocked to publish the nofication to the console.
@@ -128,76 +114,51 @@ Once application is deployed and [integrated with SAP Build Work Zone](https://g
 
 ## Advanced Usage
 
+### Custom Notification Types Path
 
+Notifications plugin configures `srv/notification-types.json` as default notification types file. If you are using different file, you can update the file path in `cds.env.requires.notifications.types` 
 
-#### Custom Notification Types Path
+### Custom Notification Type Prefix
 
-When you run `cds add notifications`, it will add `notificationstype.json` file with template for a notification type in the project root folder.  You can add the notification types in the `notificationtype.json` file for sending the custom notification types.
+To make notification types unique to the application, prefix is added to the type key. By default, `application name` is added as the prefix. You can update the `cds.env.requires.notifications.prefix` if required.
 
-#### Custom Notification Type Prefix
-
-To make notification types unique to the application, prefix is added to the type key. By default, `application name` is added as the prefix. You can update the `prefix` if required.
-
-#### Low-level  Notifications API
+### Low-level  Notifications API
 
 You can use these two signature to send the custom notification with pre-defined notification types.
 
-##### With standard parameters
+#### With pre-defined parameters
 
 By using this approach you can post a notification by providing different parts of the notification object grouped in related units 
 
 ```js
 alert.notify({
-  recipients: ["admin1@test.com","admin2@test.com"],
-  type: "IncidentCreated"
+  recipients: [...supporters()],
+  type: "IncidentResolved"
   priority: 'NEUTRAL',
-  properties: [
+  data: {
+    customer: customer.info,
+    title: incident.title,
+    user: cds.context.user.id,
+  },
+  OriginId: "Example Origin Id",
+  NotificationTypeVersion: "1",
+  ProviderId: "/SAMPLEPROVIDER",
+  ActorId: "BACKENDACTORID",
+  ActorDisplayText: "ActorName",
+  ActorImageURL: "https://some-url",
+  NotificationTypeTimestamp: "2022-03-15T09:58:42.807Z",
+  TargetParameters: [
     {
-      Key: 'name',
-      IsSensitive: false,
-      Language: 'en',
-      Value: 'Engine overheating',
-      Type: 'String'
-    },
-    {
-      Key: 'customer',
-      IsSensitive: false,
-      Language: 'en',
-      Value: 'John',
-      Type: 'String'
+      "Key": "string",
+      "Value": "string"
     }
-  ],
-  navigation: {
-    NavigationTargetAction: "displayInbox",
-    NavigationTargetObject: "WorkflowTask",
-  }
-  payload: {
-    Id: "01234567-89ab-cdef-0123-456789abcdef",
-    OriginId: "Example Origin Id",
-    NotificationTypeId: "01234567-89ab-cdef-0123-456789abcdef",
-    NotificationTypeVersion: "1",
-    ProviderId: "/SAMPLEPROVIDER",
-    ActorId: "BACKENDACTORID",
-    ActorDisplayText: "ActorName",
-    ActorImageURL: "https://some-url",
-    NotificationTypeTimestamp: "2022-03-15T09:58:42.807Z",
-    TargetParameters: [
-      {
-        "Key": "string",
-        "Value": "string"
-      }
    ]
-  }
-});
+  });
 ```
 
-
-
-##### Passing the whole notification object
+#### Passing the whole notification object
 
 By using this approach you need to pass the whole notification object as described in the API documentation
-
-
 
 ```js
 alert.notify({
@@ -216,29 +177,22 @@ alert.notify({
       Key: 'customer',
       IsSensitive: false,
       Language: 'en',
-      Value: 'John',
+      Value: 'Dave',
       Type: 'String'
     }
   ],
-  Recipients: ["admin1@test.com","admin2@test.com"]
+  Recipients: [{ RecipientId: "supportuser1@mycompany.com" },{ RecipientId: "supportuser2@mycompany.com" }]
 });
 ```
-
-
 
 ## Contributing
 
 This project is open to feature requests/suggestions, bug reports etc. via [GitHub issues](https://github.com/cap-js/change-tracking/issues). Contribution and feedback are encouraged and always welcome. For more information about how to contribute, the project structure, as well as additional contribution information, see our [Contribution Guidelines](CONTRIBUTING.md).
 
-
 ## Code of Conduct
 
 We as members, contributors, and leaders pledge to make participation in our community a harassment-free experience for everyone. By participating in this project, you agree to abide by its [Code of Conduct](CODE_OF_CONDUCT.md) at all times.
 
-
 ## Licensing
 
 Copyright 2023 SAP SE or an SAP affiliate company and contributors. Please see our [LICENSE](LICENSE) for copyright and license information. Detailed information including third-party components and their licensing/copyright information is available [via the REUSE tool](https://api.reuse.software/info/github.com/cap-js/change-tracking).
-
-
-
