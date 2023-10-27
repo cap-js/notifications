@@ -7,15 +7,11 @@ The `@cap-js/notifications` package is a [CDS plugin](https://cap.cloud.sap/docs
 ### Table of Contents
 
 - [Setup](#setup)
-- [Usage](#usage)
-  - [Update Notification Configuration](#update-notification-configuration)
-    - [Notification Types Path](#notification-types-path)
-    - [Notification Type Prefix](#notification-type-prefix)
-  - [Add Notification Types](#add-notification-types)
   - [Add code to send notifications](#add-code-to-send-notifications)
     - [Simple Notification with title](#simple-notification-with-title)
     - [Simple Notification with title and description](#simple-notification-with-title-and-description)
-    - [Custom Notifications](#custom-notifications)
+  - [Add Notification Types](#add-notification-types)
+  - [Custom Notifications](#custom-notifications)
       - [With standard parameters](#with-standard-parameters)
       - [Passing the whole notification object](#passing-the-whole-notification-object)
   - [Sample Application with notifications](#sample-application-with-notifications)
@@ -23,8 +19,12 @@ The `@cap-js/notifications` package is a [CDS plugin](https://cap.cloud.sap/docs
     - [In Production Environment](#in-production-environment)
       - [Notification Destination](#notification-destination)
       - [Integrate with SAP Build Work Zone](#integrate-with-sap-build-work-zone)
+- [Advanced Usage](#advanced-usage)
+  - [Update Notification Configuration](#update-notification-configuration)
+    - [Notification Types Path](#notification-types-path)
+    - [Notification Type Prefix](#notification-type-prefix)
 - [Contributing](#contributing)
-  - [Code of Conduct](#code-of-conduct)
+- [Code of Conduct](#code-of-conduct)
 - [Licensing](#licensing)
 
 ## Setup
@@ -32,10 +32,8 @@ The `@cap-js/notifications` package is a [CDS plugin](https://cap.cloud.sap/docs
 To enable notifications, simply add this self-configuring plugin package to your project:
 
 ```sh
- cds add notifications 
+ npm add @cap-js/notifications
 ```
-
-<img width="1300" alt="cds add notifications" style="border-radius:0.5rem" src="_assets/cdsAddNotifications.gif">
 
 ## Usage
 
@@ -45,7 +43,7 @@ In this guide, we use the [Incidents Management reference sample app](https://gi
 
 `cds add notifications` will add default configurations for notifications in the `package.json` file.
 
-<img width="1300" alt="Default Notification config" style="border-radius:0.5rem" src="_assets/packageJsonConfig.gif">
+
 
 #### Notification Types Path
 
