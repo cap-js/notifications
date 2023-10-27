@@ -96,7 +96,7 @@ Sample: If you want to send the notification when the incident is resolved, you 
 ## Test-drive Locally
 In local environment, when you publish notification, it is mocked to publish the nofication to the console.
 
-<img width="1300" alt="Notify to console" style="border-radius:0.5rem;padding:1rem;background:rgb(24 24 24)" src="_assets/notifyToConsole.png">
+<img width="700" alt="Notify to console" style="border-radius:0.5rem" src="_assets/notifyToConsole.png">
 
 ## Run in Production
 
