@@ -10,7 +10,7 @@ class NotificationService extends cds.Service {
    * @param {object} message - The message object
    */
   emit (event, message) {
-    if(!event) {
+    if (!event) {
       LOG._warn && LOG.warn(messages.NO_OBJECT_FOR_NOTIFY);
       return;
     }

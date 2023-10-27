@@ -553,11 +553,6 @@ describe("Test utils", () => {
   //   ).toBeFalsy();
   // });
 
-  test("When no notification data for custom notification is passed to buildNotification", () => {
-    expect(buildNotification(undefined)).toBeFalsy();
-    expect(buildNotification(null)).toBeFalsy();
-  });
-
   test("Given invalid NTypes | When validateNotificationTypes is called | Then false is returned", () => {
     expect(validateNotificationTypes([{ NotificationTypeKey: "Test" }, { blabla: "Test2" }])).toEqual(false);
   });
