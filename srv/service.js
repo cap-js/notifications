@@ -1,12 +1,40 @@
-const { buildNotification } = require("./../lib/utils");
+const { buildNotification } = require("./../lib/utils")
+const cds = require('@sap/cds')
 
-const cds = require('@sap/cds');
-const Base = cds.outboxed ? cds.Service : require('@sap/cds/libx/_runtime/messaging/Outbox');
+class NotificationService extends cds.Service {
 
-module.exports = class NotificationService extends Base {
-  notify (message) {
-    // Subclasses simply register handlers for 'notification' events
-    // App code could plugin own before / after handlers
-    return this.emit('notification', buildNotification(message))
+  /**
+   * Emits a notification. Method notify can be used alternatively.
+   * @param {string} [event] - The notification type.
+   * @param {object} message - The message object
+   */
+  emit (event, message) {
+    // Outbox calls us with a req object, e.g. { event, data, headers }
+    if (event.event) return super.emit (event)
+    // First argument is optional for convenience
+    if (!message) [ message, event ] = [ event ]
+    // CAP events translate to notification types and vice versa
+    if (event) message.type = event
+    else event = message.type || message.NotificationTypeKey || 'Default'
+    // Prepare and emit the notification
+    message = buildNotification(message)
+    return super.emit (event, message)
   }
+
+  /**
+   * That's just a semantic alias for emit.
+   */
+  notify (type, message) {
+    return this.emit (type,message)
+  }
+
+}
+module.exports = NotificationService
+
+// Without Generic Outbox only alert.notify() can be used, not alert.emit()
+// Remove that when @sap/cds with Generic Outbox is released
+if (!cds.outboxed) {
+  class OutboxedNotificationService extends require('@sap/cds/libx/_runtime/messaging/Outbox') {}
+  OutboxedNotificationService.prototype.notify = NotificationService.prototype.emit
+  module.exports = OutboxedNotificationService
 }

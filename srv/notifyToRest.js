@@ -9,7 +9,7 @@ const NOTIFICATIONS_API_ENDPOINT = "v2/Notification.svc";
 
 module.exports = exports = class NotifyToRest extends NotificationService {
   async init() {
-    this.on("notification", req => this.postNotification(req.data))
+    this.on("*", req => this.postNotification(req.data))
     return super.init()
   }
 

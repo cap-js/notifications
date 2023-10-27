@@ -5,7 +5,8 @@ const LOG = cds.log('notifications');
 module.exports = class NotifyToConsole extends NotificationService {
   async init() {
 
-    this.on("notification", req => {
+    this.on("*", req => {
+      LOG._debug && LOG.debug('Handling notification event:', req.event)
       const notification = req.data; if (!notification) return
       console.log (
         '\n---------------------------------------------------------------\n' +
