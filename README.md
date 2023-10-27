@@ -161,7 +161,7 @@ alert.notify({
 
 #### Passing the whole notification object
 
-By using this approach you need to pass the whole notification object as described in the API documentation
+By using this approach you need to pass the whole notification object as described in the [API documentation](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/developing-cloud-foundry-applications-with-notifications)
 
 ```js
 alert.notify({
