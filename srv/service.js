@@ -1,5 +1,6 @@
-const { buildNotification } = require("./../lib/utils")
+const { buildNotification, messages } = require("./../lib/utils")
 const cds = require('@sap/cds')
+const LOG = cds.log('notifications');
 
 class NotificationService extends cds.Service {
 
@@ -9,6 +10,10 @@ class NotificationService extends cds.Service {
    * @param {object} message - The message object
    */
   emit (event, message) {
+    if(!event) {
+      LOG._warn && LOG.warn(messages.NO_OBJECT_FOR_NOTIFY);
+      return;
+    }
     // Outbox calls us with a req object, e.g. { event, data, headers }
     if (event.event) return super.emit (event)
     // First argument is optional for convenience
