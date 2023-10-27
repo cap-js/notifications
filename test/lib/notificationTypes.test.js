@@ -18,6 +18,7 @@ describe("Managing of Notification Types", () => {
     httpClient.executeHttpRequest.mockReturnValue(emptyResponseBody);
     connectivity.buildHeadersForDestination.mockReturnValue({});
     utils.getNotificationTypesKeyWithPrefix.mockImplementation((str) => testPrefix + "/" + str);
+    // REVISIT: Never test internal APIs -> blocks us from refactoring
     utils.getPrefix.mockReturnValue(testPrefix);
 
     notificationTypes.processNotificationTypes([copy(notificationTypeWithAllProperties), copy(notificationTypeWithoutVersion)]).then(() => {

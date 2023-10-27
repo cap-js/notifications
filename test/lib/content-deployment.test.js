@@ -26,7 +26,6 @@ describe("contentDeployment", () => {
 
     console.log(setGlobalLogLevel.mock.calls);
     assert.expect(setGlobalLogLevel.mock.calls[0][0]).to.be.equal("error");
-    assert.expect(readFile.mock.calls[0][0]).to.be.equal('');
     assert.expect(validateNotificationTypes.mock.calls[0][0]).to.be.deep.equal([]);
     assert.expect(processNotificationTypes.mock.calls[0][0]).to.be.deep.equal([]);
   });
@@ -41,7 +40,6 @@ describe("contentDeployment", () => {
 
     console.log(setGlobalLogLevel.mock.calls);
     assert.expect(setGlobalLogLevel.mock.calls[0][0]).to.be.equal("error");
-    assert.expect(readFile.mock.calls[0][0]).to.be.equal('');
     assert.expect(validateNotificationTypes.mock.calls[0][0]).to.be.deep.equal([]);
     assert.expect(processNotificationTypes.mock.calls[0]).to.be.deep.equal(undefined);
   });

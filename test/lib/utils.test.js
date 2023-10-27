@@ -1,4 +1,4 @@
-const { buildNotification, validateNotificationTypes, doesKeyExist, readFile, getNotificationDestination } = require("../../lib/utils");
+const { buildNotification, validateNotificationTypes, readFile, getNotificationDestination } = require("../../lib/utils");
 const { existsSync, readFileSync } = require("fs");
 const { getDestination } = require("@sap-cloud-sdk/connectivity");
 
@@ -125,7 +125,7 @@ describe("Test utils", () => {
       buildNotification({
         recipients: ["test.mail@mail.com"],
         type: "TestNotificationType",
-        properties: [
+        Properties: [
           {
             Key: "title",
             IsSensitive: false,
@@ -165,7 +165,7 @@ describe("Test utils", () => {
       buildNotification({
         recipients: ["test.mail@mail.com"],
         type: "TestNotificationType",
-        properties: [
+        Properties: [
           {
             Key: "title",
             IsSensitive: false,
@@ -174,10 +174,8 @@ describe("Test utils", () => {
             Type: "String"
           }
         ],
-        navigation: {
-          NavigationTargetAction: "TestTargetAction",
-          NavigationTargetObject: "TestTargetObject"
-        }
+        NavigationTargetAction: "TestTargetAction",
+        NavigationTargetObject: "TestTargetObject",
       })
     ).toMatchObject(expectedNotification);
   });
@@ -209,7 +207,7 @@ describe("Test utils", () => {
       buildNotification({
         recipients: ["test.mail@mail.com"],
         type: "TestNotificationType",
-        properties: [
+        Properties: [
           {
             Key: "title",
             IsSensitive: false,
@@ -218,10 +216,8 @@ describe("Test utils", () => {
             Type: "String"
           }
         ],
-        navigation: {
-          NavigationTargetAction: "TestTargetAction",
-          NavigationTargetObject: "TestTargetObject"
-        },
+        NavigationTargetAction: "TestTargetAction",
+        NavigationTargetObject: "TestTargetObject",
         priority: "HIGH"
       })
     ).toMatchObject(expectedNotification);
@@ -229,7 +225,6 @@ describe("Test utils", () => {
 
   test("When recipients, type, properties, navigation, priority, payload are passed to buildNotification", () => {
     const expectedNotification = {
-      Id: "01234567-89ab-cdef-0123-456789abcdef",
       OriginId: "01234567-89ab-cdef-0123-456789abcdef",
       NotificationTypeId: "01234567-89ab-cdef-0123-456789abcdef",
       NotificationTypeKey: "notifications/TestNotificationType",
@@ -268,7 +263,7 @@ describe("Test utils", () => {
       buildNotification({
         recipients: ["test.mail@mail.com"],
         type: "TestNotificationType",
-        properties: [
+        Properties: [
           {
             Key: "title",
             IsSensitive: false,
@@ -277,27 +272,22 @@ describe("Test utils", () => {
             Type: "String"
           }
         ],
-        navigation: {
-          NavigationTargetAction: "TestTargetAction",
-          NavigationTargetObject: "TestTargetObject"
-        },
+        NavigationTargetAction: "TestTargetAction",
+        NavigationTargetObject: "TestTargetObject",
         priority: "HIGH",
-        payload: {
-          Id: "01234567-89ab-cdef-0123-456789abcdef",
-          OriginId: "01234567-89ab-cdef-0123-456789abcdef",
-          NotificationTypeId: "01234567-89ab-cdef-0123-456789abcdef",
-          ProviderId: "SAMPLEPROVIDER",
-          ActorId: "BACKENDACTORID",
-          ActorDisplayText: "ActorName",
-          ActorImageURL: "https://some-url",
-          NotificationTypeTimestamp: "2022-03-15T09:58:42.807Z",
-          TargetParameters: [
-            {
-              Key: "string",
-              Value: "string"
-            }
-          ]
-        }
+        OriginId: "01234567-89ab-cdef-0123-456789abcdef",
+        NotificationTypeId: "01234567-89ab-cdef-0123-456789abcdef",
+        ProviderId: "SAMPLEPROVIDER",
+        ActorId: "BACKENDACTORID",
+        ActorDisplayText: "ActorName",
+        ActorImageURL: "https://some-url",
+        NotificationTypeTimestamp: "2022-03-15T09:58:42.807Z",
+        TargetParameters: [
+          {
+            Key: "string",
+            Value: "string"
+          }
+        ]
       })
     ).toMatchObject(expectedNotification);
   });
@@ -341,7 +331,7 @@ describe("Test utils", () => {
       buildNotification({
         recipients: ["test.mail@mail.com"],
         type: "TestNotificationType",
-        properties: [
+        Properties: [
           {
             Key: "title",
             IsSensitive: false,
@@ -350,25 +340,21 @@ describe("Test utils", () => {
             Type: "String"
           }
         ],
-        navigation: {
-          NavigationTargetAction: "TestTargetAction",
-          NavigationTargetObject: "TestTargetObject"
-        },
+        NavigationTargetAction: "TestTargetAction",
+        NavigationTargetObject: "TestTargetObject",
         priority: "HIGH",
-        payload: {
-          NotificationTypeId: "01234567-89ab-cdef-0123-456789abcdef",
-          ProviderId: "SAMPLEPROVIDER",
-          ActorId: "BACKENDACTORID",
-          ActorDisplayText: "ActorName",
-          ActorImageURL: "https://some-url",
-          NotificationTypeTimestamp: "2022-03-15T09:58:42.807Z",
-          TargetParameters: [
-            {
-              Key: "string",
-              Value: "string"
-            }
-          ]
-        }
+        NotificationTypeId: "01234567-89ab-cdef-0123-456789abcdef",
+        ProviderId: "SAMPLEPROVIDER",
+        ActorId: "BACKENDACTORID",
+        ActorDisplayText: "ActorName",
+        ActorImageURL: "https://some-url",
+        NotificationTypeTimestamp: "2022-03-15T09:58:42.807Z",
+        TargetParameters: [
+          {
+            Key: "string",
+            Value: "string"
+          }
+        ]
       })
     ).toMatchObject(expectedNotification);
   });
@@ -553,22 +539,6 @@ describe("Test utils", () => {
     ).toBeFalsy();
   });
 
-  test("When invalid payload for custom notification is passed to buildNotification", () => {
-    expect(
-      buildNotification({
-        recipients: ["test.mail@mail.com"],
-        type: "TestNotificationType",
-        priority: "NEUTRAL",
-        payload: "invalid"
-      })
-    ).toBeFalsy();
-  });
-
-  test("When no notification data for custom notification is passed to buildNotification", () => {
-    expect(buildNotification(undefined)).toBeFalsy();
-    expect(buildNotification(null)).toBeFalsy();
-  });
-
   test("Given invalid NTypes | When validateNotificationTypes is called | Then false is returned", () => {
     expect(validateNotificationTypes([{ NotificationTypeKey: "Test" }, { blabla: "Test2" }])).toEqual(false);
   });
@@ -576,20 +546,6 @@ describe("Test utils", () => {
   test("Given valid NTypes | When validateNotificationTypes is called | Then true is returned", () => {
     expect(validateNotificationTypes([])).toEqual(true);
     expect(validateNotificationTypes([{ NotificationTypeKey: "Test" }, { NotificationTypeKey: "Test2" }])).toEqual(true);
-  });
-
-  test("Given invalid inputs | When doesKeyExist is called | Then false is returned", () => {
-    expect(doesKeyExist({ test: "test1" }, {})).toEqual(false);
-    expect(doesKeyExist([{ test: "test1" }], "test")).toEqual(false);
-  });
-
-  test("Given that key does not exist | When doesKeyExist is called | Then false is returned", () => {
-    expect(doesKeyExist({ test: "test1" }, "doesnotexist")).toEqual(false);
-    expect(doesKeyExist({ test: "test1" }, "test1")).toEqual(false);
-  });
-
-  test("Given that key does exist | When doesKeyExist is called | Then true is returned", () => {
-    expect(doesKeyExist({ test: "test1" }, "test")).toEqual(true);
   });
 
   test("Given that file does not exist | When readFile is called | Then empty array is returned", () => {

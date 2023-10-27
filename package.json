@@ -32,22 +32,25 @@
   },
   "cds": {
     "requires": {
-      "kinds": {
-        "notifications": {
-          "[development]": {
-            "kind": "notify-to-console"
-          },
-          "[production]": {
-            "kind": "notify-to-rest"
-          }
+      "destinations": true,
+      "notifications": {
+        "[development]": {
+          "kind": "notify-to-console"
         },
+        "[production]": {
+          "destination": "SAP_Notifications",
+          "kind": "notify-to-rest"
+        },
+        "prefix": "$app-name",
+        "types": "srv/notification-types.json",
+        "outbox": true
+      },
+      "kinds": {
         "notify-to-console": {
-          "impl": "@cap-js/notifications/srv/notifyToConsole",
-          "outbox": false
+          "impl": "@cap-js/notifications/srv/notifyToConsole"
         },
         "notify-to-rest": {
-          "impl": "@cap-js/notifications/srv/notifyToRest",
-          "outbox": true
+          "impl": "@cap-js/notifications/srv/notifyToRest"
         }
       }
     }
