@@ -3,6 +3,7 @@ const NotificationService = require("./service")
 const { buildHeadersForDestination } = require("@sap-cloud-sdk/connectivity");
 const { executeHttpRequest } = require("@sap-cloud-sdk/http-client");
 const { getNotificationDestination } = require("../lib/utils");
+const cds = require("@sap/cds");
 const LOG = cds.log('notifications');
 const NOTIFICATIONS_API_ENDPOINT = "v2/Notification.svc";
 
