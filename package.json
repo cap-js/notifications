@@ -16,9 +16,9 @@
     "@sap/cds-dk": "^7.3.1"
   },
   "dependencies": {
-    "@sap-cloud-sdk/connectivity": "3.5.0",
-    "@sap-cloud-sdk/http-client": "3.5.0",
-    "@sap-cloud-sdk/util": "3.5.0"
+    "@sap-cloud-sdk/connectivity": "^3.5.0",
+    "@sap-cloud-sdk/http-client": "^3.5.0",
+    "@sap-cloud-sdk/util": "^3.5.0"
   },
   "devDependencies": {
     "jest": "^29.7.0",
