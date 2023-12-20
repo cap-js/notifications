@@ -1,5 +1,4 @@
 // import required modules and functions
-const cds = require("@sap/cds");
 const { validateNotificationTypes, readFile } = require("../../lib/utils");
 const { processNotificationTypes } = require("../../lib/notificationTypes");
 const { setGlobalLogLevel } = require("@sap-cloud-sdk/util");
