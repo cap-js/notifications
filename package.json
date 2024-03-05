@@ -18,7 +18,10 @@
   "dependencies": {
     "@sap-cloud-sdk/connectivity": "^3.5.0",
     "@sap-cloud-sdk/http-client": "^3.5.0",
-    "@sap-cloud-sdk/util": "^3.5.0"
+    "@sap-cloud-sdk/util": "^3.5.0",
+    "@sap/xssec": "^3.6.0",
+    "axios": "1.6.0",
+    "follow-redirects": "^1.15.4"
   },
   "devDependencies": {
     "jest": "^29.7.0",

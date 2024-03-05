@@ -2,12 +2,10 @@ const cds = require("@sap/cds/lib");
 
 if (cds.cli.command === "build") {
   // register build plugin
-  const build = require('@sap/cds-dk/lib/build')
-  build.register('notifications', {
-    impl: '@cap-js/notifications/lib/build',
-    description: 'Notifications build plugin',
-    taskDefaults: { src: cds.env.folders.srv }
-  })
+  cds.build?.register?.('notifications', { 
+      impl: '@cap-js/notifications/lib/build',
+      taskDefaults: { src: cds.env.folders.srv }
+  });
 }
 
 else cds.once("served", async () => {
