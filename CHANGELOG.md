@@ -10,3 +10,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Added
 
 - Initial release
+
+## Version 0.2.0
+
+### Added
+
+- Fixed code smells and Dependabot alerts
