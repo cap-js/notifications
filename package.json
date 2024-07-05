@@ -22,7 +22,9 @@
   },
   "devDependencies": {
     "jest": "^29.7.0",
-    "chai": "^4.3.10"
+    "chai": "^4.3.10",
+    "@sap/cds": ">=7.3",
+    "@sap/cds-dk": ">=7.3"
   },
   "scripts": {
     "lint": "npx eslint .",

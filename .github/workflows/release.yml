@@ -18,8 +18,7 @@ jobs:
         registry-url: https://registry.npmjs.org/
     - name: run tests
       run: |
-        npm i -g @sap/cds-dk
-        npm i
+        npm ci
         npm run test
     - name: get version
       id: package-version
