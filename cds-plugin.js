@@ -22,9 +22,11 @@ if (cds.cli.command === "build") {
   return;
 }
 
-else cds.once("served", async () => {
+cds.once("served", async () => {
   const { validateNotificationTypes, readFile } = require("./lib/utils");
   const { createNotificationTypesMap } = require("./lib/notificationTypes");
+  const { deployNotificationTypes } = require("./lib/content-deployment");
+
   const production = cds.env.profiles?.includes("production");
 
   // read notification types
@@ -34,6 +36,7 @@ else cds.once("served", async () => {
       const notificationTypesMap = createNotificationTypesMap(notificationTypes, true);
       cds.notifications = { local: { types: notificationTypesMap } };
     }
+    await deployNotificationTypes();
   }
 
   require("@sap-cloud-sdk/util").setGlobalLogLevel("error")
