@@ -36,9 +36,9 @@ cds.once("served", async () => {
     if (production)
       await deployNotificationTypes();
 
-    else {
+    if (!production) {
       const notificationTypesMap = createNotificationTypesMap(notificationTypes, true);
-      cds.noti
+      cds.notifications = { local: { types: notificationTypesMap } };
     }
 
   }
