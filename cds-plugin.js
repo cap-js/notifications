@@ -32,11 +32,15 @@ cds.once("served", async () => {
   // read notification types
   const notificationTypes = readFile(cds.env.requires?.notifications?.types);
   if (validateNotificationTypes(notificationTypes)) {
-    if (!production) {
+
+    if (production)
+      await deployNotificationTypes();
+
+    else {
       const notificationTypesMap = createNotificationTypesMap(notificationTypes, true);
-      cds.notifications = { local: { types: notificationTypesMap } };
+      cds.noti
     }
-    await deployNotificationTypes();
+
   }
 
   require("@sap-cloud-sdk/util").setGlobalLogLevel("error")
