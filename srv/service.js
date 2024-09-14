@@ -86,7 +86,7 @@ class NotificationService extends cds.Service {
     const defaults =  
       cds.env.requires.notifications.defaults[IDwithoutPrefix] 
       && cds.env.requires.notifications.defaults[IDwithoutPrefix][notification.NotificationTypeVersion ?? "1"];
-    if (!defaults.minDaysBetweenNotifications) return; //Intended that it returns with 0
+    if (!defaults.minTimeBetweenNotifications) return; //Intended that it returns with 0
     const {Notifications} = cds.entities('sap.cds.common');
     if (!Notifications) {
       LOG.warn(`Notification ${notification.NotificationTypeKey} has a minimum time between specified but Notifications table is not provided! Please includes @cap-js/notifications/index.cds in your cds model.`)
@@ -95,7 +95,7 @@ class NotificationService extends cds.Service {
     const where = [
       {ref: ['recipient']},
       'in',
-      {list: notification.Recipients.map(r => ({val: r.RecipientId}))},
+      {list: notification.Recipients.map(r => ({val: r.RecipientId ?? r.GlobalUserId}))},
     ];
     (notification.TargetParameters ?? []).forEach(target => {
       if (target.Key !== 'IsActiveEntity') //Dont check because it may be 1 and not true on db + check makes no sense
@@ -108,7 +108,7 @@ class NotificationService extends cds.Service {
           }]},
         );
     });
-    const minDistance = new Date(Date.now() - calcTimeMs(defaults.minDaysBetweenNotifications)).toISOString()
+    const minDistance = new Date(Date.now() - calcTimeMs(defaults.minTimeBetweenNotifications)).toISOString()
     const receivedNotifications = await SELECT.from(Notifications).where([
       {ref: ['notificationTypeKey']},
       '=',
@@ -121,7 +121,7 @@ class NotificationService extends cds.Service {
       {xpr: where}
     ]);
 
-    notification.Recipients = notification.Recipients.filter(recipient => !receivedNotifications.some(notif => recipient.RecipientId === notif.recipient));
+    notification.Recipients = notification.Recipients.filter(recipient => !receivedNotifications.some(notif => (recipient.RecipientId ?? recipient.GlobalUserId) === notif.recipient));
     if (notification.Recipients.length === 0) {
         LOG.info(`${notification.NotificationTypeKey} notification without recipients after removing recipients who received the notification recently!`);
     }

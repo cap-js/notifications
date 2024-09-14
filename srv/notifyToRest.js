@@ -34,7 +34,7 @@ module.exports = exports = class NotifyToRest extends NotificationService {
       return notificationData.Recipients.map(r => ({
         ID: notification.Id,
         notificationTypeKey: notificationData.NotificationTypeKey,
-        recipient: r.RecipientId,
+        recipient: r.RecipientId ?? r.GlobalUserId,
         targetParameters: notificationData.TargetParameters.map(t => ({
           notification_ID: notification.Id,
           value: t.Value,

@@ -20,7 +20,7 @@
         "SemanticObject": "",
         "SemanticAction": ""
     },
-    "MinDaysBetweenNotifications": 0,
+    "MinTimeBetweenNotifications": 0,
     "Properties": {
         "property1": {
             "IsSensitive": true,
