@@ -37,6 +37,13 @@ module.exports = class NotifyToConsole extends NotificationService {
         value: t.Value,
         name: t.Key
       })),
+      properties: notificationData.Properties.map(t => ({
+        notification_ID: notification.Id,
+        value: t.Value,
+        name: t.Key,
+        type: t.Type,
+        isSensitive: t.IsSensitive,
+      }))
     }))
   }
 }

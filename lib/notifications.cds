@@ -14,6 +14,7 @@ namespace sap.cds.common;
 entity Notifications : cuid, managed {
     notificationTypeKey : String;
     recipient        : User;
+    properties : Composition of many Properties on properties.notification = $self;
     targetParameters : Composition of many TargetParameters on targetParameters.notification = $self;
 }
 
@@ -21,6 +22,14 @@ entity TargetParameters : cuid {
     notification    : Association to one Notifications;
     value           : String(250);
     name            : String(250);
+}
+
+entity Properties : cuid {
+    notification    : Association to one Notifications;
+    value           : String(250);
+    name            : String(250);
+    type            : String(250);
+    isSensitive     : String(250);
 }
 
 annotate Notifications with @PersonalData : {

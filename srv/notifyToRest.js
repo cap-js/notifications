@@ -40,6 +40,13 @@ module.exports = exports = class NotifyToRest extends NotificationService {
           value: t.Value,
           name: t.Key
         })),
+        properties: notificationData.Properties.map(t => ({
+          notification_ID: notification.Id,
+          value: t.Value,
+          name: t.Key,
+          type: t.Type,
+          isSensitive: t.IsSensitive,
+        }))
       }))
     } catch (err) {
       const message = err.response.data?.error?.message?.value ?? err.response.message;
