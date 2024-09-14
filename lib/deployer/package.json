@@ -1,0 +1,12 @@
+{
+    "name": "@cap-js/notifications-deployer",
+    "dependencies": {
+      "@sap-cloud-sdk/connectivity": "^3.13.0",
+      "@sap-cloud-sdk/http-client": "^3.13.0",
+      "@sap-cloud-sdk/util": "^3.13.0"
+    },
+    "scripts": {
+      "start": "node ./content-deployment.js"
+    }
+  }
+  

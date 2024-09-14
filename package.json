@@ -1,6 +1,6 @@
 {
   "name": "@cap-js/notifications",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "CDS plugin providing integration to the SAP BTP Alert Notification Service.",
   "repository": "cap-js/notifications",
   "author": "SAP SE (https://www.sap.com)",
@@ -9,7 +9,8 @@
   "main": "cds-plugin.js",
   "files": [
     "lib",
-    "srv"
+    "srv",
+    "index.cds"
   ],
   "peerDependencies": {
     "@sap/cds": ">=7.3",
@@ -18,11 +19,12 @@
   "dependencies": {
     "@sap-cloud-sdk/connectivity": "^3.13.0",
     "@sap-cloud-sdk/http-client": "^3.13.0",
-    "@sap-cloud-sdk/util": "^3.13.0"
+    "@sap-cloud-sdk/util": "^3.13.0",
+    "@sap/textbundle": "^5.2.0"
   },
   "devDependencies": {
-    "jest": "^29.7.0",
-    "chai": "^4.3.10"
+    "chai": "^4.3.10",
+    "jest": "^29.7.0"
   },
   "scripts": {
     "lint": "npx eslint .",
@@ -32,6 +34,10 @@
   "cds": {
     "requires": {
       "destinations": true,
+      "alert-notification": {
+        "__note": "Service name for ANS. Config so it is added in MTX cases as a dependency",
+        "subscriptionDependency": "xsappname"
+      },
       "notifications": {
         "[development]": {
           "kind": "notify-to-console"
