@@ -12,6 +12,7 @@ namespace sap.cds.common;
     EntitySemantics : 'Other'
 }
 entity Notifications : cuid, managed {
+    notificationID: UUID; //This is  the ID the Notification also has in the notifications service
     notificationTypeKey : String;
     recipient        : User;
     properties : Composition of many Properties on properties.notification = $self;
@@ -19,13 +20,15 @@ entity Notifications : cuid, managed {
 }
 
 entity TargetParameters : cuid {
-    notification    : Association to one Notifications;
+    notificationID : UUID;
+    notification    : Association to one Notifications on notification.notificationID = notificationID;
     value           : String(250);
     name            : String(250);
 }
 
 entity Properties : cuid {
-    notification    : Association to one Notifications;
+    notificationID : UUID;
+    notification    : Association to one Notifications on notification.notificationID = notificationID;
     value           : String(250);
     name            : String(250);
     type            : String(250);

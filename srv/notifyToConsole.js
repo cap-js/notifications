@@ -29,16 +29,16 @@ module.exports = class NotifyToConsole extends NotificationService {
     )
     const notification = {Id: cds.utils.uuid()};
     return notificationData.Recipients.map(r => ({
-      ID: notification.Id,
+      notificationID: notification.Id,
       notificationTypeKey: notificationData.NotificationTypeKey,
       recipient: r.RecipientId ?? r.GlobalUserId,
       targetParameters: notificationData.TargetParameters.map(t => ({
-        notification_ID: notification.Id,
+        notificationID: notification.Id,
         value: t.Value,
         name: t.Key
       })),
       properties: notificationData.Properties.map(t => ({
-        notification_ID: notification.Id,
+        notificationID: notification.Id,
         value: t.Value,
         name: t.Key,
         type: t.Type,
