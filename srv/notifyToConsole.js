@@ -3,35 +3,40 @@ const cds = require("@sap/cds");
 const LOG = cds.log('notifications');
 
 module.exports = class NotifyToConsole extends NotificationService {
-  async init() {
 
-    this.on("*", req => {
-      LOG._debug && LOG.debug('Handling notification event:', req.event)
-      const notification = req.data; if (!notification) return
-      console.log (
-        '\n---------------------------------------------------------------\n' +
-        'Notification:', req.event,
-         notification,
-        '\n---------------------------------------------------------------\n',
-      )
+  postNotification(notificationData) {
+    const { NotificationTypeKey, NotificationTypeVersion } = notificationData
+    const types = cds.notifications.local.types // fetch notification types this way as there is no deployed service
 
-      const { NotificationTypeKey, NotificationTypeVersion } = notification
-      const types = cds.notifications.local.types // REVISIT: what is this?
+    if (!(NotificationTypeKey in types)) {
+      LOG._warn && LOG.warn(
+        `Notification Type ${NotificationTypeKey} is not in the notification types file`
+      );
+      return;
+    }
 
-      if (!(NotificationTypeKey in types)) {
-        LOG._warn && LOG.warn(
-          `Notification Type ${NotificationTypeKey} is not in the notification types file`
-        );
-        return;
-      }
+    if (!(NotificationTypeVersion in types[NotificationTypeKey])) {
+      LOG._warn && LOG.warn(
+        `Notification Type Version ${NotificationTypeVersion} for type ${NotificationTypeKey} is not in the notification types file`
+      );
+    }
 
-      if (!(NotificationTypeVersion in types[NotificationTypeKey])) {
-        LOG._warn && LOG.warn(
-          `Notification Type Version ${NotificationTypeVersion} for type ${NotificationTypeKey} is not in the notification types file`
-        );
-      }
-    })
-
-    return super.init()
+    console.log (
+      '\n---------------------------------------------------------------\n' +
+      'Notification:', notificationData.NotificationTypeKey,
+      notificationData,
+      '\n---------------------------------------------------------------\n',
+    )
+    const notification = {Id: cds.utils.uuid()};
+    return notificationData.Recipients.map(r => ({
+      ID: notification.Id,
+      notificationTypeKey: notificationData.NotificationTypeKey,
+      recipient: r.RecipientId,
+      targetParameters: notificationData.TargetParameters.map(t => ({
+        notification_ID: notification.Id,
+        value: t.Value,
+        name: t.Key
+      })),
+    }))
   }
 }

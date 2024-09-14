@@ -1,0 +1,35 @@
+{
+    "ID": "SimpleType",
+    "TemplateSensitive": "I18NKEY",
+    "TemplatePublic": {
+        "code": "I18NKEY",
+        "args": ["property1", "property2"]
+    },
+    "TemplateGrouped": "I18NKEY",
+    "Subtitle": "I18NKEY",
+    "Description": "I18NKEY",
+    "EmailSubject": "I18NKEY",
+    "EmailHtml": "I18NKEY",
+    "EmailText": "I18NKEY",
+    "DeliveryChannels": {
+        "Mail": true,
+        "Web": true
+    },
+    "Priority": "Neutral,Medium,High,Low",
+    "Navigation": {
+        "SemanticObject": "",
+        "SemanticAction": ""
+    },
+    "MinDaysBetweenNotifications": 0,
+    "Properties": {
+        "property1": {
+            "IsSensitive": true,
+            "Type": "String"
+        },
+        "property2": {
+            "IsSensitive": true,
+            "Type": "Boolean"
+        }
+    },
+    "TargetParameters": ["property1"]
+}
