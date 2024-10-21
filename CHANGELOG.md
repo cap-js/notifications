@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## Version 0.2.2
+
+### Fixed
+
+- Build issues fixed
+
+
 ## Version 0.2.1
 
 ### Fixed
