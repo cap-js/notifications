@@ -11,13 +11,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - Fix cds build failure
 
 
-## Version 0.2.2
-
-### Fixed
-
-- Build issues fixed
-
-
 ## Version 0.2.1
 
 ### Fixed
