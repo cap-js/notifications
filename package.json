@@ -38,6 +38,10 @@
         "[development]": {
           "kind": "notify-to-console"
         },
+        "[hybrid]": {
+          "destination": "SAP_Notifications",
+          "kind": "notify-to-rest"
+        },
         "[production]": {
           "destination": "SAP_Notifications",
           "kind": "notify-to-rest"
