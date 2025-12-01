@@ -125,6 +125,12 @@ Notifications plugin configures `srv/notification-types.json` as default notific
 
 To make notification types unique to the application, prefix is added to the type key. By default, `application name` is added as the prefix. You can update the `cds.env.requires.notifications.prefix` if required.
 
+### Authentication Identifier
+
+Depending on your Work Zone Notifications configuration, set `cds.env.requires.notifications.authenticationIdentifier` to `UserID` if the authenciation identifier in Work Zone is set to `User ID`. Notifications are then published with Recipient Key `GlobalUserId` instead of `RecipientId`. If not set, `RecipientId` is used.
+
+For the Work Zone Authentication Identifier configuration details refer to: [Work Zone Subaccount Settings](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/subaccount-settings)
+
 ### Low-level  Notifications API
 
 You can use these two signature to send the custom notification with pre-defined notification types.
