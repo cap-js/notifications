@@ -127,7 +127,7 @@ To make notification types unique to the application, prefix is added to the typ
 
 ### Authentication Identifier
 
-Depending on your Work Zone Notifications configuration, set `cds.env.requires.notifications.authenticationIdentifier` to `UserID` if the authenciation identifier in Work Zone is set to `User ID`. Notifications are then published with Recipient Key `GlobalUserId` instead of `RecipientId`. If not set, `RecipientId` is used.
+Depending on your Work Zone Notifications configuration, set `cds.env.requires.notifications.authenticationIdentifier` to `UserID` if the authenciation identifier in Work Zone is set to `User ID`. Notifications are then published with Recipient Key `GlobalUserId` instead of `RecipientId`. If not set, `RecipientId` is used. Note, that in order for E-Mail Notifications to be sent for notifications published with a User ID, a destination to the IDS needs to be configured for the lookup of the corresponding email address.
 
 For the Work Zone Authentication Identifier configuration details refer to: [Work Zone Subaccount Settings](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/subaccount-settings)
 
