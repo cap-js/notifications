@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## Version 0.3.0
+
+### Added
+
+- Support switching the recipients identifier to GlobalUserId by setting `cds.env.requires.notifications.authenticationIdentifier` to 'UserUUID'
+
+### Fixed
+
+- Plugin now correctly works in a hybrid setup
+
 ## Version 0.2.5
 
 ### Fixed
