@@ -8,7 +8,7 @@ module.exports = class NotifyToConsole extends NotificationService {
     this.on("*", req => {
       LOG._debug && LOG.debug('Handling notification event:', req.event)
       const notification = req.data; if (!notification) return
-      console.log (
+      LOG.info (
         '\n---------------------------------------------------------------\n' +
         'Notification:', req.event,
          notification,

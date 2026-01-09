@@ -1,9 +1,0 @@
-extends: eslint:recommended
-env:
-  node: true
-  commonjs: true
-  jest: true
-  es2021: true
-parserOptions:
-  ecmaVersion: latest
-rules: {}
