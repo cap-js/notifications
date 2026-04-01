@@ -105,7 +105,8 @@ In local environment, when you publish notification, it is mocked to publish the
 
 #### Notification Destination
 
-As a pre-requisite to publish the notification, you need to have a [destination](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/enabling-notifications-for-custom-apps-on-sap-btp-cloud-foundry#configure-the-destination-to-the-notifications-service) configured to publish the notification. In the `package.json` by default destination name `SAP_Notifications` is added, you can modify the destination name that you are configuring.
+As a pre-requisite to publish the notification, you need to have a [destination](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/enabling-notifications-for-custom-apps-on-sap-btp-cloud-foundry#configure-the-destination-to-the-notifications-service) configured to publish the notification. The plugin is pre-configured to use destination name `SAP_Notifications` by default for hybrid and production environments. You can override this in your
+  application's CDS configuration if needed (see Advanced Usage section below). 
 
 #### Integrate with SAP Build Work Zone
 
