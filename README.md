@@ -46,6 +46,8 @@ alert.notify({
 });
 ```
 
+> **Note:** The simple API supports only: `recipients`, `priority`, `title`, and `description`. For advanced properties like `ActorId`, `NavigationTargetObject`, `TargetParameters`, etc., use a [named notification type](#use-notification-types) or the [low-level API](#low-level-notifications-api).
+
 * **priority** - Priority of the notification, this argument is optional, it defaults to NEUTRAL
 * **description** - Subtitle for the notification, this argument is optional
 
