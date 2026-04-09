@@ -24,12 +24,19 @@ module.exports = exports = class NotifyToRest extends NotificationService {
       LOG._info && LOG.info(
         `Sending notification of key: ${notificationData.NotificationTypeKey} and version: ${notificationData.NotificationTypeVersion}`
       );
-      await executeHttpRequest(notificationDestination, {
+      const response = await executeHttpRequest(notificationDestination, {
         url: `${NOTIFICATIONS_API_ENDPOINT}/Notifications`,
         method: "post",
         data: notificationData,
-        headers: csrfHeaders,
+        headers: { ...csrfHeaders, Accept: "application/json" },
       });
+      if (LOG._debug) {
+        LOG.debug("Notification sent", {
+          body: response?.data,
+          headers: response?.headers,
+        });
+      }
+      return response;
     } catch (err) {
       const message = err.response.data?.error?.message?.value ?? err.response.message;
       const error = new cds.error(message);
