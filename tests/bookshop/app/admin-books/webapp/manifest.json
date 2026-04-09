@@ -79,7 +79,7 @@
           "target": "BooksDetails"
         },
         {
-          "pattern": "Books({key}/author({key2}):?query:",
+          "pattern": "Books({key})/author({key2}):?query:",
           "name": "AuthorsDetails",
           "target": "AuthorsDetails"
         }

@@ -2,10 +2,9 @@ const cds = require("@sap/cds");
 const { join } = cds.utils.path;
 const { messages } = require("../../lib/utils");
 
-const { } = cds.test(join(__dirname, "../bookshop"));
+cds.test(join(__dirname, "../bookshop"));
 
 describe("Notifications Integration", () => {
-  // Boot the bookshop app with the plugin active before all tests
   let alert;
   let infoSpy;
   let warnSpy;

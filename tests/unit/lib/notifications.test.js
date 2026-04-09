@@ -58,6 +58,7 @@ describe("Test post notification", () => {
         [404, true],
         [429, false],
     ])("HTTP %i error - unrecoverable is %s", async (status, unrecoverable) => {
+        expect.assertions(3);
         const error = new Error();
         error.response = { message: "mocked error", status };
         executeHttpRequest.mockRejectedValue(error);

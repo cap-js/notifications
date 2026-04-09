@@ -12,7 +12,7 @@
     "requires": {
       "notifications": {
         "outbox": false,
-        "types": "tests/bookshop/srv/notification-types.json"
+        "types": "srv/notification-types.json"
       }
     }
   },

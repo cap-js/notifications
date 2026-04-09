@@ -349,7 +349,7 @@ describe("Managing of Notification Types", () => {
       it("Create Default and all new types when none exist in Work Zone", () => {
         httpClient.executeHttpRequest.mockReturnValue(emptyResponseBody);
 
-        notificationTypes.processNotificationTypes([structuredClone(notificationTypeWithAllProperties), structuredClone(notificationTypeWithoutVersion)]).then(() => {
+        return notificationTypes.processNotificationTypes([structuredClone(notificationTypeWithAllProperties), structuredClone(notificationTypeWithoutVersion)]).then(() => {
           const [, createDefault, createFirst, createSecond, extra] = httpClient.executeHttpRequest.mock.calls.map(c => c[1]);
 
           expect(createDefault.method).toBe("post");
@@ -379,7 +379,7 @@ describe("Managing of Notification Types", () => {
         const versionTwo = structuredClone(notificationTypeWithAllProperties);
         versionTwo.NotificationTypeVersion = "2";
 
-        notificationTypes.processNotificationTypes([structuredClone(notificationTypeWithAllProperties), versionTwo, structuredClone(notificationTypeWithoutVersion)]).then(() => {
+        return notificationTypes.processNotificationTypes([structuredClone(notificationTypeWithAllProperties), versionTwo, structuredClone(notificationTypeWithoutVersion)]).then(() => {
           const createCall = httpClient.executeHttpRequest.mock.calls[1][1];
           expect(createCall.method).toBe("post");
           expect(createCall.data.NotificationTypeVersion).toBe("2");
@@ -415,7 +415,7 @@ describe("Managing of Notification Types", () => {
           }
         });
 
-        notificationTypes.processNotificationTypes([structuredClone(notificationTypeWithAllProperties)]).then(() => {
+        return notificationTypes.processNotificationTypes([structuredClone(notificationTypeWithAllProperties)]).then(() => {
           expect(httpClient.executeHttpRequest.mock.calls[1][1].method).toBe("post");
           expect(httpClient.executeHttpRequest.mock.calls[2]).toBeUndefined();
         });
