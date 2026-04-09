@@ -1,0 +1,16 @@
+[
+  {
+    "NotificationTypeKey": "BookOrdered",
+    "NotificationTypeVersion": "1",
+    "Templates": [
+      {
+        "Language": "en",
+        "TemplatePublic": "Book Ordered",
+        "TemplateSensitive": "Book '{{title}}' Ordered",
+        "TemplateGrouped": "Bookshop Updates",
+        "TemplateLanguage": "mustache",
+        "Subtitle": "{{buyer}} ordered {{title}}"
+      }
+    ]
+  }
+]
