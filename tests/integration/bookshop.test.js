@@ -5,22 +5,11 @@ const { messages } = require("../../lib/utils");
 cds.test(join(__dirname, "../bookshop"));
 
 describe("Notifications Integration", () => {
+  let log = cds.test.log()
   let alert;
-  let infoSpy;
-  let warnSpy;
 
   beforeAll(async () => {
     alert = await cds.connect.to("notifications");
-  });
-
-  beforeEach(() => {
-    infoSpy = jest.spyOn(global.console, "info");
-    warnSpy = jest.spyOn(global.console, "warn");
-  });
-
-  afterEach(() => {
-    infoSpy.mockRestore();
-    warnSpy.mockRestore();
   });
 
   test("Notifications service resolves to console implementation in development", async () => {
@@ -38,10 +27,7 @@ describe("Notifications Integration", () => {
       data: { title: "test" }
     });
 
-    expect(warnSpy).toHaveBeenCalledWith(
-      "[notifications] -",
-      expect.stringContaining("UnknownType is not in the notification types file")
-    );
+    expect(log.output).toContain("UnknownType is not in the notification types file");
   });
 
   test("Sending a default notification logs to console", async () => {
@@ -51,30 +37,17 @@ describe("Notifications Integration", () => {
       description: "A new book has been added to the catalogue"
     });
 
-    expect(infoSpy).toHaveBeenCalledWith(
-      "[notifications] -",
-      expect.any(String),
-      expect.any(String),
-      expect.objectContaining({
-        NotificationTypeKey: "Default",
-        Priority: "NEUTRAL",
-        Recipients: [{ RecipientId: "reader@bookshop.com" }],
-        Properties: expect.arrayContaining([
-          expect.objectContaining({ Key: "title", Value: "New book arrived" })
-        ])
-      }),
-      expect.any(String)
-    );
+    expect(log.output).toContain("Notification:");
+    expect(log.output).toContain("NotificationTypeKey: 'Default'");
+    expect(log.output).toContain("RecipientId: 'reader@bookshop.com'");
+    expect(log.output).toContain("Value: 'New book arrived'");
   });
 
   test("Sending a notification with no arguments warns and does nothing", async () => {
     await alert.notify();
 
-    expect(warnSpy).toHaveBeenCalledWith(
-      "[notifications] -",
-      messages.NO_OBJECT_FOR_NOTIFY
-    );
-    expect(infoSpy).not.toHaveBeenCalled();
+    expect(log.output).toContain(messages.NO_OBJECT_FOR_NOTIFY);
+    expect(log.output).not.toContain("Notification:");
   });
 
   test("Custom typed notification uses prefixed type key from types file", async () => {
@@ -83,15 +56,7 @@ describe("Notifications Integration", () => {
       data: { title: "Moby Dick", buyer: "reader@bookshop.com" }
     });
 
-    expect(infoSpy).toHaveBeenCalledWith(
-      "[notifications] -",
-      expect.any(String),
-      expect.any(String),
-      expect.objectContaining({
-        NotificationTypeKey: "bookshop/BookOrdered"
-      }),
-      expect.any(String)
-    );
-    expect(warnSpy).not.toHaveBeenCalled();
+    expect(log.output).toContain("bookshop/BookOrdered");
+    expect(log.output).not.toContain("is not in the notification types file");
   });
 });

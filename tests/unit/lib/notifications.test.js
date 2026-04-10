@@ -31,25 +31,20 @@ const expectedCustomNotification = {
 };
 
 describe("Test post notification", () => {
+    let log = cds.test.log()
     let alert;
-    let infoSpy;
 
     beforeEach(() => {
         alert = new NotifyToRest;
-        infoSpy = jest.spyOn(global.console, 'info');
         getNotificationDestination.mockReturnValue(undefined);
         buildHeadersForDestination.mockReturnValue(undefined);
-    });
-
-    afterEach(() => {
-        infoSpy.mockClear();
     });
 
     it("Logs and sends when a valid notification object is posted", async () => {
         executeHttpRequest.mockReturnValue(expectedCustomNotification);
         await alert.postNotification(expectedCustomNotification)
 
-        expect(infoSpy).toHaveBeenCalledWith("[notifications] -", "Sending notification of key: Custom and version: 1");
+        expect(log.output).toContain("Sending notification of key: Custom and version: 1");
         expect(executeHttpRequest).toHaveBeenCalled();
     })
 
@@ -69,7 +64,7 @@ describe("Test post notification", () => {
             expect(!!err.unrecoverable).toBe(unrecoverable);
         }
 
-        expect(infoSpy).toHaveBeenCalledWith("[notifications] -", "Sending notification of key: Custom and version: 1");
+        expect(log.output).toContain("Sending notification of key: Custom and version: 1");
         expect(executeHttpRequest).toHaveBeenCalled();
     });
 })

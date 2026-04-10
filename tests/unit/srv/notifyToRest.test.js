@@ -2,6 +2,7 @@ const { messages, buildNotification } = require("../../../lib/utils");
 const NotifyToRest = require("../../../srv/notifyToRest");
 
 describe("Notify to rest", () => {
+  let log = cds.test.log()
   let notifyToRest;
 
   beforeEach(() => {
@@ -9,44 +10,34 @@ describe("Notify to rest", () => {
   })
 
   describe("Warnings", () => {
-    let warnSpy;
-
-    beforeEach(() => {
-      warnSpy = jest.spyOn(global.console, "warn");
-    })
-
-    afterEach(() => {
-      warnSpy.mockClear();
-    });
-
     it("No object is passed", async () => {
       notifyToRest.notify();
-      expect(warnSpy).toHaveBeenCalledWith("[notifications] -", messages.NO_OBJECT_FOR_NOTIFY);
+      expect(log.output).toContain(messages.NO_OBJECT_FOR_NOTIFY);
     });
 
     it("Empty object is passed", async () => {
       notifyToRest.notify({});
-      expect(warnSpy).toHaveBeenCalledWith("[notifications] -", messages.EMPTY_OBJECT_FOR_NOTIFY);
+      expect(log.output).toContain(messages.EMPTY_OBJECT_FOR_NOTIFY);
     });
 
     it("Recipients or title isn't passed in default notification", async () => {
       notifyToRest.notify({ dummy: true });
-      expect(warnSpy).toHaveBeenCalledWith("[notifications] -", messages.MANDATORY_PARAMETER_NOT_PASSED_FOR_DEFAULT_NOTIFICATION);
+      expect(log.output).toContain(messages.MANDATORY_PARAMETER_NOT_PASSED_FOR_DEFAULT_NOTIFICATION);
     });
 
     it("Title isn't a string in default notification", async () => {
       notifyToRest.notify({ title: 1, recipients: ["abc@abc.com"] });
-      expect(warnSpy).toHaveBeenCalledWith("[notifications] -", messages.TITLE_IS_NOT_STRING);
+      expect(log.output).toContain(messages.TITLE_IS_NOT_STRING);
     });
 
     it("Priority isn't valid in default notification", async () => {
       notifyToRest.notify({ title: "abc", recipients: ["abc@abc.com"], priority: "abc" });
-      expect(warnSpy).toHaveBeenCalledWith("[notifications] -", "Invalid priority abc. Allowed priorities are LOW, NEUTRAL, MEDIUM, HIGH");
+      expect(log.output).toContain("Invalid priority abc. Allowed priorities are LOW, NEUTRAL, MEDIUM, HIGH");
     });
 
     it("Description isn't valid in default notification", async () => {
       notifyToRest.notify({ title: "abc", recipients: ["abc@abc.com"], priority: "low", description: true });
-      expect(warnSpy).toHaveBeenCalledWith("[notifications] -", messages.DESCRIPTION_IS_NOT_STRING);
+      expect(log.output).toContain(messages.DESCRIPTION_IS_NOT_STRING);
     });
   });
 
