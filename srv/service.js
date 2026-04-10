@@ -35,11 +35,3 @@ class NotificationService extends cds.Service {
 
 }
 module.exports = NotificationService
-
-// Without Generic Outbox only alert.notify() can be used, not alert.emit()
-// Remove that when @sap/cds with Generic Outbox is released
-if (!cds.outboxed) {
-  class OutboxedNotificationService extends require('@sap/cds/libx/_runtime/messaging/Outbox') {}
-  OutboxedNotificationService.prototype.notify = NotificationService.prototype.emit
-  module.exports = OutboxedNotificationService
-}

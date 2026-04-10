@@ -1,0 +1,20 @@
+{
+  "name": "bookshop",
+  "version": "1.0.0",
+  "description": "A simple CAP project.",
+  "dependencies": {
+    "@cap-js/notifications": "file:../.."
+  },
+  "scripts": {
+    "start": "cds-serve"
+  },
+  "cds": {
+    "requires": {
+      "notifications": {
+        "outbox": false,
+        "types": "srv/notification-types.json"
+      }
+    }
+  },
+  "private": true
+}
