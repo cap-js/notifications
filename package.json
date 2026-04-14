@@ -24,6 +24,8 @@
     "@cap-js/cds-test": ">=0",
     "@cap-js/cds-types": "^0.16.0",
     "@cap-js/sqlite": "^2.2.0",
+    "@sap/cds": ">=8.0",
+    "@sap/cds-dk": ">=8.0",
     "express": "^5.2.1",
     "jest": "^30.3.0"
   },
