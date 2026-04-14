@@ -1,3 +1,4 @@
+const cds = require('@sap/cds');
 const { getNotificationDestination } = require("../../../lib/utils");
 const { buildHeadersForDestination } = require("@sap-cloud-sdk/connectivity");
 const NotifyToRest = require("../../../srv/notifyToRest");

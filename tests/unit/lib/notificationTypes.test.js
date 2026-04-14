@@ -2,7 +2,6 @@ const utils = require("../../../lib/utils");
 const httpClient = require("@sap-cloud-sdk/http-client");
 const connectivity = require("@sap-cloud-sdk/connectivity");
 const notificationTypes = require("../../../lib/notificationTypes");
-const assert = require("chai");
 
 jest.mock("../../../lib/utils");
 jest.mock("@sap-cloud-sdk/http-client");
