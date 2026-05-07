@@ -53,7 +53,7 @@ describe("Test utils", () => {
         ]
       };
 
-      it("Build a default notification with priority", () => {
+      test("Build a default notification with priority", () => {
         expect(
           buildNotification({
             recipients: ["test.mail@mail.com"],
@@ -63,7 +63,7 @@ describe("Test utils", () => {
         ).toMatchObject(expectedWithoutDescription);
       });
 
-      it("Build a default notification without priority", () => {
+      test("Build a default notification without priority", () => {
         expect(
           buildNotification({
             recipients: ["test.mail@mail.com"],
@@ -72,7 +72,7 @@ describe("Test utils", () => {
         ).toMatchObject(expectedWithoutDescription);
       });
 
-      it("Build a default notification with description and priority", () => {
+      test("Build a default notification with description and priority", () => {
         expect(
           buildNotification({
             recipients: ["test.mail@mail.com"],
@@ -83,7 +83,7 @@ describe("Test utils", () => {
         ).toMatchObject(expectedWithDescription);
       });
 
-      it("Build a default notification with description", () => {
+      test("Build a default notification with description", () => {
         expect(
           buildNotification({
             recipients: ["test.mail@mail.com"],
@@ -117,11 +117,11 @@ describe("Test utils", () => {
         Recipients: [{ RecipientId: "test.mail@mail.com" }]
       };
 
-      it("Build a custom notification with properties", () => {
+      test("Build a custom notification with properties", () => {
         expect(buildNotification(baseInput)).toMatchObject(baseExpected);
       });
 
-      it("Build a custom notification with navigation targets", () => {
+      test("Build a custom notification with navigation targets", () => {
         expect(buildNotification({ 
           ...baseInput, 
           NavigationTargetAction: "TestTargetAction", 
@@ -133,7 +133,7 @@ describe("Test utils", () => {
         });
       });
 
-      it("Build a custom notification with a non-default priority", () => {
+      test("Build a custom notification with a non-default priority", () => {
         expect(buildNotification({ 
           ...baseInput, 
           priority: "HIGH" 
@@ -143,7 +143,7 @@ describe("Test utils", () => {
         });
       });
 
-      it("Build a custom notification with a non-default priority and navigation targets", () => {
+      test("Build a custom notification with a non-default priority and navigation targets", () => {
         expect(
           buildNotification({
             ...baseInput,
@@ -159,7 +159,7 @@ describe("Test utils", () => {
         });
       });
 
-      it("Maps data object to Properties array", () => {
+      test("Maps data object to Properties array", () => {
         expect(
           buildNotification({
             recipients: ["test.mail@mail.com"],
@@ -177,7 +177,7 @@ describe("Test utils", () => {
         });
       });
 
-      it("Pass all low-level API fields through to the notification", () => {
+      test("Pass all low-level API fields through to the notification", () => {
         const lowLevelFields = {
           OriginId: "01234567-89ab-cdef-0123-456789abcdef",
           NotificationTypeId: "01234567-89ab-cdef-0123-456789abcdef",
@@ -202,7 +202,7 @@ describe("Test utils", () => {
         });
       });
 
-      it("Pass partial low-level API fields through to the notification", () => {
+      test("Pass partial low-level API fields through to the notification", () => {
         const partialLowLevelFields = {
           NotificationTypeId: "01234567-89ab-cdef-0123-456789abcdef",
           NavigationTargetAction: "TestTargetAction",
@@ -230,12 +230,12 @@ describe("Test utils", () => {
     });
 
     describe("Invalid inputs", () => {
-      it("Return falsy when an empty object is passed", () => {
+      test("Return falsy when an empty object is passed", () => {
         expect(buildNotification({})).toBeFalsy();
       });
 
       describe("Default notification", () => {
-        it("Return falsy when title is missing", () => {
+        test("Return falsy when title is missing", () => {
           expect(
             buildNotification({
               recipients: ["test.mail@mail.com"],
@@ -244,7 +244,7 @@ describe("Test utils", () => {
           ).toBeFalsy();
         });
 
-        it("Return falsy when recipients is empty", () => {
+        test("Return falsy when recipients is empty", () => {
           expect(
             buildNotification({
               recipients: [],
@@ -254,7 +254,7 @@ describe("Test utils", () => {
           ).toBeFalsy();
         });
 
-        it("Return falsy when recipients is not an array", () => {
+        test("Return falsy when recipients is not an array", () => {
           expect(
             buildNotification({
               recipients: "invalid",
@@ -264,7 +264,7 @@ describe("Test utils", () => {
           ).toBeFalsy();
         });
 
-        it("Return falsy when priority is not a valid value", () => {
+        test("Return falsy when priority is not a valid value", () => {
           expect(
             buildNotification({
               recipients: ["test.mail@mail.com"],
@@ -274,7 +274,7 @@ describe("Test utils", () => {
           ).toBeFalsy();
         });
 
-        it("Return falsy when description is not a string", () => {
+        test("Return falsy when description is not a string", () => {
           expect(
             buildNotification({
               recipients: ["test.mail@mail.com"],
@@ -285,7 +285,7 @@ describe("Test utils", () => {
           ).toBeFalsy();
         });
 
-        it("Return falsy when title is not a string", () => {
+        test("Return falsy when title is not a string", () => {
           expect(
             buildNotification({
               recipients: ["test.mail@mail.com"],
@@ -297,7 +297,7 @@ describe("Test utils", () => {
       });
 
       describe("Custom notification", () => {
-        it("Return falsy when recipients is missing", () => {
+        test("Return falsy when recipients is missing", () => {
           expect(
             buildNotification({
               type: "TestNotificationType"
@@ -305,7 +305,7 @@ describe("Test utils", () => {
           ).toBeFalsy();
         });
 
-        it("Return falsy when recipients is empty", () => {
+        test("Return falsy when recipients is empty", () => {
           expect(
             buildNotification({
               recipients: [],
@@ -314,7 +314,7 @@ describe("Test utils", () => {
           ).toBeFalsy();
         });
 
-        it("Return falsy when recipients is not an array", () => {
+        test("Return falsy when recipients is not an array", () => {
           expect(
             buildNotification({
               recipients: "invalid",
@@ -323,7 +323,7 @@ describe("Test utils", () => {
           ).toBeFalsy();
         });
 
-        it("Return falsy when priority is not a valid value", () => {
+        test("Return falsy when priority is not a valid value", () => {
           expect(
             buildNotification({
               recipients: ["test.mail@mail.com"],
@@ -333,7 +333,7 @@ describe("Test utils", () => {
           ).toBeFalsy();
         });
 
-        it("Return falsy when properties is not an array", () => {
+        test("Return falsy when properties is not an array", () => {
           expect(
             buildNotification({
               recipients: ["test.mail@mail.com"],
@@ -344,7 +344,7 @@ describe("Test utils", () => {
           ).toBeFalsy();
         });
 
-        it("Return falsy when navigation is not an object", () => {
+        test("Return falsy when navigation is not an object", () => {
           expect(
             buildNotification({
               recipients: ["test.mail@mail.com"],
@@ -355,7 +355,7 @@ describe("Test utils", () => {
           ).toBeFalsy();
         });
 
-        it("Return falsy when payload is not an object", () => {
+        test("Return falsy when payload is not an object", () => {
           expect(
             buildNotification({
               recipients: ["test.mail@mail.com"],
@@ -368,7 +368,7 @@ describe("Test utils", () => {
       });
     });
 
-    it("Pass a raw notification object through with the prefix applied to the type key", () => {
+    test("Pass a raw notification object through with the prefix applied to the type key", () => {
       const rawNotification = {
         NotificationTypeKey: "TestNotificationType",
         NotificationTypeVersion: "1",
@@ -402,26 +402,26 @@ describe("Test utils", () => {
   });
 
   describe("Notification types validation", () => {
-    it("Return false when an entry is missing NotificationTypeKey", () => {
+    test("Return false when an entry is missing NotificationTypeKey", () => {
       expect(validateNotificationTypes([{ NotificationTypeKey: "Test" }, { blabla: "Test2" }])).toEqual(false);
     });
 
-    it("Return true for an empty array", () => {
+    test("Return true for an empty array", () => {
       expect(validateNotificationTypes([])).toBe(true);
     });
 
-    it("Return true when all entries have NotificationTypeKey", () => {
+    test("Return true when all entries have NotificationTypeKey", () => {
       expect(validateNotificationTypes([{ NotificationTypeKey: "Test" }, { NotificationTypeKey: "Test2" }])).toEqual(true);
     });
   });
 
   describe("Read file", () => {
-    it("Return an empty array when the file does not exist", () => {
+    test("Return an empty array when the file does not exist", () => {
       existsSync.mockReturnValue(false);
       expect(readFile("test.json")).toMatchObject([]);
     });
 
-    it("Return the parsed file contents when the file exists", () => {
+    test("Return the parsed file contents when the file exists", () => {
       existsSync.mockReturnValue(true);
       readFileSync.mockReturnValue('[{ "test": "test" }]');
       expect(readFile("test.json")).toMatchObject([{ test: "test" }]);
@@ -429,19 +429,19 @@ describe("Test utils", () => {
   });
 
   describe("Get notification destination", () => {
-    it("Return the destination when it exists", async () => {
+    test("Return the destination when it exists", async () => {
       getDestination.mockReturnValue({ "mock-destination": "mock-destination" });
       expect(await getNotificationDestination()).toMatchObject({ "mock-destination": "mock-destination" });
     });
 
-    it("Throw an error when the destination is not found", async () => {
+    test("Throw an error when the destination is not found", async () => {
       getDestination.mockReturnValue(undefined);
       await expect(() => getNotificationDestination()).rejects.toThrow("Failed to get destination: SAP_Notifications");
     });
   });
 
   describe("Configuration", () => {
-    it("Use GlobalUserId as the recipient key when authenticationIdentifier is set to UserUUID", () => {
+    test("Use GlobalUserId as the recipient key when authenticationIdentifier is set to UserUUID", () => {
       cds.env.requires.notifications ??= {};
       cds.env.requires.notifications.authenticationIdentifier = "UserUUID";
 
@@ -454,7 +454,7 @@ describe("Test utils", () => {
       expect(result.Recipients[0]).toMatchObject({ GlobalUserId: "user-uuid-123" });
     });
 
-    it("Fall back to basename of cds.root as prefix when package.json cannot be read", () => {
+    test("Fall back to basename of cds.root as prefix when package.json cannot be read", () => {
       let result;
       jest.isolateModules(() => {
         const cds = require("@sap/cds");

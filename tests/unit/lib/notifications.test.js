@@ -40,7 +40,7 @@ describe("Test post notification", () => {
         buildHeadersForDestination.mockReturnValue(undefined);
     });
 
-    it("Logs and sends when a valid notification object is posted", async () => {
+    test("Logs and sends when a valid notification object is posted", async () => {
         executeHttpRequest.mockReturnValue(expectedCustomNotification);
         await alert.postNotification(expectedCustomNotification)
 
@@ -48,7 +48,7 @@ describe("Test post notification", () => {
         expect(executeHttpRequest).toHaveBeenCalled();
     })
 
-    it.each([
+    test.each([
         [500, false],
         [404, true],
         [429, false],

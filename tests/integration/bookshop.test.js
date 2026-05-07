@@ -1,62 +1,67 @@
-const cds = require("@sap/cds");
-const { join } = cds.utils.path;
-const { messages } = require("../../lib/utils");
+const cds = require("@sap/cds")
+const { join } = cds.utils.path
+const { messages } = require("../../lib/utils")
 
-cds.test(join(__dirname, "../bookshop"));
+cds.test(join(__dirname, "../bookshop"))
 
 describe("Notifications Integration", () => {
   let log = cds.test.log()
-  let alert;
+  let alert
 
   beforeAll(async () => {
-    alert = await cds.connect.to("notifications");
-  });
+    alert = await cds.connect.to("notifications")
+  })
 
   test("Notifications service resolves to console implementation in development", async () => {
-    expect(alert.constructor.name).toBe("NotifyToConsole");
-  });
+    expect(alert.constructor.name).toBe("NotifyToConsole")
+  })
 
   test("Notification types are loaded into cds.notifications on startup", () => {
-    expect(cds.notifications?.local?.types).toBeDefined();
-    expect(cds.notifications.local.types).toHaveProperty("bookshop/BookOrdered");
-  });
+    expect(cds.notifications?.local?.types).toBeDefined()
+    expect(cds.notifications.local.types).toHaveProperty("bookshop/BookOrdered")
+  })
 
   test("Sending a notification with unknown type key gives a warning", async () => {
     await alert.notify("UnknownType", {
       recipients: ["reader@bookshop.com"],
       data: { title: "test" }
-    });
+    })
 
-    expect(log.output).toContain("UnknownType is not in the notification types file");
-  });
+    expect(log.output).toContain("UnknownType is not in the notification types file")
+  })
 
   test("Sending a default notification logs to console", async () => {
     await alert.notify({
       recipients: ["reader@bookshop.com"],
       title: "New book arrived",
       description: "A new book has been added to the catalogue"
-    });
+    })
 
-    expect(log.output).toContain("Notification:");
-    expect(log.output).toContain("NotificationTypeKey: 'Default'");
-    expect(log.output).toContain("RecipientId: 'reader@bookshop.com'");
-    expect(log.output).toContain("Value: 'New book arrived'");
-  });
+    expect(log.output).toContain("Notification:")
+    expect(log.output).toContain("NotificationTypeKey: 'Default'")
+    expect(log.output).toContain("RecipientId: 'reader@bookshop.com'")
+    expect(log.output).toContain("Value: 'New book arrived'")
+  })
 
   test("Sending a notification with no arguments warns and does nothing", async () => {
-    await alert.notify();
+    await alert.notify()
 
-    expect(log.output).toContain(messages.NO_OBJECT_FOR_NOTIFY);
-    expect(log.output).not.toContain("Notification:");
-  });
+    expect(log.output).toContain(messages.NO_OBJECT_FOR_NOTIFY)
+    expect(log.output).not.toContain("Notification:")
+  })
 
   test("Custom typed notification uses prefixed type key from types file", async () => {
     await alert.notify("BookOrdered", {
       recipients: ["reader@bookshop.com"],
       data: { title: "Moby Dick", buyer: "reader@bookshop.com" }
-    });
+    })
 
-    expect(log.output).toContain("bookshop/BookOrdered");
-    expect(log.output).not.toContain("is not in the notification types file");
-  });
-});
+    expect(log.output).toContain("bookshop/BookOrdered")
+    expect(log.output).not.toContain("is not in the notification types file")
+  })
+
+  test("Notification types from CDS and JSON are merged", () => {
+    expect(cds.notifications.local.types).toHaveProperty("bookshop/BookOrdered")
+    expect(cds.notifications.local.types).toHaveProperty("bookshop/BookReturned")
+  })
+})

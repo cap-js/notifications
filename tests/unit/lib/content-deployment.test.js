@@ -16,14 +16,14 @@ describe("contentDeployment", () => {
     readFile.mockImplementation(() => []);
   });
 
-  it("Set log level to error on startup", async () => {
+  test("Set log level to error on startup", async () => {
     validateNotificationTypes.mockReturnValue(false);
     await contentDeployment.deployNotificationTypes();
 
     expect(setGlobalLogLevel).toHaveBeenCalledWith("error");
   });
 
-  it("Process notification types when they are valid", async () => {
+  test("Process notification types when they are valid", async () => {
     validateNotificationTypes.mockReturnValue(true);
     processNotificationTypes.mockResolvedValue();
     await contentDeployment.deployNotificationTypes();
@@ -32,7 +32,7 @@ describe("contentDeployment", () => {
     expect(processNotificationTypes).toHaveBeenCalledWith([]);
   });
 
-  it("Notification types are not processed when they are invalid", async () => {
+  test("Notification types are not processed when they are invalid", async () => {
     validateNotificationTypes.mockReturnValue(false);
     processNotificationTypes.mockResolvedValue();
     await contentDeployment.deployNotificationTypes();
@@ -41,7 +41,7 @@ describe("contentDeployment", () => {
     expect(processNotificationTypes).not.toHaveBeenCalled();
   });
 
-  it("Call readFile with empty string when notifications types path is not configured", async () => {
+  test("Call readFile with empty string when notifications types path is not configured", async () => {
     validateNotificationTypes.mockReturnValue(false);
     const originalTypes = cds.env.requires.notifications.types;
     delete cds.env.requires.notifications.types;
