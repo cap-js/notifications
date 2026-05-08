@@ -5,6 +5,17 @@ function makeModel(defs) {
 }
 
 describe("notificationTypesFromModel", () => {
+  let originalI18nDescriptor
+
+  beforeEach(() => {
+    originalI18nDescriptor = Object.getOwnPropertyDescriptor(require('@sap/cds'), 'i18n')
+  })
+
+  afterEach(() => {
+    if (originalI18nDescriptor) {
+      Object.defineProperty(require('@sap/cds'), 'i18n', originalI18nDescriptor)
+    }
+  })
 
   test("Return empty array for null/undefined model", () => {
     expect(notificationTypesFromModel(null)).toEqual([])
@@ -167,5 +178,53 @@ describe("notificationTypesFromModel", () => {
 
     const [type] = notificationTypesFromModel(model)
     expect(type.DeliveryChannels).toHaveLength(0)
+  })
+
+  test("Resolve {i18n>KEY} references to English labels", () => {
+    const cds = require('@sap/cds')
+    Object.defineProperty(cds, 'i18n', {
+      value: { labels: { at: (key, lang) => key === 'BOOK_ORDERED_TITLE' && lang === 'en' ? 'Book Ordered' : undefined } },
+      configurable: true,
+      writable: true
+    })
+
+    const model = makeModel({
+      "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>BOOK_ORDERED_TITLE}" }
+    })
+
+    const [type] = notificationTypesFromModel(model)
+    expect(type.Templates[0].TemplateSensitive).toBe("Book Ordered")
+  })
+
+  test("Fall back to raw value when i18n key not found", () => {
+    const cds = require('@sap/cds')
+    cds.i18n = { labels: { at: () => undefined } }
+
+    const model = makeModel({
+      "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>MISSING_KEY}" }
+    })
+
+    const [type] = notificationTypesFromModel(model)
+    expect(type.Templates[0].TemplateSensitive).toBe("{i18n>MISSING_KEY}")
+  })
+
+  test("Pass plain strings through i18n unchanged", () => {
+    const model = makeModel({
+      "E": { kind: "event", name: "E", "@notification.template.title": "Plain Title" }
+    })
+    const [type] = notificationTypesFromModel(model)
+    expect(type.Templates[0].TemplateSensitive).toBe("Plain Title")
+  })
+
+  test("Resolve {i18n>KEY} in subtitle field", () => {
+    Object.defineProperty(cds, 'i18n', {
+      value: { labels: { at: (key) => key === 'SUBTITLE_KEY' ? 'Resolved Subtitle' : undefined } },
+      configurable: true, writable: true
+    })
+    const model = makeModel({
+      "E": { kind: "event", name: "E", "@notification.template.title": "t", "@notification.template.subtitle": "{i18n>SUBTITLE_KEY}" }
+    })
+    const [type] = notificationTypesFromModel(model)
+    expect(type.Templates[0].Subtitle).toBe("Resolved Subtitle")
   })
 })

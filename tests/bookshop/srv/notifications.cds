@@ -1,10 +1,10 @@
-@description: 'Book Ordered'
+@description: '{i18n>BOOK_ORDERED_DESCRIPTION}'
 @notification: {
   template: {
-    title        : 'Book Ordered',
-    publicTitle  : 'Book Ordered',
-    subtitle     : '{{buyer}} ordered {{title}}',
-    groupedTitle : 'Bookshop Updates',
+    title        : '{i18n>BOOK_ORDERED_TITLE}',
+    publicTitle  : '{i18n>BOOK_ORDERED_PUBLIC_TITLE}',
+    subtitle     : '{i18n>BOOK_ORDERED_SUBTITLE}',
+    groupedTitle : '{i18n>BOOK_ORDERED_GROUPED_TITLE}',
   }
 }
 event BookOrdered {

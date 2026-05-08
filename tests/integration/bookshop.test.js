@@ -64,4 +64,10 @@ describe("Notifications Integration", () => {
     expect(cds.notifications.local.types).toHaveProperty("bookshop/BookOrdered")
     expect(cds.notifications.local.types).toHaveProperty("bookshop/BookReturned")
   })
+
+  test("Notification type templates have resolved i18n values", () => {
+    const type = cds.notifications.local.types["bookshop/BookOrdered"]["1"]
+    expect(type.Templates[0].TemplateSensitive).toBe("Book Ordered")
+    expect(type.Templates[0].Subtitle).toBe("{{buyer}} ordered {{title}}")
+  })
 })
