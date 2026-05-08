@@ -1,3 +1,4 @@
+const cds = require('@sap/cds');
 const { messages, buildNotification } = require("../../../lib/utils");
 const NotifyToRest = require("../../../srv/notifyToRest");
 
