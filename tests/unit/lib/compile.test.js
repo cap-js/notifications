@@ -180,6 +180,18 @@ describe("notificationTypesFromModel", () => {
     expect(type.DeliveryChannels).toHaveLength(0)
   })
 
+  test("Generate a template for all 44 ANS-supported languages", () => {
+    const model = makeModel({
+      "E": { kind: "event", name: "E", "@notification.template.title": "Hello" }
+    })
+    const [type] = notificationTypesFromModel(model)
+    expect(type.Templates).toHaveLength(44)
+    expect(type.Templates[0].Language).toBe("en")
+    expect(type.Templates.map(t => t.Language)).toContain("de")
+    expect(type.Templates.map(t => t.Language)).toContain("zh-Hans")
+    expect(type.Templates.map(t => t.Language)).toContain("zh-Hant")
+  })
+
   test("Resolve {i18n>KEY} references to English labels", () => {
     const cds = require('@sap/cds')
     Object.defineProperty(cds, 'i18n', {
@@ -196,7 +208,33 @@ describe("notificationTypesFromModel", () => {
     expect(type.Templates[0].TemplateSensitive).toBe("Book Ordered")
   })
 
-  test("Fall back to raw value when i18n key not found", () => {
+  test("Resolve {i18n>KEY} to locale-specific translation when available", () => {
+    const cds = require('@sap/cds')
+    Object.defineProperty(cds, 'i18n', {
+      value: { labels: { at: (key, lang) => {
+        if (key !== 'TITLE') return undefined
+        if (lang === 'de') return 'Hallo'
+        if (lang === 'en') return 'Hello'
+        return undefined
+      }}},
+      configurable: true,
+      writable: true
+    })
+
+    const model = makeModel({
+      "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>TITLE}" }
+    })
+
+    const [type] = notificationTypesFromModel(model)
+    const en = type.Templates.find(t => t.Language === 'en')
+    const de = type.Templates.find(t => t.Language === 'de')
+    const fr = type.Templates.find(t => t.Language === 'fr')
+    expect(en.TemplateSensitive).toBe("Hello")
+    expect(de.TemplateSensitive).toBe("Hallo")
+    expect(fr.TemplateSensitive).toBe("Hello") // falls back to English
+  })
+
+  test("Fall back to raw value when i18n key not found in any locale", () => {
     const cds = require('@sap/cds')
     cds.i18n = { labels: { at: () => undefined } }
 
