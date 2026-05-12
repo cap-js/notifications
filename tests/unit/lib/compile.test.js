@@ -114,6 +114,21 @@ describe("notificationTypesFromModel", () => {
     expect(type.NotificationTypeKey).toBe("BookOrdered")
   })
 
+  test("Unwrap hash-form enum references in deliveryChannels", () => {
+    const model = makeModel({
+      "E": {
+        kind: "event",
+        name: "E",
+        "@notification.template.title": "t",
+        "@notification.deliveryChannels": [{ channel: { "#": "Mail" }, enabled: true }]
+      }
+    })
+
+    const [type] = notificationTypesFromModel(model)
+    expect(type.DeliveryChannels[0].Type).toBe("MAIL")
+    expect(type.DeliveryChannels[0].Enabled).toBe(true)
+  })
+
   test("Unwrap plain string enum values in deliveryChannels", () => {
     const model = makeModel({
       "E": {
