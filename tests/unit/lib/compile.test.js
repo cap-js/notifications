@@ -242,4 +242,84 @@ describe("notificationTypesFromModel", () => {
     const [type] = notificationTypesFromModel(model)
     expect(type.Templates[0].Subtitle).toBe("Resolved Subtitle")
   })
+
+  describe("Element name length validation", () => {
+    test("Throw when an element name exceeds 128 characters", () => {
+      const longName = 'a'.repeat(129)
+      const model = makeModel({
+        "E": {
+          kind: "event",
+          name: "E",
+          "@notification": {},
+          elements: { [longName]: { type: "cds.String" } }
+        }
+      })
+      expect(() => notificationTypesFromModel(model)).toThrow(longName)
+      expect(() => notificationTypesFromModel(model)).toThrow("'E'")
+    })
+
+    test("No error for element names at exactly 128 characters", () => {
+      const exactName = 'a'.repeat(128)
+      const model = makeModel({
+        "E": {
+          kind: "event",
+          name: "E",
+          "@notification": {},
+          elements: { [exactName]: { type: "cds.String" } }
+        }
+      })
+      expect(() => notificationTypesFromModel(model)).not.toThrow()
+    })
+
+    test("No error when all element names are within the 128-character limit", () => {
+      const model = makeModel({
+        "E": {
+          kind: "event",
+          name: "E",
+          "@notification": {},
+          elements: { title: { type: "cds.String" }, buyer: { type: "cds.String" } }
+        }
+      })
+      expect(() => notificationTypesFromModel(model)).not.toThrow()
+    })
+
+    test("Report all violating element names in the error message", () => {
+      const b = 'b'.repeat(129)
+      const c = 'c'.repeat(130)
+      const model = makeModel({
+        "E": {
+          kind: "event",
+          name: "E",
+          "@notification": {},
+          elements: {
+            valid: { type: "cds.String" },
+            [b]: { type: "cds.String" },
+            [c]: { type: "cds.String" }
+          }
+        }
+      })
+      expect(() => notificationTypesFromModel(model)).toThrow(b)
+      expect(() => notificationTypesFromModel(model)).toThrow(c)
+    })
+
+    test("Use stripped event name in error when event has a namespace prefix", () => {
+      const longName = 'x'.repeat(129)
+      const model = makeModel({
+        "My.Namespace.OrderPlaced": {
+          kind: "event",
+          name: "My.Namespace.OrderPlaced",
+          "@notification": {},
+          elements: { [longName]: { type: "cds.String" } }
+        }
+      })
+      expect(() => notificationTypesFromModel(model)).toThrow("'OrderPlaced'")
+    })
+
+    test("No error when event has no elements", () => {
+      const model = makeModel({
+        "E": { kind: "event", name: "E", "@notification": {} }
+      })
+      expect(() => notificationTypesFromModel(model)).not.toThrow()
+    })
+  })
 })

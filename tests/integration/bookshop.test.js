@@ -1,6 +1,8 @@
 const cds = require("@sap/cds")
 const { join } = cds.utils.path
 const { messages } = require("../../lib/utils")
+const { notificationTypesFromModel } = require("../../lib/compile")
+
 
 cds.test(join(__dirname, "../bookshop"))
 
@@ -69,5 +71,13 @@ describe("Notifications Integration", () => {
     const type = cds.notifications.local.types["bookshop/BookOrdered"]["1"]
     expect(type.Templates[0].TemplateSensitive).toBe("Book Ordered")
     expect(type.Templates[0].Subtitle).toBe("{{buyer}} ordered {{title}}")
+  })
+
+  test("Throw when a notification event has an element name exceeding 128 characters", async () => {
+    const longName = 'a'.repeat(129)
+    const model = cds.parse.cdl(`@notification event OversizedEvent { ${longName}: String; }`)
+    expect(() => notificationTypesFromModel(model)).toThrow(
+      "Event 'OversizedEvent' has elements exceeding the maximum key length of 128 characters"
+    )
   })
 })
