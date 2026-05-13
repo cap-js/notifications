@@ -73,14 +73,24 @@ describe("Notifications Integration", () => {
 
   test("Notification type for BookOrdered has templates for all 44 ANS languages", () => {
     const type = cds.notifications.local.types["bookshop/BookOrdered"]["1"]
-    expect(type.Templates).toHaveLength(44)
+    expect(type.Templates).toHaveLength(2)
+    expect(type.Templates.map(t => t.Language)).toContain("en")
     expect(type.Templates.map(t => t.Language)).toContain("de")
-    expect(type.Templates.map(t => t.Language)).toContain("zh-Hans")
   })
 
   test("German template for BookOrdered has German translation", () => {
     const type = cds.notifications.local.types["bookshop/BookOrdered"]["1"]
     const de = type.Templates.find(t => t.Language === "de")
+    expect(de.TemplateSensitive).toBe("Buch bestellt")
+    expect(de.Subtitle).toBe("{{buyer}} hat {{title}} bestellt")
+  })
+
+  test("Notification type templates have resolved i18n values", () => {
+    const type = cds.notifications.local.types["bookshop/BookOrdered"]["1"]
+    const en = type.Templates.find(t => t.Language === 'en')
+    const de = type.Templates.find(t => t.Language === 'de')
+    expect(en.TemplateSensitive).toBe("Book Ordered")
+    expect(en.Subtitle).toBe("{{buyer}} ordered {{title}}")
     expect(de.TemplateSensitive).toBe("Buch bestellt")
     expect(de.Subtitle).toBe("{{buyer}} hat {{title}} bestellt")
   })

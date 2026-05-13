@@ -27,7 +27,7 @@ else cds.once("served", async () => {
   const srvPath = path.join(cds.root, cds.env.folders.srv)
   const model = await cds.load(srvPath)
   const notificationTypes = [
-    ...notificationTypesFromModel(model),
+    ...notificationTypesFromModel(model, srvPath),
     ...( typesPath ? readFile(typesPath) : [] )
   ]
 
