@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - Return the full HTTP response from the REST notification handler.
   Note: With outbox enabled (default), the application's `await notify()` resolves when
   the message is queued; the return value is only available when `outbox: false`.
+- New default `auto` for `cds.env.requires.notifications.authenticationIdentifier`. Each recipient is inspected: UUID values are published with `GlobalUserId`, everything else with `RecipientId`, with a warning when a value is neither a UUID nor an email. The previous values `UserUUID` and `RecipientId` are still supported for an explicit choice.
+  In practice this means the plugin "just works" without configuration: applications can pass emails, UUIDs, or a mix of both, and the correct recipient key is chosen per value — no upfront configuration about Work Zone's authentication identifier required.
 
 ## Version 0.3.0
 
