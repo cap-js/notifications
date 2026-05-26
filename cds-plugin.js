@@ -32,7 +32,11 @@ else cds.once("served", async () => {
   ]
 
   if (validateNotificationTypes(notificationTypes)) {
-    if (!production) {
+    const kind = cds.env.requires?.notifications?.kind
+    if (kind === 'notify-to-rest') {
+      const { processNotificationTypes } = require('./lib/notificationTypes')
+      await processNotificationTypes(notificationTypes)
+    } else if (!production) {
       const notificationTypesMap = createNotificationTypesMap(notificationTypes, true)
       cds.notifications = { local: { types: notificationTypesMap } }
     }

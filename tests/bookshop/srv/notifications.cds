@@ -5,7 +5,12 @@
     publicTitle  : '{i18n>BOOK_ORDERED_PUBLIC_TITLE}',
     subtitle     : '{i18n>BOOK_ORDERED_SUBTITLE}',
     groupedTitle : '{i18n>BOOK_ORDERED_GROUPED_TITLE}',
-  }
+    email        : {
+      subject: 'Book Ordered: {{title}}',
+      html   : '<p>Hi {{buyer}},</p><p>Your order for <b>{{title}}</b> has been placed.</p>',
+    }
+  },
+  deliveryChannels: [{ channel: 'Mail', enabled: true, defaultPreference: true, editablePreference: true}]
 }
 event BookOrdered {
   title     : String;
