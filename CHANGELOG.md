@@ -12,6 +12,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - Return the full HTTP response from the REST notification handler.
   Note: With outbox enabled (default), the application's `await notify()` resolves when
   the message is queued; the return value is only available when `outbox: false`.
+- Support for defining notification types via CDS `@notification` annotations as an alternative to `srv/notification-types.json`.
+- Support for email delivery channels via `@notification.deliveryChannels` in CDS annotations and `DeliveryChannels` in the JSON format.
+- Support for email templates via `@notification.template.email.subject` and `@notification.template.email.html` in CDS annotations, and `EmailSubject` / `EmailHtml` in JSON templates.
+- i18n support for CDS annotation string values using `{i18n>key}` syntax.
+- Notification types are automatically registered and kept in sync with the notification service on application startup when running in hybrid or production mode.
+
+### Fixed
+
+- Fixed `#EnumValue` enum references in `@notification.deliveryChannels` — the `{ "#": "..." }` CSN form produced by the CDS compiler was not handled by `resolveEnum`, causing a `TypeError` at runtime.
+- Improved error messages when notification type registration fails, now surfacing the ANS error detail instead of a raw HTTP error dump.
 
 ## Version 0.3.0
 
