@@ -7,7 +7,7 @@
     groupedTitle : '{i18n>BOOK_ORDERED_GROUPED_TITLE}',
     email        : {
       subject: 'Book Ordered: {{title}}',
-      html   : '<p>Hi {{buyer}},</p><p>Your order for <b>{{title}}</b> has been placed.</p>',
+      html   : './book-ordered-email.html',
     }
   },
   deliveryChannels: [{ channel: 'Mail', enabled: true, defaultPreference: true, editablePreference: true}]

@@ -1,7 +1,24 @@
+jest.mock('fs', () => ({
+  ...jest.requireActual('fs'),
+  existsSync: jest.fn(),
+  readFileSync: jest.fn(),
+}))
+
+const { existsSync, readFileSync } = require('fs')
 const { notificationTypesFromModel } = require("../../../lib/compile")
 
 function makeModel(defs) {
   return { definitions: defs }
+}
+
+function makeEventWithHtml(html, file = 'srv/notifications.cds') {
+  return {
+    kind: 'event',
+    name: 'E',
+    '@notification.template.title': 't',
+    '@notification.template.email.html': html,
+    $location: { file, line: 1, col: 1 },
+  }
 }
 
 describe("notificationTypesFromModel", () => {
@@ -233,13 +250,99 @@ describe("notificationTypesFromModel", () => {
 
   test("Resolve {i18n>KEY} in subtitle field", () => {
     Object.defineProperty(cds, 'i18n', {
-      value: { labels: { at: (key) => key === 'SUBTITLE_KEY' ? 'Resolved Subtitle' : undefined } },
+      value: { labels: { at: (key) => key === 'BOOK_ORDERED_SUBTITLE' ? '{{buyer}} ordered {{title}}' : undefined } },
       configurable: true, writable: true
     })
     const model = makeModel({
-      "E": { kind: "event", name: "E", "@notification.template.title": "t", "@notification.template.subtitle": "{i18n>SUBTITLE_KEY}" }
+      "E": { kind: "event", name: "E", "@notification.template.title": "t", "@notification.template.subtitle": "{i18n>BOOK_ORDERED_SUBTITLE}" }
     })
     const [type] = notificationTypesFromModel(model)
-    expect(type.Templates[0].Subtitle).toBe("Resolved Subtitle")
+    expect(type.Templates[0].Subtitle).toBe("{{buyer}} ordered {{title}}")
+  })
+
+  test("Resolve {i18n>KEY} embedded within inline html string", () => {
+    const cds = require('@sap/cds')
+    Object.defineProperty(cds, 'i18n', {
+      value: { labels: { at: (key) => key === 'BOOK_ORDERED_SUBTITLE' ? '{{buyer}} ordered {{title}}' : undefined } },
+      configurable: true, writable: true
+    })
+    const model = makeModel({
+      "E": { kind: "event", name: "E", "@notification.template.email.html": "<p>{i18n>BOOK_ORDERED_SUBTITLE}</p>" }
+    })
+    const [type] = notificationTypesFromModel(model)
+    expect(type.Templates[0].EmailHtml).toBe("<p>{{buyer}} ordered {{title}}</p>")
+  })
+})
+
+describe("HTML file resolution", () => {
+  const cds = require('@sap/cds')
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  test("Read html file when annotation value starts with ./", () => {
+    existsSync.mockReturnValue(true)
+    readFileSync.mockReturnValue('<p>Hello {{buyer}}</p>')
+
+    const model = makeModel({ "E": makeEventWithHtml('./email.html') })
+    const [type] = notificationTypesFromModel(model)
+
+    expect(type.Templates[0].EmailHtml).toBe('<p>Hello {{buyer}}</p>')
+    expect(existsSync).toHaveBeenCalled()
+    expect(readFileSync).toHaveBeenCalled()
+  })
+
+  test("Read html file when annotation value starts with ../", () => {
+    existsSync.mockReturnValue(true)
+    readFileSync.mockReturnValue('<p>content</p>')
+
+    const model = makeModel({ "E": makeEventWithHtml('../templates/email.html') })
+    const [type] = notificationTypesFromModel(model)
+
+    expect(type.Templates[0].EmailHtml).toBe('<p>content</p>')
+  })
+
+  test("Pass through inline html unchanged (no file read)", () => {
+    const model = makeModel({ "E": makeEventWithHtml('<p>inline</p>') })
+    const [type] = notificationTypesFromModel(model)
+
+    expect(type.Templates[0].EmailHtml).toBe('<p>inline</p>')
+    expect(existsSync).not.toHaveBeenCalled()
+  })
+
+  test("Returns annotation value as-is when html file not found", () => {
+    existsSync.mockReturnValue(false)
+
+    const model = makeModel({ "E": makeEventWithHtml('./missing.html') })
+    const [type] = notificationTypesFromModel(model)
+
+    expect(type.Templates[0].EmailHtml).toBe('./missing.html')
+    expect(readFileSync).not.toHaveBeenCalled()
+  })
+
+  test("Resolves {i18n>KEY} placeholders inside html file content", () => {
+    Object.defineProperty(cds, 'i18n', {
+      value: { labels: { at: (key) => key === 'BOOK_ORDERED_DESCRIPTION' ? 'Book Ordered' : undefined } },
+      configurable: true, writable: true
+    })
+    existsSync.mockReturnValue(true)
+    readFileSync.mockReturnValue('<p>{i18n>BOOK_ORDERED_DESCRIPTION}</p>')
+
+    const model = makeModel({ "E": makeEventWithHtml('./email.html') })
+    const [type] = notificationTypesFromModel(model)
+
+    expect(type.Templates[0].EmailHtml).toBe('<p>Book Ordered</p>')
+  })
+
+  test("Resolves html file path relative to the cds source file", () => {
+    existsSync.mockReturnValue(true)
+    readFileSync.mockReturnValue('<p>hi</p>')
+
+    const model = makeModel({ "E": makeEventWithHtml('./email.html', 'srv/notifications.cds') })
+    notificationTypesFromModel(model)
+
+    const calledPath = existsSync.mock.calls[0][0]
+    expect(calledPath).toMatch(/srv[/\\]email\.html$/)
   })
 })
