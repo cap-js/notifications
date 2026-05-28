@@ -241,7 +241,7 @@ To make notification types unique to the application, prefix is added to the typ
 
 - `auto` (default): the recipient key is chosen per recipient. Values matching the UUID format are published with `GlobalUserId`, everything else with `RecipientId`. If a value is neither a UUID nor an email a warning is logged. This allows mixing UUIDs and emails in the same `recipients` array without additional configuration.
 - `UserUUID`: always publish with `GlobalUserId`. Use this when the authentication identifier in Work Zone is set to `User ID`.
-- `RecipientId`: always publish with `RecipientId`. Use this when you want to enforce email recipients.
+- `RecipientId`: always publish with `RecipientId`. Use this when recipients are identified by email or login name.
 
 Note, that in order for E-Mail Notifications to be sent for notifications published with a User ID, a destination to the IDS needs to be configured for the lookup of the corresponding email address.
 
