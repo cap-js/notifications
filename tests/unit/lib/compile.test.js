@@ -274,6 +274,64 @@ describe("notificationTypesFromModel", () => {
   })
 })
 
+describe("defaultEmailDelivery config", () => {
+  const cds = require('@sap/cds')
+
+  afterEach(() => {
+    delete cds.env.requires?.notifications?.defaultEmailDelivery
+  })
+
+  test("Add MAIL delivery channel when defaultEmailDelivery is true and no channels annotated", () => {
+    cds.env.requires.notifications ??= {}
+    cds.env.requires.notifications.defaultEmailDelivery = true
+
+    const model = makeModel({
+      "E": { kind: "event", name: "E", "@notification.template.title": "t" }
+    })
+
+    const [type] = notificationTypesFromModel(model)
+    expect(type.DeliveryChannels).toEqual([{ Type: 'MAIL', Enabled: true, DefaultPreference: true, EditablePreference: true }])
+  })
+
+  test("Do not override explicit delivery channels when defaultEmailDelivery is true", () => {
+    cds.env.requires.notifications ??= {}
+    cds.env.requires.notifications.defaultEmailDelivery = true
+
+    const model = makeModel({
+      "E": {
+        kind: "event",
+        name: "E",
+        "@notification.template.title": "t",
+        "@notification.deliveryChannels": [{ channel: "Web", enabled: false }]
+      }
+    })
+
+    const [type] = notificationTypesFromModel(model)
+    expect(type.DeliveryChannels).toEqual([{ Type: 'WEB', Enabled: false }])
+  })
+
+  test("Do not add delivery channels when defaultEmailDelivery is false", () => {
+    cds.env.requires.notifications ??= {}
+    cds.env.requires.notifications.defaultEmailDelivery = false
+
+    const model = makeModel({
+      "E": { kind: "event", name: "E", "@notification.template.title": "t" }
+    })
+
+    const [type] = notificationTypesFromModel(model)
+    expect(type.DeliveryChannels).toBeUndefined()
+  })
+
+  test("Do not add delivery channels when defaultEmailDelivery is not configured", () => {
+    const model = makeModel({
+      "E": { kind: "event", name: "E", "@notification.template.title": "t" }
+    })
+
+    const [type] = notificationTypesFromModel(model)
+    expect(type.DeliveryChannels).toBeUndefined()
+  })
+})
+
 describe("HTML file resolution", () => {
   const cds = require('@sap/cds')
 
