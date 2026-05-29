@@ -24,6 +24,10 @@ else cds.once("served", async () => {
   const production = cds.env.profiles?.includes("production")
 
   const typesPath = cds.env.requires?.notifications?.types
+  const kind = cds.env.requires?.notifications?.kind
+  const needsProcessing = kind === 'notify-to-rest' || !production
+  if (!needsProcessing) return
+
   const srvPath = path.join(cds.root, cds.env.folders.srv)
   const model = await cds.load(srvPath)
   const notificationTypes = [
@@ -32,7 +36,6 @@ else cds.once("served", async () => {
   ]
 
   if (validateNotificationTypes(notificationTypes)) {
-    const kind = cds.env.requires?.notifications?.kind
     if (kind === 'notify-to-rest') {
       const { processNotificationTypes } = require('./lib/notificationTypes')
       await processNotificationTypes(notificationTypes)
