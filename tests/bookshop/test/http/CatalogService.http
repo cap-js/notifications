@@ -1,0 +1,39 @@
+@server=http://localhost:4004
+@username=alice
+@password=
+
+
+### ListOfBooks
+# @name ListOfBooks_GET
+GET {{server}}/odata/v4/catalog/ListOfBooks
+Authorization: Basic {{username}}:{{password}}
+
+
+### Books
+# @name Books_GET
+GET {{server}}/odata/v4/catalog/Books
+Authorization: Basic {{username}}:{{password}}
+
+
+### Genres
+# @name Genres_GET
+GET {{server}}/odata/v4/catalog/Genres
+Authorization: Basic {{username}}:{{password}}
+
+
+### Currencies
+# @name Currencies_GET
+GET {{server}}/odata/v4/catalog/Currencies
+Authorization: Basic {{username}}:{{password}}
+
+
+### submitOrder
+# @name submitOrder_POST
+POST {{server}}/odata/v4/catalog/submitOrder
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+{
+  "book": "65402382-e029-4e04-8ea1-05e9264faa26",
+  "quantity": 94
+}
