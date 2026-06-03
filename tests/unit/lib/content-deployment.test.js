@@ -1,53 +1,56 @@
-const cds = require("@sap/cds");
-const { validateNotificationTypes, readFile } = require("../../../lib/utils");
-const { processNotificationTypes } = require("../../../lib/notificationTypes");
-const { setGlobalLogLevel } = require("@sap-cloud-sdk/util");
+const cds = require("@sap/cds")
+const { validateNotificationTypes, readFile } = require("../../../lib/utils")
+const { processNotificationTypes } = require("../../../lib/notificationTypes")
+const { notificationTypesFromModel } = require("../../../lib/compile")
+const { setGlobalLogLevel } = require("@sap-cloud-sdk/util")
 
-jest.mock("../../../lib/utils");
-jest.mock("../../../lib/notificationTypes");
-jest.mock("@sap-cloud-sdk/util");
+jest.mock("../../../lib/utils")
+jest.mock("../../../lib/notificationTypes")
+jest.mock("../../../lib/compile")
+jest.mock("@sap-cloud-sdk/util")
 
-const contentDeployment = require("../../../lib/content-deployment");
+const { deployNotificationTypes } = require("../../../lib/content-deployment")
 
 describe("contentDeployment", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    setGlobalLogLevel.mockImplementation(() => undefined);
-    readFile.mockImplementation(() => []);
-  });
+    jest.clearAllMocks()
+    setGlobalLogLevel.mockImplementation(() => undefined)
+    readFile.mockReturnValue([])
+    notificationTypesFromModel.mockReturnValue([])
+  })
 
-  it("Set log level to error on startup", async () => {
-    validateNotificationTypes.mockReturnValue(false);
-    await contentDeployment.deployNotificationTypes();
+  test("Set log level to error on startup", async () => {
+    validateNotificationTypes.mockReturnValue(false)
+    await deployNotificationTypes()
 
-    expect(setGlobalLogLevel).toHaveBeenCalledWith("error");
-  });
+    expect(setGlobalLogLevel).toHaveBeenCalledWith("error")
+  })
 
-  it("Process notification types when they are valid", async () => {
-    validateNotificationTypes.mockReturnValue(true);
-    processNotificationTypes.mockResolvedValue();
-    await contentDeployment.deployNotificationTypes();
+  test("Process notification types when they are valid", async () => {
+    validateNotificationTypes.mockReturnValue(true)
+    processNotificationTypes.mockResolvedValue()
+    await deployNotificationTypes()
 
-    expect(validateNotificationTypes).toHaveBeenCalledWith([]);
-    expect(processNotificationTypes).toHaveBeenCalledWith([]);
-  });
+    expect(validateNotificationTypes).toHaveBeenCalledWith([])
+    expect(processNotificationTypes).toHaveBeenCalledWith([])
+  })
 
-  it("Notification types are not processed when they are invalid", async () => {
-    validateNotificationTypes.mockReturnValue(false);
-    processNotificationTypes.mockResolvedValue();
-    await contentDeployment.deployNotificationTypes();
+  test("Notification types are not processed when they are invalid", async () => {
+    validateNotificationTypes.mockReturnValue(false)
+    processNotificationTypes.mockResolvedValue()
+    await deployNotificationTypes()
 
-    expect(validateNotificationTypes).toHaveBeenCalledWith([]);
-    expect(processNotificationTypes).not.toHaveBeenCalled();
-  });
+    expect(validateNotificationTypes).toHaveBeenCalledWith([])
+    expect(processNotificationTypes).not.toHaveBeenCalled()
+  })
 
-  it("Call readFile with empty string when notifications types path is not configured", async () => {
-    validateNotificationTypes.mockReturnValue(false);
-    const originalTypes = cds.env.requires.notifications.types;
-    delete cds.env.requires.notifications.types;
-    await contentDeployment.deployNotificationTypes();
-    cds.env.requires.notifications.types = originalTypes;
+  test("readFile is not called when notifications types path is not configured", async () => {
+    validateNotificationTypes.mockReturnValue(false)
+    const originalTypes = cds.env.requires.notifications.types
+    delete cds.env.requires.notifications.types
+    await deployNotificationTypes()
+    cds.env.requires.notifications.types = originalTypes
     
-    expect(readFile).toHaveBeenCalledWith('');
-  });
-});
+    expect(readFile).not.toHaveBeenCalled()
+  })
+})
