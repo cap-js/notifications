@@ -28,8 +28,7 @@ else cds.once("served", async () => {
   const needsProcessing = kind === 'notify-to-rest' || !production
   if (!needsProcessing) return
 
-  const srvPath = path.join(cds.root, cds.env.folders.srv)
-  const model = await cds.load(srvPath)
+  const model = cds.context?.model ?? cds.model
   const notificationTypes = [
     ...notificationTypesFromModel(model),
     ...( typesPath ? readFile(typesPath) : [] )

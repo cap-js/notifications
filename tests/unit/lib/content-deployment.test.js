@@ -9,11 +9,7 @@ jest.mock("../../../lib/notificationTypes")
 jest.mock("../../../lib/compile")
 jest.mock("@sap-cloud-sdk/util")
 
-// Set defaults before require — the module calls deployNotificationTypes() on load
-readFile.mockReturnValue([])
-notificationTypesFromModel.mockReturnValue([])
-
-const contentDeployment = require("../../../lib/content-deployment")
+const { deployNotificationTypes } = require("../../../lib/content-deployment")
 
 describe("contentDeployment", () => {
   beforeEach(() => {
@@ -25,7 +21,7 @@ describe("contentDeployment", () => {
 
   test("Set log level to error on startup", async () => {
     validateNotificationTypes.mockReturnValue(false)
-    await contentDeployment.deployNotificationTypes()
+    await deployNotificationTypes()
 
     expect(setGlobalLogLevel).toHaveBeenCalledWith("error")
   })
@@ -33,7 +29,7 @@ describe("contentDeployment", () => {
   test("Process notification types when they are valid", async () => {
     validateNotificationTypes.mockReturnValue(true)
     processNotificationTypes.mockResolvedValue()
-    await contentDeployment.deployNotificationTypes()
+    await deployNotificationTypes()
 
     expect(validateNotificationTypes).toHaveBeenCalledWith([])
     expect(processNotificationTypes).toHaveBeenCalledWith([])
@@ -42,7 +38,7 @@ describe("contentDeployment", () => {
   test("Notification types are not processed when they are invalid", async () => {
     validateNotificationTypes.mockReturnValue(false)
     processNotificationTypes.mockResolvedValue()
-    await contentDeployment.deployNotificationTypes()
+    await deployNotificationTypes()
 
     expect(validateNotificationTypes).toHaveBeenCalledWith([])
     expect(processNotificationTypes).not.toHaveBeenCalled()
@@ -52,7 +48,7 @@ describe("contentDeployment", () => {
     validateNotificationTypes.mockReturnValue(false)
     const originalTypes = cds.env.requires.notifications.types
     delete cds.env.requires.notifications.types
-    await contentDeployment.deployNotificationTypes()
+    await deployNotificationTypes()
     cds.env.requires.notifications.types = originalTypes
     
     expect(readFile).not.toHaveBeenCalled()

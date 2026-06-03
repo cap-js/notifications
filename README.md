@@ -88,6 +88,8 @@ Any event with at least one `@notification` annotation (the bare `@notification`
 
 > **Note:** The plugin automatically injects a `recipients` element into every notification event at model-load time, no need to declare it yourself.
 
+> **Note:** Be sure that the event is contained within a service. This can be done by wrapping the event with a service or using the keyword `using` to include the event within an existing service.
+
 The following annotations are supported:
 
 | Annotation | Notification field |

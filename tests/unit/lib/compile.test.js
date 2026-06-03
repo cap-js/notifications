@@ -1,7 +1,7 @@
 const { notificationTypesFromModel } = require("../../../lib/compile")
 
 function makeModel(defs) {
-  return { definitions: defs }
+  return { definitions: Object.values(defs) }
 }
 
 describe("notificationTypesFromModel", () => {
@@ -47,9 +47,9 @@ describe("notificationTypesFromModel", () => {
 
   test("Convert a fully annotated event to a notification type", () => {
     const model = makeModel({
-      "BookOrdered": {
+      "BookOrderedNotify": {
         kind: "event",
-        name: "BookOrdered",
+        name: "BookOrderedNotify",
         "@description": "Book Ordered",
         "@Common.SemanticObject": "Book",
         "@Common.SemanticObjectAction": "display",
@@ -64,7 +64,7 @@ describe("notificationTypesFromModel", () => {
 
     const [type] = notificationTypesFromModel(model)
 
-    expect(type.NotificationTypeKey).toBe("BookOrdered")
+    expect(type.NotificationTypeKey).toBe("BookOrderedNotify")
     expect(type.NotificationTypeVersion).toBe("1")
     expect(type.NavigationTargetObject).toBe("Book")
     expect(type.NavigationTargetAction).toBe("display")
@@ -103,15 +103,15 @@ describe("notificationTypesFromModel", () => {
 
   test("Strip namespace prefix from event name", () => {
     const model = makeModel({
-      "CatalogService.BookOrdered": {
+      "CatalogService.BookOrderedNotify": {
         kind: "event",
-        name: "CatalogService.BookOrdered",
+        name: "CatalogService.BookOrderedNotify",
         "@notification": { template: { title: "x" } }
       }
     })
 
     const [type] = notificationTypesFromModel(model)
-    expect(type.NotificationTypeKey).toBe("BookOrdered")
+    expect(type.NotificationTypeKey).toBe("BookOrderedNotify")
   })
 
   test("Unwrap hash-form enum references in deliveryChannels", () => {
