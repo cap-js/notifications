@@ -11,8 +11,8 @@ module.exports = cds.service.impl(async function () {
 
     await UPDATE('sap.capire.bookshop.Books').set({ stock: book.stock - quantity }).where({ ID: bookId })
 
-    await alert.notify('BookOrdered', {
-      recipients: ['eric.peairs@sap.com'],
+    await alert.notify('BookOrderedNotify', {
+      recipients: ['reader@bookshop.example'],
       data: { title: book.title, buyer: req.user.id }
     })
     return { stock: book.stock - quantity }
