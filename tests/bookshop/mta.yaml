@@ -1,0 +1,101 @@
+_schema-version: 3.3.0
+ID: bookshop-notify
+version: 1.0.0
+description: "A simple CAP project."
+parameters:
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm pack ../../
+        - sh -c 'TGZ_FILE="$(ls -1 | grep -E "^cap-js-notifications.*\.tgz$" | head -n 1)" && npm i "./${TGZ_FILE}"'
+        - npm ci
+        - npx -p @sap/cds-dk cds build --production
+        - sh -c 'cp "$(ls -1 | grep -E "^cap-js-notifications.*\.tgz$" | head -n 1)" ./gen/srv'
+modules:
+  - name: bookshop-notify-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      instances: 1
+      buildpack: nodejs_buildpack
+    build-parameters:
+      builder: npm-ci
+    provides:
+      - name: srv-api # required by consumers of CAP services (e.g. approuter)
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: bookshop-notify-auth
+      - name: bookshop-notify-db
+      - name: bookshop-notify-destination
+      - name: bookshop-notify-alert-notification
+
+  - name: bookshop-notify-db-deployer
+    type: hdb
+    path: gen/db
+    parameters:
+      buildpack: nodejs_buildpack
+    requires:
+      - name: bookshop-notify-db
+  - name: notification-content-deployment
+    type: nodejs
+    path: gen/srv
+    parameters:
+      no-route: true
+      no-start: true
+      memory: 256MB
+      disk-quota: 1GB
+      tasks:
+        - name: notification-content-deployment
+          command: "node node_modules/@cap-js/notifications/lib/content-deployment.js"
+          memory: 256MB
+          disk-quota: 1GB
+    requires:
+      - name: bookshop-notify-destination
+      - name: bookshop-notify-auth
+      - name: bookshop-notify-db
+      - name: bookshop-notify-alert-notification
+
+resources:
+  - name: bookshop-notify-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config:
+        xsappname: bookshop-notify-${org}-${space}
+        tenant-mode: dedicated
+        oauth2-configuration:
+          credential-types:
+            - "binding-secret"
+            - "x509"
+        role-collections:
+          - name: 'admin (bookshop-notify ${org}-${space})'
+            description: 'generated'
+            role-template-references:
+              - '$XSAPPNAME.admin'
+  - name: bookshop-notify-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+  - name: bookshop-notify-destination
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: destination
+      service-plan: lite
+  - name: bookshop-notify-alert-notification
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: alert-notification
+      service-plan: business-notifications
+      config:
+        defaultEmailDeliveryConfig:
+          emailSenderAddress: cap-java@notifications.sap.com
+          emailSenderName: CAP Java
+        notificationDeliveryTrackingConfig:
+          enabledChannels:
+            - MAIL

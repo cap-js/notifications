@@ -2,7 +2,7 @@ const { notificationTypesFromModel } = require("../../../lib/compile")
 const fs = require('fs')
 
 function makeModel(defs) {
-  return { definitions: defs }
+  return { definitions: Object.values(defs) }
 }
 
 describe("notificationTypesFromModel", () => {
@@ -48,9 +48,9 @@ describe("notificationTypesFromModel", () => {
 
   test("Convert a fully annotated event to a notification type", () => {
     const model = makeModel({
-      "BookOrdered": {
+      "BookOrderedNotify": {
         kind: "event",
-        name: "BookOrdered",
+        name: "BookOrderedNotify",
         "@description": "Book Ordered",
         "@Common.SemanticObject": "Book",
         "@Common.SemanticObjectAction": "display",
@@ -65,7 +65,7 @@ describe("notificationTypesFromModel", () => {
 
     const [type] = notificationTypesFromModel(model)
 
-    expect(type.NotificationTypeKey).toBe("BookOrdered")
+    expect(type.NotificationTypeKey).toBe("BookOrderedNotify")
     expect(type.NotificationTypeVersion).toBe("1")
     expect(type.NavigationTargetObject).toBe("Book")
     expect(type.NavigationTargetAction).toBe("display")
@@ -104,15 +104,30 @@ describe("notificationTypesFromModel", () => {
 
   test("Strip namespace prefix from event name", () => {
     const model = makeModel({
-      "CatalogService.BookOrdered": {
+      "CatalogService.BookOrderedNotify": {
         kind: "event",
-        name: "CatalogService.BookOrdered",
+        name: "CatalogService.BookOrderedNotify",
         "@notification": { template: { title: "x" } }
       }
     })
 
     const [type] = notificationTypesFromModel(model)
-    expect(type.NotificationTypeKey).toBe("BookOrdered")
+    expect(type.NotificationTypeKey).toBe("BookOrderedNotify")
+  })
+
+  test("Unwrap hash-form enum references in deliveryChannels", () => {
+    const model = makeModel({
+      "E": {
+        kind: "event",
+        name: "E",
+        "@notification.template.title": "t",
+        "@notification.deliveryChannels": [{ channel: { "#": "Mail" }, enabled: true }]
+      }
+    })
+
+    const [type] = notificationTypesFromModel(model)
+    expect(type.DeliveryChannels[0].Type).toBe("MAIL")
+    expect(type.DeliveryChannels[0].Enabled).toBe(true)
   })
 
   test("Unwrap plain string enum values in deliveryChannels", () => {
