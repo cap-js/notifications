@@ -30,7 +30,7 @@ else cds.once("served", async () => {
 
   const model = cds.context?.model ?? cds.model
   const notificationTypes = [
-    ...notificationTypesFromModel(model, srvPath),
+    ...notificationTypesFromModel(model),
     ...( typesPath ? readFile(typesPath) : [] )
   ]
 
