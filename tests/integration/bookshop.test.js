@@ -74,7 +74,7 @@ describe("Notifications Integration", () => {
 
   test("Notification type for BookOrderedNotify has templates for all available languages", () => {
     const type = cds.notifications.local.types["bookshop/BookOrderedNotify"]["1"]
-    expect(type.Templates).toHaveLength(2);
+    expect(type.Templates).toHaveLength(2)
     expect(type.Templates.map(t => t.Language)).toContain("en")
     expect(type.Templates.map(t => t.Language)).toContain("de")
   })

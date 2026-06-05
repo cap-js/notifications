@@ -40,14 +40,14 @@ describe('Notifications Build Plugin', () => {
     cds.env.requires.notifications = saved
   })
 
-  test('build succeeds with a raw unlinked model', async () => {
+  test('Build succeeds with a raw unlinked model', async () => {
     const plugin = makePlugin({
       model: () => cds.load(join(__dirname, '../../bookshop/srv'))
     })
     await expect(plugin.build()).resolves.not.toThrow()
   })
 
-  test('build writes notification-types.json when types are found', async () => {
+  test('Build writes notification-types.json when types are found', async () => {
     const plugin = makePlugin({
       model: () => cds.load(join(__dirname, '../../bookshop/srv'))
     })
@@ -57,7 +57,7 @@ describe('Notifications Build Plugin', () => {
     expect(written.some(t => t.NotificationTypeKey === 'BookOrderedNotify')).toBe(true)
   })
 
-  test('build does not write output when model has no notification events', async () => {
+  test('Build does not write output when model has no notification events', async () => {
     const plugin = makePlugin({
       model: () => Promise.resolve(cds.linked({ definitions: [] }))
     })
@@ -65,7 +65,7 @@ describe('Notifications Build Plugin', () => {
     expect(plugin.write).not.toHaveBeenCalled()
   })
 
-  test('build merges types from JSON file with model types', async () => {
+  test('Build merges types from JSON file with model types', async () => {
     cds.env.requires.notifications.types = join(__dirname, '../../bookshop/srv/notification-types.json')
     const plugin = makePlugin({
       model: () => cds.load(join(__dirname, '../../bookshop/srv'))
@@ -76,7 +76,7 @@ describe('Notifications Build Plugin', () => {
     expect(written.some(t => t.NotificationTypeKey === 'BookReturned')).toBe(true)
   })
 
-  test('build output includes templates for multiple languages', async () => {
+  test('Build output includes an English template', async () => {
     const plugin = makePlugin({
       model: () => cds.load(join(__dirname, '../../bookshop/srv'))
     })
@@ -84,6 +84,5 @@ describe('Notifications Build Plugin', () => {
     const written = JSON.parse(plugin.write.mock.calls[0][0])
     const type = written.find(t => t.NotificationTypeKey === 'BookOrderedNotify')
     expect(type.Templates.map(t => t.Language)).toContain('en')
-    expect(type.Templates.map(t => t.Language)).toContain('de')
   })
 })
