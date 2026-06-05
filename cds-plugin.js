@@ -37,6 +37,7 @@ else cds.once("served", async () => {
   if (validateNotificationTypes(notificationTypes)) {
     if (kind === 'notify-to-rest') {
       const { processNotificationTypes } = require('./lib/notificationTypes')
+      // deploy automatically on startup
       await processNotificationTypes(notificationTypes)
     } else if (!production) {
       const notificationTypesMap = createNotificationTypesMap(notificationTypes, true)

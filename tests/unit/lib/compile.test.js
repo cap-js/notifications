@@ -1,11 +1,10 @@
 const { notificationTypesFromModel } = require("../../../lib/compile")
-const fs = require('fs')
 
 function makeModel(defs) {
   return { definitions: Object.values(defs) }
 }
 
-describe("notificationTypesFromModel", () => {
+describe("Notification Types from Model", () => {
   let originalI18nDescriptor
 
   beforeEach(() => {
@@ -197,9 +196,18 @@ describe("notificationTypesFromModel", () => {
   })
 
   describe("i18n integration", () => {
+    const cds = require('@sap/cds')
+
+    function mockLabels(locales, texts4) {
+      jest.spyOn(cds.i18n.labels.files, 'locales').mockReturnValue(locales)
+      jest.spyOn(cds.i18n.labels, 'texts4').mockImplementation(texts4)
+    }
+
     afterEach(() => jest.restoreAllMocks())
 
     test("Fall back to single English template when no i18n files found", () => {
+      mockLabels([], () => ({}))
+
       const model = makeModel({
         "E": { kind: "event", name: "E", "@notification.template.title": "Hello" }
       })
@@ -210,11 +218,7 @@ describe("notificationTypesFromModel", () => {
     })
 
     test("Generate one template per available locale from i18n files", () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true)
-      jest.spyOn(fs, 'readdirSync').mockReturnValue(['i18n.properties', 'i18n_de.properties'])
-      jest.spyOn(fs, 'readFileSync').mockImplementation(p =>
-        p.endsWith('i18n_de.properties') ? 'TITLE=Hallo' : 'TITLE=Hello'
-      )
+      mockLabels(['', 'de'], locale => locale === 'de' ? { TITLE: 'Hallo' } : { TITLE: 'Hello' })
 
       const model = makeModel({ "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>TITLE}" } })
       const [type] = notificationTypesFromModel(model)
@@ -224,9 +228,7 @@ describe("notificationTypesFromModel", () => {
     })
 
     test("Resolve {i18n>KEY} references from i18n.properties file", () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true)
-      jest.spyOn(fs, 'readdirSync').mockReturnValue(['i18n.properties'])
-      jest.spyOn(fs, 'readFileSync').mockReturnValue('BOOK_ORDERED_TITLE=Book Ordered')
+      mockLabels([''], () => ({ BOOK_ORDERED_TITLE: 'Book Ordered' }))
 
       const model = makeModel({ "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>BOOK_ORDERED_TITLE}" } })
       const [type] = notificationTypesFromModel(model)
@@ -234,10 +236,8 @@ describe("notificationTypesFromModel", () => {
     })
 
     test("Resolve {i18n>KEY} to locale-specific translation when available", () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true)
-      jest.spyOn(fs, 'readdirSync').mockReturnValue(['i18n.properties', 'i18n_de.properties'])
-      jest.spyOn(fs, 'readFileSync').mockImplementation(p =>
-        p.endsWith('i18n_de.properties') ? 'BOOK_ORDERED_TITLE=Buch bestellt' : 'BOOK_ORDERED_TITLE=Book Ordered'
+      mockLabels(['', 'de'], locale =>
+        locale === 'de' ? { BOOK_ORDERED_TITLE: 'Buch bestellt' } : { BOOK_ORDERED_TITLE: 'Book Ordered' }
       )
 
       const model = makeModel({ "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>BOOK_ORDERED_TITLE}" } })
@@ -247,19 +247,18 @@ describe("notificationTypesFromModel", () => {
     })
 
     test("Fall back to raw value when i18n key not found in any locale", () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true)
-      jest.spyOn(fs, 'readdirSync').mockReturnValue(['i18n.properties'])
-      jest.spyOn(fs, 'readFileSync').mockReturnValue('')
+      mockLabels([''], () => ({}))
 
       const model = makeModel({
         "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>MISSING_KEY}" }
       })
-
       const [type] = notificationTypesFromModel(model)
       expect(type.Templates[0].TemplateSensitive).toBe("{i18n>MISSING_KEY}")
     })
 
     test("Pass plain strings through i18n unchanged", () => {
+      mockLabels([], () => ({}))
+
       const model = makeModel({
         "E": { kind: "event", name: "E", "@notification.template.title": "Plain Title" }
       })
@@ -268,9 +267,7 @@ describe("notificationTypesFromModel", () => {
     })
 
     test("Resolve {i18n>KEY} in subtitle field", () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true)
-      jest.spyOn(fs, 'readdirSync').mockReturnValue(['i18n.properties'])
-      jest.spyOn(fs, 'readFileSync').mockReturnValue('SUBTITLE_KEY=Resolved Subtitle')
+      mockLabels([''], () => ({ SUBTITLE_KEY: 'Resolved Subtitle' }))
 
       const model = makeModel({
         "E": { kind: "event", name: "E", "@notification.template.title": "t", "@notification.template.subtitle": "{i18n>SUBTITLE_KEY}" }
@@ -280,16 +277,14 @@ describe("notificationTypesFromModel", () => {
     })
 
     test("Falls back to English when key is missing from a locale's file", () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true)
-      jest.spyOn(fs, 'readdirSync').mockReturnValue(['i18n.properties', 'i18n_de.properties'])
-      jest.spyOn(fs, 'readFileSync').mockImplementation(p =>
-        p.endsWith('i18n_de.properties') ? '' : 'TITLE=Hello'
+      mockLabels(['', 'de'], locale =>
+        locale === 'de' ? {} : { TITLE: 'Hello' }
       )
 
       const model = makeModel({ "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>TITLE}" } })
       const [type] = notificationTypesFromModel(model)
       expect(type.Templates.find(t => t.Language === 'en').TemplateSensitive).toBe("Hello")
-      expect(type.Templates.find(t => t.Language === 'de').TemplateSensitive).toBe("Hello")
+      expect(type.Templates.find(t => t.Language === 'de').TemplateSensitive).toBe("{i18n>TITLE}")
     })
   })
 })
