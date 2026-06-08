@@ -198,15 +198,15 @@ describe("Notification Types from Model", () => {
   describe("i18n integration", () => {
     const cds = require('@sap/cds')
 
-    function mockLabels(files, texts4) {
-      jest.replaceProperty(cds.i18n.labels, 'files', { 'project/_i18n': files })
-      jest.spyOn(cds.i18n.labels, 'texts4').mockImplementation(texts4)
+    function mockLabels(allImpl, atImpl) {
+      jest.spyOn(cds.i18n.labels, 'all').mockImplementation(allImpl)
+      jest.spyOn(cds.i18n.labels, 'at').mockImplementation(atImpl)
     }
 
     afterEach(() => jest.restoreAllMocks())
 
     test("Fall back to single English template when no i18n files found", () => {
-      mockLabels([], () => ({}))
+      mockLabels(() => ({}), () => undefined)
 
       const model = makeModel({
         "E": { kind: "event", name: "E", "@notification.template.title": "Hello" }
@@ -218,7 +218,8 @@ describe("Notification Types from Model", () => {
     })
 
     test("Generate one template per available locale from i18n files", () => {
-      mockLabels(['i18n.properties', 'i18n_de.properties'], locale => locale === 'de' ? { TITLE: 'Hallo' } : { TITLE: 'Hello' })
+      mockLabels(() => ({ en: 'Hello', de: 'Hallo' }),
+        (_, locale) => locale === 'de' ? 'Hallo' : 'Hello')
 
       const model = makeModel({ "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>TITLE}" } })
       const [type] = notificationTypesFromModel(model)
@@ -228,7 +229,7 @@ describe("Notification Types from Model", () => {
     })
 
     test("Resolve {i18n>KEY} references from i18n.properties file", () => {
-      mockLabels(['i18n.properties'], () => ({ BOOK_ORDERED_TITLE: 'Book Ordered' }))
+      mockLabels(() => ({ en: 'Book Ordered' }), () => 'Book Ordered')
 
       const model = makeModel({ "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>BOOK_ORDERED_TITLE}" } })
       const [type] = notificationTypesFromModel(model)
@@ -236,9 +237,8 @@ describe("Notification Types from Model", () => {
     })
 
     test("Resolve {i18n>KEY} to locale-specific translation when available", () => {
-      mockLabels(['i18n.properties', 'i18n_de.properties'], locale =>
-        locale === 'de' ? { BOOK_ORDERED_TITLE: 'Buch bestellt' } : { BOOK_ORDERED_TITLE: 'Book Ordered' }
-      )
+      mockLabels(() => ({ en: 'Book Ordered', de: 'Buch bestellt' }),
+        (_, locale) => locale === 'de' ? 'Buch bestellt' : 'Book Ordered')
 
       const model = makeModel({ "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>BOOK_ORDERED_TITLE}" } })
       const [type] = notificationTypesFromModel(model)
@@ -247,7 +247,7 @@ describe("Notification Types from Model", () => {
     })
 
     test("Fall back to raw value when i18n key not found in any locale", () => {
-      mockLabels(['i18n.properties'], () => ({}))
+      mockLabels(() => ({}), () => undefined)
 
       const model = makeModel({
         "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>MISSING_KEY}" }
@@ -257,7 +257,7 @@ describe("Notification Types from Model", () => {
     })
 
     test("Pass plain strings through i18n unchanged", () => {
-      mockLabels([], () => ({}))
+      mockLabels(() => ({}), () => undefined)
 
       const model = makeModel({
         "E": { kind: "event", name: "E", "@notification.template.title": "Plain Title" }
@@ -267,7 +267,7 @@ describe("Notification Types from Model", () => {
     })
 
     test("Resolve {i18n>KEY} in subtitle field", () => {
-      mockLabels(['i18n.properties'], () => ({ SUBTITLE_KEY: 'Resolved Subtitle' }))
+      mockLabels(() => ({ en: 'Resolved Subtitle' }), () => 'Resolved Subtitle')
 
       const model = makeModel({
         "E": { kind: "event", name: "E", "@notification.template.title": "t", "@notification.template.subtitle": "{i18n>SUBTITLE_KEY}" }
@@ -277,9 +277,7 @@ describe("Notification Types from Model", () => {
     })
 
     test("Exclude locale when none of its keys differ from English", () => {
-      mockLabels(['i18n.properties', 'i18n_de.properties'], locale =>
-        locale === 'de' ? {} : { TITLE: 'Hello' }
-      )
+      mockLabels(() => ({ en: 'Hello' }), () => 'Hello')
 
       const model = makeModel({ "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>TITLE}" } })
       const [type] = notificationTypesFromModel(model)
@@ -288,7 +286,7 @@ describe("Notification Types from Model", () => {
     })
 
     test("Exclude locale when its translation is identical to English", () => {
-      mockLabels(['i18n.properties', 'i18n_de.properties'], () => ({ TITLE: 'Hello' }))
+      mockLabels(() => ({ en: 'Hello', de: 'Hello' }), () => 'Hello')
 
       const model = makeModel({ "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>TITLE}" } })
       const [type] = notificationTypesFromModel(model)
@@ -297,10 +295,8 @@ describe("Notification Types from Model", () => {
     })
 
     test("Include locale only when at least one key differs from English", () => {
-      mockLabels(['i18n.properties', 'i18n_de.properties'], locale => locale === 'de'
-        ? { TITLE: 'Hallo', SUBTITLE: 'Unverändert' }
-        : { TITLE: 'Hello', SUBTITLE: 'Unverändert' }
-      )
+      mockLabels((key) => key === 'TITLE' ? { en: 'Hello', de: 'Hallo' } : { en: 'Same', de: 'Same' },
+        (key, locale) => key === 'TITLE' ? (locale === 'de' ? 'Hallo' : 'Hello') : 'Same')
 
       const model = makeModel({ "E": { kind: "event", name: "E",
         "@notification.template.title": "{i18n>TITLE}",
@@ -309,22 +305,20 @@ describe("Notification Types from Model", () => {
       const [type] = notificationTypesFromModel(model)
       expect(type.Templates).toHaveLength(2)
       expect(type.Templates.find(t => t.Language === 'de').TemplateSensitive).toBe('Hallo')
-      expect(type.Templates.find(t => t.Language === 'de').Subtitle).toBe('Unverändert')
+      expect(type.Templates.find(t => t.Language === 'de').Subtitle).toBe('Same')
     })
 
     test("Two events with same locale files get independent template sets", () => {
-      mockLabels(['i18n.properties', 'i18n_de.properties'], locale => locale === 'de'
-        ? { A_TITLE: 'A auf Deutsch' }
-        : { A_TITLE: 'A in English', B_TITLE: 'B in English' }
-      )
+      mockLabels((key) => key === 'A_TITLE' ? { en: 'A in English', de: 'A auf Deutsch' } : { en: 'B in English' },
+        (key, locale) => key === 'A_TITLE' ? (locale === 'de' ? 'A auf Deutsch' : 'A in English') : 'B in English')
 
       const model = makeModel({
         "A": { kind: "event", name: "A", "@notification.template.title": "{i18n>A_TITLE}" },
         "B": { kind: "event", name: "B", "@notification.template.title": "{i18n>B_TITLE}" },
       })
       const [typeA, typeB] = notificationTypesFromModel(model)
-      expect(typeA.Templates).toHaveLength(2) // de has a different A_TITLE
-      expect(typeB.Templates).toHaveLength(1) // de has no B_TITLE at all
+      expect(typeA.Templates).toHaveLength(2)
+      expect(typeB.Templates).toHaveLength(1)
     })
   })
 })
