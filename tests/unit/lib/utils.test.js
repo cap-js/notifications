@@ -92,6 +92,18 @@ describe("Test utils", () => {
           })
         ).toMatchObject(expectedWithDescription)
       })
+
+      test("Default notification uses locale from cds.context when set", () => {
+        const prev = cds.context
+        cds.context = { locale: "de" }
+        const result = buildNotification({
+          recipients: ["test@mail.com"],
+          title: "Hallo"
+        })
+        cds.context = prev
+        expect(result.Properties[0].Language).toBe("de")
+        expect(result.Properties[1].Language).toBe("de")
+      })
     })
 
     describe("Custom notifications", () => {
@@ -226,6 +238,18 @@ describe("Test utils", () => {
           ...partialLowLevelFields,
           Priority: "HIGH"
         })
+      })
+
+      test("Custom notification data mapping uses locale from cds.context when set", () => {
+        const prev = cds.context
+        cds.context = { locale: "de" }
+        const result = buildNotification({
+          recipients: ["test@mail.com"],
+          type: "TestType",
+          data: { title: "Hallo" }
+        })
+        cds.context = prev
+        expect(result.Properties[0].Language).toBe("de")
       })
     })
 

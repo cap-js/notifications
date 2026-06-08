@@ -34,8 +34,8 @@
   },
   "scripts": {
     "lint": "npx eslint .",
-    "test": "npx jest",
-    "test-with-coverage": "npx jest --coverage"
+    "test": "npx jest --silent",
+    "test-with-coverage": "npx jest --silent --coverage"
   },
   "cds": {
     "requires": {
