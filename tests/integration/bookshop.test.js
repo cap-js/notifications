@@ -97,7 +97,7 @@ describe("Notifications Integration", () => {
   })
 
   test("Email html is loaded from file with i18n resolved", () => {
-    const type = cds.notifications.local.types["bookshop/BookOrdered"]["1"]
+    const type = cds.notifications.local.types["bookshop/BookOrderedNotify"]["1"]
     expect(type.Templates[0].EmailHtml).toBe(
       "<h1>Book Ordered</h1>\n<p>Hi {{buyer}}, your order for <b>{{title}}</b> has been placed.</p>\n"
     )
