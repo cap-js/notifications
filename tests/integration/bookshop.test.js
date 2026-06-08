@@ -20,7 +20,7 @@ describe("Notifications Integration", () => {
 
   test("Notification types are loaded into cds.notifications on startup", () => {
     expect(cds.notifications?.local?.types).toBeDefined()
-    expect(cds.notifications.local.types).toHaveProperty("bookshop/BookOrdered")
+    expect(cds.notifications.local.types).toHaveProperty("bookshop/BookOrderedNotify")
   })
 
   test("Sending a notification with unknown type key gives a warning", async () => {
@@ -53,24 +53,25 @@ describe("Notifications Integration", () => {
   })
 
   test("Custom typed notification uses prefixed type key from types file", async () => {
-    await alert.notify("BookOrdered", {
+    await alert.notify("BookOrderedNotify", {
       recipients: ["reader@bookshop.com"],
       data: { title: "Moby Dick", buyer: "reader@bookshop.com" }
     })
 
-    expect(log.output).toContain("bookshop/BookOrdered")
+    expect(log.output).toContain("bookshop/BookOrderedNotify")
     expect(log.output).not.toContain("is not in the notification types file")
   })
 
   test("Notification types from CDS and JSON are merged", () => {
-    expect(cds.notifications.local.types).toHaveProperty("bookshop/BookOrdered")
+    expect(cds.notifications.local.types).toHaveProperty("bookshop/BookOrderedNotify")
     expect(cds.notifications.local.types).toHaveProperty("bookshop/BookReturned")
   })
 
   test("Notification type templates have resolved i18n values", () => {
-    const type = cds.notifications.local.types["bookshop/BookOrdered"]["1"]
-    expect(type.Templates[0].TemplateSensitive).toBe("Book Ordered")
-    expect(type.Templates[0].Subtitle).toBe("{{buyer}} ordered {{title}}")
+    const type = cds.notifications.local.types["bookshop/BookOrderedNotify"]["1"]
+    const en = type.Templates.find(t => t.Language === 'en')
+    expect(en.TemplateSensitive).toBe("Book Ordered")
+    expect(en.Subtitle).toBe("{{buyer}} ordered {{title}}")
   })
 
   test("Throw when a notification event has an element name exceeding 128 characters", async () => {
@@ -79,5 +80,19 @@ describe("Notifications Integration", () => {
     expect(() => notificationTypesFromModel(model)).toThrow(
       "Event 'OversizedEvent' has elements exceeding the maximum key length of 128 characters"
     )
+  })
+
+  test("Notification type for BookOrderedNotify has templates for all available languages", () => {
+    const type = cds.notifications.local.types["bookshop/BookOrderedNotify"]["1"]
+    expect(type.Templates).toHaveLength(2)
+    expect(type.Templates.map(t => t.Language)).toContain("en")
+    expect(type.Templates.map(t => t.Language)).toContain("de")
+  })
+
+  test("German template for BookOrderedNotify has German translation", () => {
+    const type = cds.notifications.local.types["bookshop/BookOrderedNotify"]["1"]
+    const de = type.Templates.find(t => t.Language === "de")
+    expect(de.TemplateSensitive).toBe("Buch bestellt")
+    expect(de.Subtitle).toBe("{{buyer}} hat {{title}} bestellt")
   })
 })

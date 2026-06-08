@@ -1,10 +1,10 @@
 const { notificationTypesFromModel } = require("../../../lib/compile")
 
 function makeModel(defs) {
-  return { definitions: defs }
+  return { definitions: Object.values(defs) }
 }
 
-describe("notificationTypesFromModel", () => {
+describe("Notification Types from Model", () => {
   let originalI18nDescriptor
 
   beforeEach(() => {
@@ -47,9 +47,9 @@ describe("notificationTypesFromModel", () => {
 
   test("Convert a fully annotated event to a notification type", () => {
     const model = makeModel({
-      "BookOrdered": {
+      "BookOrderedNotify": {
         kind: "event",
-        name: "BookOrdered",
+        name: "BookOrderedNotify",
         "@description": "Book Ordered",
         "@Common.SemanticObject": "Book",
         "@Common.SemanticObjectAction": "display",
@@ -64,7 +64,7 @@ describe("notificationTypesFromModel", () => {
 
     const [type] = notificationTypesFromModel(model)
 
-    expect(type.NotificationTypeKey).toBe("BookOrdered")
+    expect(type.NotificationTypeKey).toBe("BookOrderedNotify")
     expect(type.NotificationTypeVersion).toBe("1")
     expect(type.NavigationTargetObject).toBe("Book")
     expect(type.NavigationTargetAction).toBe("display")
@@ -103,15 +103,15 @@ describe("notificationTypesFromModel", () => {
 
   test("Strip namespace prefix from event name", () => {
     const model = makeModel({
-      "CatalogService.BookOrdered": {
+      "CatalogService.BookOrderedNotify": {
         kind: "event",
-        name: "CatalogService.BookOrdered",
+        name: "CatalogService.BookOrderedNotify",
         "@notification": { template: { title: "x" } }
       }
     })
 
     const [type] = notificationTypesFromModel(model)
-    expect(type.NotificationTypeKey).toBe("BookOrdered")
+    expect(type.NotificationTypeKey).toBe("BookOrderedNotify")
   })
 
   test("Unwrap hash-form enum references in deliveryChannels", () => {
@@ -195,52 +195,131 @@ describe("notificationTypesFromModel", () => {
     expect(type.DeliveryChannels).toHaveLength(0)
   })
 
-  test("Resolve {i18n>KEY} references to English labels", () => {
+  describe("i18n integration", () => {
     const cds = require('@sap/cds')
-    Object.defineProperty(cds, 'i18n', {
-      value: { labels: { at: (key, lang) => key === 'BOOK_ORDERED_TITLE' && lang === 'en' ? 'Book Ordered' : undefined } },
-      configurable: true,
-      writable: true
+
+    function mockLabels(allImpl, atImpl) {
+      jest.spyOn(cds.i18n.labels, 'all').mockImplementation(allImpl)
+      jest.spyOn(cds.i18n.labels, 'at').mockImplementation(atImpl)
+    }
+
+    afterEach(() => jest.restoreAllMocks())
+
+    test("Fall back to single English template when no i18n files found", () => {
+      mockLabels(() => ({}), () => undefined)
+
+      const model = makeModel({
+        "E": { kind: "event", name: "E", "@notification.template.title": "Hello" }
+      })
+      const [type] = notificationTypesFromModel(model)
+      expect(type.Templates).toHaveLength(1)
+      expect(type.Templates[0].Language).toBe("en")
+      expect(type.Templates[0].TemplateSensitive).toBe("Hello")
     })
 
-    const model = makeModel({
-      "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>BOOK_ORDERED_TITLE}" }
+    test("Generate one template per available locale from i18n files", () => {
+      mockLabels(() => ({ en: 'Hello', de: 'Hallo' }),
+        (_, locale) => locale === 'de' ? 'Hallo' : 'Hello')
+
+      const model = makeModel({ "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>TITLE}" } })
+      const [type] = notificationTypesFromModel(model)
+      expect(type.Templates).toHaveLength(2)
+      expect(type.Templates.find(t => t.Language === 'en').TemplateSensitive).toBe('Hello')
+      expect(type.Templates.find(t => t.Language === 'de').TemplateSensitive).toBe('Hallo')
     })
 
-    const [type] = notificationTypesFromModel(model)
-    expect(type.Templates[0].TemplateSensitive).toBe("Book Ordered")
-  })
+    test("Resolve {i18n>KEY} references from i18n.properties file", () => {
+      mockLabels(() => ({ en: 'Book Ordered' }), () => 'Book Ordered')
 
-  test("Fall back to raw value when i18n key not found", () => {
-    const cds = require('@sap/cds')
-    cds.i18n = { labels: { at: () => undefined } }
-
-    const model = makeModel({
-      "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>MISSING_KEY}" }
+      const model = makeModel({ "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>BOOK_ORDERED_TITLE}" } })
+      const [type] = notificationTypesFromModel(model)
+      expect(type.Templates[0].TemplateSensitive).toBe("Book Ordered")
     })
 
-    const [type] = notificationTypesFromModel(model)
-    expect(type.Templates[0].TemplateSensitive).toBe("{i18n>MISSING_KEY}")
-  })
+    test("Resolve {i18n>KEY} to locale-specific translation when available", () => {
+      mockLabels(() => ({ en: 'Book Ordered', de: 'Buch bestellt' }),
+        (_, locale) => locale === 'de' ? 'Buch bestellt' : 'Book Ordered')
 
-  test("Pass plain strings through i18n unchanged", () => {
-    const model = makeModel({
-      "E": { kind: "event", name: "E", "@notification.template.title": "Plain Title" }
+      const model = makeModel({ "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>BOOK_ORDERED_TITLE}" } })
+      const [type] = notificationTypesFromModel(model)
+      expect(type.Templates.find(t => t.Language === 'en').TemplateSensitive).toBe("Book Ordered")
+      expect(type.Templates.find(t => t.Language === 'de').TemplateSensitive).toBe("Buch bestellt")
     })
-    const [type] = notificationTypesFromModel(model)
-    expect(type.Templates[0].TemplateSensitive).toBe("Plain Title")
-  })
 
-  test("Resolve {i18n>KEY} in subtitle field", () => {
-    Object.defineProperty(cds, 'i18n', {
-      value: { labels: { at: (key) => key === 'SUBTITLE_KEY' ? 'Resolved Subtitle' : undefined } },
-      configurable: true, writable: true
+    test("Fall back to raw value when i18n key not found in any locale", () => {
+      mockLabels(() => ({}), () => undefined)
+
+      const model = makeModel({
+        "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>MISSING_KEY}" }
+      })
+      const [type] = notificationTypesFromModel(model)
+      expect(type.Templates[0].TemplateSensitive).toBe("{i18n>MISSING_KEY}")
     })
-    const model = makeModel({
-      "E": { kind: "event", name: "E", "@notification.template.title": "t", "@notification.template.subtitle": "{i18n>SUBTITLE_KEY}" }
+
+    test("Pass plain strings through i18n unchanged", () => {
+      mockLabels(() => ({}), () => undefined)
+
+      const model = makeModel({
+        "E": { kind: "event", name: "E", "@notification.template.title": "Plain Title" }
+      })
+      const [type] = notificationTypesFromModel(model)
+      expect(type.Templates[0].TemplateSensitive).toBe("Plain Title")
     })
-    const [type] = notificationTypesFromModel(model)
-    expect(type.Templates[0].Subtitle).toBe("Resolved Subtitle")
+
+    test("Resolve {i18n>KEY} in subtitle field", () => {
+      mockLabels(() => ({ en: 'Resolved Subtitle' }), () => 'Resolved Subtitle')
+
+      const model = makeModel({
+        "E": { kind: "event", name: "E", "@notification.template.title": "t", "@notification.template.subtitle": "{i18n>SUBTITLE_KEY}" }
+      })
+      const [type] = notificationTypesFromModel(model)
+      expect(type.Templates[0].Subtitle).toBe("Resolved Subtitle")
+    })
+
+    test("Exclude locale when none of its keys differ from English", () => {
+      mockLabels(() => ({ en: 'Hello' }), () => 'Hello')
+
+      const model = makeModel({ "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>TITLE}" } })
+      const [type] = notificationTypesFromModel(model)
+      expect(type.Templates).toHaveLength(1)
+      expect(type.Templates[0].Language).toBe('en')
+    })
+
+    test("Exclude locale when its translation is identical to English", () => {
+      mockLabels(() => ({ en: 'Hello', de: 'Hello' }), () => 'Hello')
+
+      const model = makeModel({ "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>TITLE}" } })
+      const [type] = notificationTypesFromModel(model)
+      expect(type.Templates).toHaveLength(1)
+      expect(type.Templates[0].Language).toBe('en')
+    })
+
+    test("Include locale only when at least one key differs from English", () => {
+      mockLabels((key) => key === 'TITLE' ? { en: 'Hello', de: 'Hallo' } : { en: 'Same', de: 'Same' },
+        (key, locale) => key === 'TITLE' ? (locale === 'de' ? 'Hallo' : 'Hello') : 'Same')
+
+      const model = makeModel({ "E": { kind: "event", name: "E",
+        "@notification.template.title": "{i18n>TITLE}",
+        "@notification.template.subtitle": "{i18n>SUBTITLE}"
+      }})
+      const [type] = notificationTypesFromModel(model)
+      expect(type.Templates).toHaveLength(2)
+      expect(type.Templates.find(t => t.Language === 'de').TemplateSensitive).toBe('Hallo')
+      expect(type.Templates.find(t => t.Language === 'de').Subtitle).toBe('Same')
+    })
+
+    test("Two events with same locale files get independent template sets", () => {
+      mockLabels((key) => key === 'A_TITLE' ? { en: 'A in English', de: 'A auf Deutsch' } : { en: 'B in English' },
+        (key, locale) => key === 'A_TITLE' ? (locale === 'de' ? 'A auf Deutsch' : 'A in English') : 'B in English')
+
+      const model = makeModel({
+        "A": { kind: "event", name: "A", "@notification.template.title": "{i18n>A_TITLE}" },
+        "B": { kind: "event", name: "B", "@notification.template.title": "{i18n>B_TITLE}" },
+      })
+      const [typeA, typeB] = notificationTypesFromModel(model)
+      expect(typeA.Templates).toHaveLength(2)
+      expect(typeB.Templates).toHaveLength(1)
+    })
   })
 
   describe("Element name length validation", () => {

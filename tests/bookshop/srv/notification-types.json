@@ -6,7 +6,19 @@
       {
         "Language": "en",
         "TemplateSensitive": "Book '{{title}}' Returned",
-        "TemplateLanguage": "mustache"
+        "TemplatePublic": "Book Returned",
+        "TemplateGrouped": "Books Returned",
+        "TemplateLanguage": "MUSTACHE",
+        "EmailSubject": "Book Returned: {{title}}",
+        "EmailHtml": "<p>The book <b>{{title}}</b> has been returned.</p>"
+      }
+    ],
+    "DeliveryChannels": [
+      {
+        "Type": "MAIL",
+        "Enabled": true,
+        "DefaultPreference": true,
+        "EditablePreference": true
       }
     ]
   }
