@@ -74,7 +74,7 @@ describe("Notifications Integration", () => {
     expect(en.Subtitle).toBe("{{buyer}} ordered {{title}}")
   })
 
-  test("Throw when a notification event has an element name exceeding 128 characters", async () => {
+  test("Throw when a notification event has an element name exceeding 128 characters", () => {
     const longName = 'a'.repeat(129)
     const model = cds.linked(cds.parse.cdl(`@notification event OversizedEvent { ${longName}: String; }`))
     expect(() => notificationTypesFromModel(model)).toThrow(
