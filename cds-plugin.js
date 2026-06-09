@@ -17,7 +17,7 @@ if (cds.cli.command === "build") {
 }
 
 else cds.once("served", async () => {
-  const { validateNotificationTypes, readFile } = require("./lib/utils")
+  const { validateNotificationTypes, readFile, buildNotificationFromEvent } = require("./lib/utils")
   const { createNotificationTypesMap } = require("./lib/notificationTypes")
   const { notificationTypesFromModel } = require("./lib/compile")
   const { path } = cds.utils
@@ -42,5 +42,19 @@ else cds.once("served", async () => {
     }
   }
 
+  const notifications = await cds.connect.to('notifications')
+  for (const service of Object.values(cds.services)) {
+    if (service === notifications || service === cds.db) continue
+    service.on('*', async (req, next) => {
+      const def = req.target
+      if (!def || def.kind !== 'event') return next()
+      if (!Object.keys(def).some(k => k === '@notification' || k.startsWith('@notification.'))) return next()
+      const notification = buildNotificationFromEvent(def, req.data)
+      await notifications.notify(notification)
+      return next()
+    })
+  }
+
   require("@sap-cloud-sdk/util").setGlobalLogLevel("error")
 })
+
