@@ -96,10 +96,11 @@ describe("Notifications Integration", () => {
     expect(de.Subtitle).toBe("{{buyer}} hat {{title}} bestellt")
   })
 
-  test("Email html is loaded from file with i18n resolved", () => {
-    const type = cds.notifications.local.types["bookshop/BookOrdered"]["1"]
-    expect(type.Templates[0].EmailHtml).toBe(
-      "<h1>Book Ordered</h1>\n<p>Hi {{buyer}}, your order for <b>{{title}}</b> has been placed.</p>\n"
+  test("Email html is loaded from inline html string", () => {
+    const type = cds.notifications.local.types["bookshop/BookOrderedNotify"]["1"]
+    const en = type.Templates.find(t => t.Language === 'en')
+    expect(en.EmailHtml).toBe(
+      "<p>Hi {{buyer}},</p><p>Your order for <b>{{title}}</b> has been placed.</p>"
     )
   })
 })

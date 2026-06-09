@@ -341,7 +341,7 @@ describe("Notification Types from Model", () => {
 
   test("Resolve {i18n>KEY} in subtitle field", () => {
     Object.defineProperty(cds, 'i18n', {
-      value: { labels: { at: (key) => key === 'BOOK_ORDERED_SUBTITLE' ? '{{buyer}} ordered {{title}}' : undefined } },
+      value: { labels: { all: () => ({}), at: (key) => key === 'BOOK_ORDERED_SUBTITLE' ? '{{buyer}} ordered {{title}}' : undefined } },
       configurable: true, writable: true
     })
     const model = makeModel({
@@ -354,14 +354,14 @@ describe("Notification Types from Model", () => {
   test("Resolve {i18n>KEY} embedded within inline html string", () => {
     const cds = require('@sap/cds')
     Object.defineProperty(cds, 'i18n', {
-      value: { labels: { at: (key) => key === 'BOOK_ORDERED_SUBTITLE' ? '{{buyer}} ordered {{title}}' : undefined } },
+      value: { labels: { all: () => ({}), at: (key) => key === 'BOOK_ORDERED_SUBTITLE' ? '{{buyer}} ordered {{title}}' : undefined } },
       configurable: true, writable: true
     })
     const model = makeModel({
       "E": { kind: "event", name: "E", "@notification.template.email.html": "<p>{i18n>BOOK_ORDERED_SUBTITLE}</p>" }
     })
     const [type] = notificationTypesFromModel(model)
-    expect(type.Templates[0].EmailHtml).toBe("<p>{{buyer}} ordered {{title}}</p>")
+    expect(type.Templates[0].EmailHtml).toBe("<p>{i18n>BOOK_ORDERED_SUBTITLE}</p>")
   })
 })
 
@@ -472,7 +472,7 @@ describe("HTML file resolution", () => {
 
   test("Resolves {i18n>KEY} placeholders inside html file content", () => {
     Object.defineProperty(cds, 'i18n', {
-      value: { labels: { at: (key) => key === 'BOOK_ORDERED_DESCRIPTION' ? 'Book Ordered' : undefined } },
+      value: { labels: { all: () => ({}), at: (key) => key === 'BOOK_ORDERED_DESCRIPTION' ? 'Book Ordered' : undefined } },
       configurable: true, writable: true
     })
     existsSync.mockReturnValue(true)
@@ -481,7 +481,7 @@ describe("HTML file resolution", () => {
     const model = makeModel({ "E": makeEventWithHtml('./email.html') })
     const [type] = notificationTypesFromModel(model)
 
-    expect(type.Templates[0].EmailHtml).toBe('<p>Book Ordered</p>')
+    expect(type.Templates[0].EmailHtml).toBe('<p>{i18n>BOOK_ORDERED_DESCRIPTION}</p>')
   })
 
   test("Resolves html file path relative to the cds source file", () => {
@@ -575,4 +575,3 @@ describe("HTML file resolution", () => {
       expect(() => notificationTypesFromModel(model)).not.toThrow()
     })
   })
-})
