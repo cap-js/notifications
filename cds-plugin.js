@@ -24,17 +24,20 @@ else cds.once("served", async () => {
   const production = cds.env.profiles?.includes("production")
 
   const typesPath = cds.env.requires?.notifications?.types
-  const srvPath = path.join(cds.root, cds.env.folders.srv)
-  const model = await cds.load(srvPath)
+  const kind = cds.env.requires?.notifications?.kind
+  const needsProcessing = kind === 'notify-to-rest' || !production
+  if (!needsProcessing) return
+
+  const model = cds.context?.model ?? cds.model
   const notificationTypes = [
     ...notificationTypesFromModel(model),
     ...( typesPath ? readFile(typesPath) : [] )
   ]
 
   if (validateNotificationTypes(notificationTypes)) {
-    const kind = cds.env.requires?.notifications?.kind
     if (kind === 'notify-to-rest') {
       const { processNotificationTypes } = require('./lib/notificationTypes')
+      // deploy automatically on startup
       await processNotificationTypes(notificationTypes)
     } else if (!production) {
       const notificationTypesMap = createNotificationTypesMap(notificationTypes, true)

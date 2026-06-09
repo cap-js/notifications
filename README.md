@@ -2,7 +2,7 @@
 
 # Notifications Plugin
 
-The `@cap-js/notifications` package is a [CDS plugin](https://cap.cloud.sap/docs/node.js/cds-plugins#cds-plugin-packages) that provides support for publishing business notifications in SAP Build Work Zone and by email.
+The `@cap-js/notifications` package is a [CDS plugin](https://cap.cloud.sap/docs/node.js/cds-plugins#cds-plugin-packages) that provides support for publishing business notifications in SAP Build Work Zone.
 
 ### Table of Contents
 
@@ -87,6 +87,8 @@ event BookOrdered {
 Any event with at least one `@notification` annotation (the bare `@notification` flag or any `@notification.*` property) is picked up as a notification type. The notification type key is derived from the event name. Namespace prefixes are stripped, so `my.bookshop.BookOrdered` becomes `BookOrdered`.
 
 > **Note:** The plugin automatically injects a `recipients` element into every notification event at model-load time, no need to declare it yourself.
+
+> **Note:** Be sure that the event is contained within a service. This can be done by wrapping the event with a service or using the keyword `using` to include the event within an existing service.
 
 The following annotations are supported:
 
@@ -216,7 +218,7 @@ As a pre-requisite to publish the notification, you need to have a [destination]
 
 #### Integrate with SAP Build Work Zone
 
-Once application is deployed and integrated with SAP Build Work Zone, you can see the notification under iori notifications icon!
+Once application is deployed and integrated with SAP Build Work Zone, you can see the notification under Fiori notifications icon!
 
 <img width="1300" alt="Sample Application Demo" style="border-radius:0.5rem;" src="_assets/incidentsNotificationDemo.gif">
 
@@ -237,7 +239,13 @@ To make notification types unique to the application, prefix is added to the typ
 
 ### Authentication Identifier
 
-Depending on your Work Zone Notifications configuration, set `cds.env.requires.notifications.authenticationIdentifier` to `UserUUID` if the authenciation identifier in Work Zone is set to `User ID`. Notifications are then published with Recipient Key `GlobalUserId` instead of `RecipientId`. If not set, `RecipientId` is used. Note, that in order for E-Mail Notifications to be sent for notifications published with a User ID, a destination to the IDS needs to be configured for the lookup of the corresponding email address.
+`cds.env.requires.notifications.authenticationIdentifier` controls which recipient key the plugin uses when publishing notifications. Supported values:
+
+- `auto` (default): the recipient key is chosen per recipient. Values matching the UUID format are published with `GlobalUserId`, everything else with `RecipientId`. If a value is neither a UUID nor an email a warning is logged. This allows mixing UUIDs and emails in the same `recipients` array without additional configuration.
+- `UserUUID`: always publish with `GlobalUserId`. Use this when the authentication identifier in Work Zone is set to `User ID`.
+- `RecipientId`: always publish with `RecipientId`. Use this when recipients are identified by email or login name.
+
+Note, that in order for E-Mail Notifications to be sent for notifications published with a User ID, a destination to the IDS needs to be configured for the lookup of the corresponding email address.
 
 For the Work Zone Authentication Identifier configuration details refer to: [Work Zone Subaccount Settings](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/subaccount-settings)
 

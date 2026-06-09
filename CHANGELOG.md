@@ -22,6 +22,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 - Fixed `#EnumValue` enum references in `@notification.deliveryChannels` — the `{ "#": "..." }` CSN form produced by the CDS compiler was not handled by `resolveEnum`, causing a `TypeError` at runtime.
 - Improved error messages when notification type registration fails, now surfacing the ANS error detail instead of a raw HTTP error dump.
+- New default `auto` for `cds.env.requires.notifications.authenticationIdentifier`. Each recipient is inspected: UUID values are published with `GlobalUserId`, everything else with `RecipientId`, with a warning when a value is neither a UUID nor an email. The previous values `UserUUID` and `RecipientId` are still supported for an explicit choice.
+  In practice this means the plugin "just works" without configuration: applications can pass emails, UUIDs, or a mix of both, and the correct recipient key is chosen per value — no upfront configuration about Work Zone's authentication identifier required.
 
 ## Version 0.3.0
 

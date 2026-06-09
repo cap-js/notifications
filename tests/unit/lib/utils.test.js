@@ -92,6 +92,18 @@ describe("Test utils", () => {
           })
         ).toMatchObject(expectedWithDescription)
       })
+
+      test("Default notification uses locale from cds.context when set", () => {
+        const prev = cds.context
+        cds.context = { locale: "de" }
+        const result = buildNotification({
+          recipients: ["test@mail.com"],
+          title: "Hallo"
+        })
+        cds.context = prev
+        expect(result.Properties[0].Language).toBe("de")
+        expect(result.Properties[1].Language).toBe("de")
+      })
     })
 
     describe("Custom notifications", () => {
@@ -226,6 +238,18 @@ describe("Test utils", () => {
           ...partialLowLevelFields,
           Priority: "HIGH"
         })
+      })
+
+      test("Custom notification data mapping uses locale from cds.context when set", () => {
+        const prev = cds.context
+        cds.context = { locale: "de" }
+        const result = buildNotification({
+          recipients: ["test@mail.com"],
+          type: "TestType",
+          data: { title: "Hallo" }
+        })
+        cds.context = prev
+        expect(result.Properties[0].Language).toBe("de")
       })
     })
 
@@ -588,7 +612,10 @@ describe("Test utils", () => {
   })
 
   describe("Configuration", () => {
-    test("Use GlobalUserId as the recipient key when authenticationIdentifier is set to UserUUID", () => {
+    const log = cds.test.log()
+    afterEach(() => { delete cds.env.requires.notifications?.authenticationIdentifier })
+
+    it("Use GlobalUserId as the recipient key when authenticationIdentifier is set to UserUUID", () => {
       cds.env.requires.notifications ??= {}
       cds.env.requires.notifications.authenticationIdentifier = "UserUUID"
 
@@ -597,11 +624,87 @@ describe("Test utils", () => {
         title: "Test Title"
       })
 
-      delete cds.env.requires.notifications.authenticationIdentifier
       expect(result.Recipients[0]).toMatchObject({ GlobalUserId: "user-uuid-123" })
     })
 
-    test("Fall back to basename of cds.root as prefix when package.json cannot be read", () => {
+    it("Auto mode picks GlobalUserId for UUID recipients", () => {
+      cds.env.requires.notifications ??= {}
+      cds.env.requires.notifications.authenticationIdentifier = "auto"
+
+      const result = buildNotification({
+        recipients: ["550e8400-e29b-41d4-a716-446655440000"],
+        title: "Test Title"
+      });
+
+      expect(result.Recipients[0]).toMatchObject({ GlobalUserId: "550e8400-e29b-41d4-a716-446655440000" })
+    })
+
+    it("Auto mode picks RecipientId for email recipients", () => {
+      cds.env.requires.notifications ??= {}
+      cds.env.requires.notifications.authenticationIdentifier = "auto"
+
+      const result = buildNotification({
+        recipients: ["test.mail@mail.com"],
+        title: "Test Title"
+      })
+
+      expect(result.Recipients[0]).toMatchObject({ RecipientId: "test.mail@mail.com" })
+    })
+
+    it("Auto mode supports mixed UUID and email recipients in one notification", () => {
+      cds.env.requires.notifications ??= {}
+      cds.env.requires.notifications.authenticationIdentifier = "auto"
+
+      const result = buildNotification({
+        recipients: ["550e8400-e29b-41d4-a716-446655440000", "test.mail@mail.com"],
+        title: "Test Title"
+      })
+
+      expect(result.Recipients).toEqual([
+        { GlobalUserId: "550e8400-e29b-41d4-a716-446655440000" },
+        { RecipientId: "test.mail@mail.com" }
+      ])
+    })
+
+    it("Auto mode warns and falls back to RecipientId when value is neither UUID nor email", () => {
+      cds.env.requires.notifications ??= {}
+      cds.env.requires.notifications.authenticationIdentifier = "auto"
+      log.clear()
+
+      const result = buildNotification({
+        recipients: ["not-a-uuid-or-email"],
+        title: "Test Title"
+      })
+
+      expect(result.Recipients[0]).toMatchObject({ RecipientId: "not-a-uuid-or-email" })
+      expect(log.output).toContain("neither a UUID nor an email")
+    })
+
+    it("Auto is the default when authenticationIdentifier is not configured", () => {
+      cds.env.requires.notifications ??= {}
+      delete cds.env.requires.notifications.authenticationIdentifier
+
+      const result = buildNotification({
+        recipients: ["550e8400-e29b-41d4-a716-446655440000"],
+        title: "Test Title"
+      })
+
+      expect(result.Recipients[0]).toMatchObject({ GlobalUserId: "550e8400-e29b-41d4-a716-446655440000" })
+    })
+
+    it("Explicit RecipientId mode never resolves to GlobalUserId even for UUID values", () => {
+      cds.env.requires.notifications ??= {}
+      cds.env.requires.notifications.authenticationIdentifier = "RecipientId"
+
+      const result = buildNotification({
+        recipients: ["550e8400-e29b-41d4-a716-446655440000"],
+        title: "Test Title"
+      })
+
+      expect(result.Recipients[0]).toMatchObject({ RecipientId: "550e8400-e29b-41d4-a716-446655440000" })
+    })
+
+    it("Fall back to basename of cds.root as prefix when package.json cannot be read", () => {
       let result
       jest.isolateModules(() => {
         const cds = require("@sap/cds")

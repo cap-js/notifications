@@ -1,0 +1,162 @@
+@server=http://localhost:4004
+@username=alice
+@password=
+
+
+### Books
+# @name Books_GET
+GET {{server}}/odata/v4/admin/Books
+Authorization: Basic {{username}}:{{password}}
+
+
+### Books Drafts GET
+# @name Books_Drafts_GET
+GET {{server}}/odata/v4/admin/Books?$filter=(IsActiveEntity eq false)
+Authorization: Basic {{username}}:{{password}}
+
+
+### Books Draft POST
+# @name Books_Draft_POST
+POST {{server}}/odata/v4/admin/Books
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+{
+  "title": "title-30602831",
+  "descr": "descr-30602831",
+  "author": {
+    "ID": "13447978-02dc-4dc8-9078-0d9e22283daa"
+  },
+  "genre": {
+    "ID": 31657298
+  },
+  "stock": 52,
+  "price": 89.22,
+  "currency": {
+    "code": "800"
+  },
+  "createdAt": "2003-10-21T23:00:00.000Z",
+  "createdBy": "createdBy.i7xan@example.net",
+  "modifiedAt": "2013-10-21T23:00:00.000Z",
+  "modifiedBy": "modifiedBy.i7xan@example.com"
+}
+
+
+### Result from POST request above
+@draftID={{Books_Draft_POST.response.body.$.ID}}
+
+
+### Books Draft PATCH
+# @name Books_Draft_Patch
+PATCH {{server}}/odata/v4/admin/Books(ID={{draftID}},IsActiveEntity=false)
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+{
+  "title": "title-30602831",
+  "descr": "descr-30602831",
+  "author": {
+    "ID": "13447978-02dc-4dc8-9078-0d9e22283daa"
+  },
+  "genre": {
+    "ID": 31657298
+  },
+  "stock": 52,
+  "price": 89.22,
+  "currency": {
+    "code": "800"
+  },
+  "createdAt": "2003-10-21T23:00:00.000Z",
+  "createdBy": "createdBy.i7xan@example.net",
+  "modifiedAt": "2013-10-21T23:00:00.000Z",
+  "modifiedBy": "modifiedBy.i7xan@example.com"
+}
+
+
+### Books Draft Prepare
+# @name Books_Draft_Prepare
+POST {{server}}/odata/v4/admin/Books(ID={{draftID}},IsActiveEntity=false)/AdminService.draftPrepare
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+{}
+
+
+### Books Draft Activate
+# @name Books_Draft_Activate
+POST {{server}}/odata/v4/admin/Books(ID={{draftID}},IsActiveEntity=false)/AdminService.draftActivate
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+{}
+
+
+### Authors
+# @name Authors_GET
+GET {{server}}/odata/v4/admin/Authors
+Authorization: Basic {{username}}:{{password}}
+
+
+### Authors
+# @name Authors_POST
+POST {{server}}/odata/v4/admin/Authors
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+{
+  "ID": "13447978-02dc-4dc8-9078-0d9e22283daa",
+  "name": "name-13447978",
+  "dateOfBirth": "2007-09-05",
+  "dateOfDeath": "2023-01-05",
+  "placeOfBirth": "placeOfBirth-13447978",
+  "placeOfDeath": "placeOfDeath-13447978",
+  "createdAt": "2023-04-09T23:00:00.000Z",
+  "createdBy": "createdBy.808iy@example.org",
+  "modifiedAt": "2006-06-01T23:00:00.000Z",
+  "modifiedBy": "modifiedBy.808iy@example.net"
+}
+
+
+### Authors
+# @name Authors_PATCH
+PATCH {{server}}/odata/v4/admin/Authors/13447978-02dc-4dc8-9078-0d9e22283daa
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+{
+  "ID": "13447978-02dc-4dc8-9078-0d9e22283daa",
+  "name": "name-13447978",
+  "dateOfBirth": "2007-09-05",
+  "dateOfDeath": "2023-01-05",
+  "placeOfBirth": "placeOfBirth-13447978",
+  "placeOfDeath": "placeOfDeath-13447978",
+  "createdAt": "2023-04-09T23:00:00.000Z",
+  "createdBy": "createdBy.808iy@example.org",
+  "modifiedAt": "2006-06-01T23:00:00.000Z",
+  "modifiedBy": "modifiedBy.808iy@example.net"
+}
+
+
+### Authors
+# @name Authors_DELETE
+DELETE {{server}}/odata/v4/admin/Authors/13447978-02dc-4dc8-9078-0d9e22283daa
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+
+### Genres
+# @name Genres_GET
+GET {{server}}/odata/v4/admin/Genres
+Authorization: Basic {{username}}:{{password}}
+
+
+### Currencies
+# @name Currencies_GET
+GET {{server}}/odata/v4/admin/Currencies
+Authorization: Basic {{username}}:{{password}}
+
+
+### Languages
+# @name Languages_GET
+GET {{server}}/odata/v4/admin/Languages
+Authorization: Basic {{username}}:{{password}}

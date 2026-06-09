@@ -3,7 +3,12 @@
   "version": "1.0.0",
   "description": "A simple CAP project.",
   "dependencies": {
-    "@cap-js/notifications": "file:../.."
+    "@cap-js/hana": "^2",
+    "@cap-js/notifications": "file:../..",
+    "@sap-cloud-sdk/connectivity": "^4.7.0",
+    "@sap-cloud-sdk/http-client": "^4.7.0",
+    "@sap-cloud-sdk/resilience": "^4.7.0",
+    "@sap/xssec": "^4"
   },
   "scripts": {
     "start": "cds-serve"
@@ -13,8 +18,15 @@
       "notifications": {
         "outbox": false,
         "types": "srv/notification-types.json"
+      },
+      "[production]": {
+        "auth": "xsuaa"
       }
     }
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "@cap-js/sqlite": "^2.4.0",
+    "@sap/cds-dk": "^9"
+  }
 }
