@@ -203,13 +203,21 @@ describe("Notification Types from Model", () => {
 
 describe("i18n integration", () => {
   const cds = require('@sap/cds')
+  let originalI18nDescriptor
+
+  beforeEach(() => {
+    originalI18nDescriptor = Object.getOwnPropertyDescriptor(cds, 'i18n')
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+    if (originalI18nDescriptor) Object.defineProperty(cds, 'i18n', originalI18nDescriptor)
+  })
 
   function mockLabels(allImpl, atImpl) {
     jest.spyOn(cds.i18n.labels, 'all').mockImplementation(allImpl)
     jest.spyOn(cds.i18n.labels, 'at').mockImplementation(atImpl)
   }
-
-  afterEach(() => jest.restoreAllMocks())
 
   test("Fall back to single English template when no i18n files found", () => {
     mockLabels(() => ({}), () => undefined)
@@ -327,7 +335,7 @@ describe("i18n integration", () => {
     expect(typeB.Templates).toHaveLength(1)
   })
 
-  test("Resolve {i18n>KEY} in subtitle field", () => {
+  test("Resolve {i18n>KEY} in subtitle field via Object.defineProperty", () => {
     Object.defineProperty(cds, 'i18n', {
       value: { labels: { all: () => ({}), at: (key) => key === 'BOOK_ORDERED_SUBTITLE' ? '{{buyer}} ordered {{title}}' : undefined } },
       configurable: true, writable: true
@@ -344,7 +352,9 @@ describe("defaultEmailDelivery config", () => {
   const cds = require('@sap/cds')
 
   afterEach(() => {
-    delete cds.env.requires?.notifications?.defaultEmailDelivery
+    if (cds.env.requires?.notifications) {
+      delete cds.env.requires.notifications.defaultEmailDelivery
+    }
   })
 
   test("Add MAIL delivery channel when defaultEmailDelivery is true and no channels annotated", () => {
@@ -400,9 +410,15 @@ describe("defaultEmailDelivery config", () => {
 
 describe("HTML file resolution", () => {
   const cds = require('@sap/cds')
+  let originalI18nDescriptor
 
   beforeEach(() => {
+    originalI18nDescriptor = Object.getOwnPropertyDescriptor(cds, 'i18n')
     jest.clearAllMocks()
+  })
+
+  afterEach(() => {
+    if (originalI18nDescriptor) Object.defineProperty(cds, 'i18n', originalI18nDescriptor)
   })
 
   test("Read html file when annotation value starts with ./", () => {
