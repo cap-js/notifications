@@ -53,6 +53,28 @@ alert.notify({
 * **priority** - Priority of the notification, this argument is optional, it defaults to NEUTRAL
 * **description** - Subtitle for the notification, this argument is optional
 
+### Batch Notifications
+
+You can send multiple notifications of the same type in a single call by passing an array as the second argument. This triggers only one outbox event, reducing the number of transactions when notifying many recipients.
+
+```js
+alert.notify('BookOrdered', [
+  { recipients: [ buyer1.id ], data: { title: book.title, buyer: buyer1.name } },
+  { recipients: [ buyer2.id ], data: { title: book.title, buyer: buyer2.name } },
+])
+```
+
+The same works for simple (default) notifications:
+
+```js
+alert.notify([
+  { recipients: [ 'alice@example.com' ], title: 'Order confirmed', description: 'Your order has been is confirmed.' },
+  { recipients: [ 'bob@example.com' ],   title: 'We have your order', description: 'Your order is now being worked on.' },
+])
+```
+
+Each notification in the batch is sent independently. If one fails, the others still go through.
+
 
 ## Use Notification Types
 

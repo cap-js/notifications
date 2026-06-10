@@ -116,6 +116,31 @@ describe("Notifications Integration", () => {
     expect(de.Subtitle).toBe("{{buyer}} hat {{title}} bestellt")
   })
 
+  test("Batch of typed notifications logs each one to console", async () => {
+    await alert.notify("BookOrderedNotify", [
+      { recipients: ["reader1@bookshop.com"], data: { title: "Moby Dick",        buyer: "reader1@bookshop.com" } },
+      { recipients: ["reader2@bookshop.com"], data: { title: "Wuthering Heights", buyer: "reader2@bookshop.com" } },
+    ])
+
+    expect(log.output).toContain("reader1@bookshop.com")
+    expect(log.output).toContain("reader2@bookshop.com")
+    expect(log.output).toContain("Moby Dick")
+    expect(log.output).toContain("Wuthering Heights")
+    expect(log.output).not.toContain("is not in the notification types file")
+  })
+
+  test("Batch of default notifications logs each one to console", async () => {
+    await alert.notify([
+      { recipients: ["alice@bookshop.com"], title: "Order #1 confirmed", description: "Your order is on its way." },
+      { recipients: ["bob@bookshop.com"],   title: "Order #2 confirmed", description: "Your order is on its way." },
+    ])
+
+    expect(log.output).toContain("alice@bookshop.com")
+    expect(log.output).toContain("bob@bookshop.com")
+    expect(log.output).toContain("Order #1 confirmed")
+    expect(log.output).toContain("Order #2 confirmed")
+  })
+
   test("Email html is loaded from file with i18n resolved", () => {
     const type = cds.notifications.local.types["bookshop/BookOrderedNotify"]["1"]
     expect(type.Templates[0].EmailHtml).toBe(
