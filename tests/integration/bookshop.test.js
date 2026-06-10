@@ -74,6 +74,18 @@ describe("Notifications Integration", () => {
     expect(en.Subtitle).toBe("{{buyer}} ordered {{title}}")
   })
 
+  test("Emitting a @notification event directly triggers a notification via the plugin", async () => {
+    const notificationService = await cds.connect.to('notificationService')
+    await notificationService.emit('BookOrderedNotify', {
+      title: 'Moby Dick',
+      buyer: 'reader@bookshop.com',
+      recipients: ['reader@bookshop.com'],
+    })
+
+    expect(log.output).toContain("BookOrderedNotify")
+    expect(log.output).toContain("Moby Dick")
+  })
+
   test("Throw when a notification event has an element name exceeding 128 characters", () => {
     const longName = 'a'.repeat(129)
     const model = cds.linked(cds.parse.cdl(`@notification event OversizedEvent { ${longName}: String; }`))

@@ -11,16 +11,34 @@ cds.on("loaded", m => {
   }
 })
 
+cds.on('serving', service => {
+  if (service.name === 'notifications' || service === cds.db) return
+  service.on('*', async (req, next) => {
+    const def = req.target ?? service.events?.[req.event]
+    if (!def || def.kind !== 'event') return next()
+    if (!Object.keys(def).some(k => k === '@notification' || k.startsWith('@notification.'))) return next()
+    const { buildNotificationFromEvent } = require('./lib/utils')
+    const notifications = await cds.connect.to('notifications')
+    const notification = buildNotificationFromEvent(def, req.data)
+    try {
+      await notifications.notify(notification)
+    } catch (err) {
+      const LOG = cds.log('notifications')
+      LOG._error && LOG.error('Failed to send notification for event', def.name, err)
+    }
+    return next()
+  })
+})
+
 if (cds.cli.command === "build") {
   // register build plugin
   cds.build?.register?.('notifications', require("./lib/build"))
 }
 
 else cds.once("served", async () => {
-  const { validateNotificationTypes, readFile, buildNotificationFromEvent } = require("./lib/utils")
+  const { validateNotificationTypes, readFile } = require("./lib/utils")
   const { createNotificationTypesMap } = require("./lib/notificationTypes")
   const { notificationTypesFromModel } = require("./lib/compile")
-  const { path } = cds.utils
   const production = cds.env.profiles?.includes("production")
 
   const typesPath = cds.env.requires?.notifications?.types
@@ -45,19 +63,5 @@ else cds.once("served", async () => {
     }
   }
 
-  const notifications = await cds.connect.to('notifications')
-  for (const service of Object.values(cds.services)) {
-    if (service === notifications || service === cds.db) continue
-    service.on('*', async (req, next) => {
-      const def = req.target
-      if (!def || def.kind !== 'event') return next()
-      if (!Object.keys(def).some(k => k === '@notification' || k.startsWith('@notification.'))) return next()
-      const notification = buildNotificationFromEvent(def, req.data)
-      await notifications.notify(notification)
-      return next()
-    })
-  }
-
   require("@sap-cloud-sdk/util").setGlobalLogLevel("error")
 })
-

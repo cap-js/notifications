@@ -486,9 +486,9 @@ describe("Test utils", () => {
       recipients: ['buyer@example.com'],
     }
 
-    test("Sets NotificationTypeKey to the unqualified event name", () => {
+    test("Sets NotificationTypeKey to the prefixed event name", () => {
       const result = buildNotificationFromEvent(baseEventDef, baseData)
-      expect(result.NotificationTypeKey).toBe('NewOrder')
+      expect(result.NotificationTypeKey).toBe('notifications/NewOrder')
     })
 
     test("Sets NotificationTypeVersion to '1'", () => {
@@ -590,9 +590,9 @@ describe("Test utils", () => {
       ['cds.Int32',     'Integer'],
       ['cds.Int64',     'Integer'],
       ['cds.UInt8',     'Integer'],
-      ['cds.Decimal',   'Integer'],
-      ['cds.Double',    'Integer'],
-      ['cds.Float',     'Integer'],
+      ['cds.Decimal',   'String'],
+      ['cds.Double',    'String'],
+      ['cds.Float',     'String'],
     ])("%s -> %s", (cdsType, expected) => {
       expect(mapCdsTypeToANSType(cdsType)).toBe(expected)
     })
