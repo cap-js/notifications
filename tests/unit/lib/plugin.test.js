@@ -99,14 +99,14 @@ describe("Serving hook - notification handler registration", () => {
     await registeredHandler({ target: eventDef, data: { ID: '123', title: 'Moby Dick', recipients: ['buyer@example.com'] } }, next)
 
     expect(notifySpy).toHaveBeenCalledWith(expect.objectContaining({
-      NotificationTypeKey: '@cap-js/notifications/OrderPlaced',
+      NotificationTypeKey: 'OrderPlaced',
       NotificationTypeVersion: '1',
       Priority: 'HIGH',
       NavigationTargetObject: 'Orders',
       NavigationTargetAction: 'manage',
       Recipients: [{ RecipientId: 'buyer@example.com' }],
       Properties: expect.arrayContaining([
-        expect.objectContaining({ Key: 'title', Value: 'Moby Dick', IsSensitive: true }),
+        expect.objectContaining({ Key: 'title', Value: 'Moby Dick', IsSensitive: false }),
       ]),
       TargetParameters: [{ Key: 'ID', Value: '123' }],
     }))
@@ -134,7 +134,7 @@ describe("Serving hook - notification handler registration", () => {
     await registeredHandler({ target: eventDef, data: { recipients: ['buyer@example.com'] } }, next)
 
     expect(next).toHaveBeenCalled()
-    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to send notification'), expect.anything(), expect.any(Error))
+    expect(errorSpy).toHaveBeenCalledWith('Failed to send notification for event', expect.any(String), expect.any(Error))
   })
 
 })

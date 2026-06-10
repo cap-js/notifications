@@ -1,4 +1,6 @@
-service notificationService {
+using { CatalogService } from './cat-service';
+
+extend service CatalogService with {
   @description: '{i18n>BOOK_ORDERED_DESCRIPTION}'
   @notification: {
     template: {

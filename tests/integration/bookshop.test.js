@@ -75,8 +75,8 @@ describe("Notifications Integration", () => {
   })
 
   test("Emitting a @notification event directly triggers a notification via the plugin", async () => {
-    const notificationService = await cds.connect.to('notificationService')
-    await notificationService.emit('BookOrderedNotify', {
+    const catalog = await cds.connect.to('CatalogService')
+    await catalog.emit('BookOrderedNotify', {
       title: 'Moby Dick',
       buyer: 'reader@bookshop.com',
       recipients: ['reader@bookshop.com'],
@@ -84,6 +84,14 @@ describe("Notifications Integration", () => {
 
     expect(log.output).toContain("BookOrderedNotify")
     expect(log.output).toContain("Moby Dick")
+  })
+
+  test("Submitting an order triggers a notification via the plugin auto-emit path", async () => {
+    const catalog = await cds.connect.to('CatalogService')
+    await catalog.send({ event: 'submitOrder', data: { book: '201', quantity: 1 }, user: new cds.User('reader@bookshop.com') })
+
+    expect(log.output).toContain("bookshop/BookOrderedNotify")
+    expect(log.output).toContain("Wuthering Heights")
   })
 
   test("Throw when a notification event has an element name exceeding 128 characters", () => {

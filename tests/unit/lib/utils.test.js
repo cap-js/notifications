@@ -486,9 +486,9 @@ describe("Test utils", () => {
       recipients: ['buyer@example.com'],
     }
 
-    test("Sets NotificationTypeKey to the prefixed event name", () => {
+    test("Sets NotificationTypeKey to the unqualified event name", () => {
       const result = buildNotificationFromEvent(baseEventDef, baseData)
-      expect(result.NotificationTypeKey).toBe('notifications/NewOrder')
+      expect(result.NotificationTypeKey).toBe('NewOrder')
     })
 
     test("Sets NotificationTypeVersion to '1'", () => {
@@ -496,9 +496,21 @@ describe("Test utils", () => {
       expect(result.NotificationTypeVersion).toBe('1')
     })
 
-    test("Maps event data fields to Properties with IsSensitive true", () => {
+    test("Maps event data fields to Properties with IsSensitive false by default", () => {
       const result = buildNotificationFromEvent(baseEventDef, baseData)
-      expect(result.Properties).toContainEqual({ Key: 'book', Language: 'en', Value: 'Moby Dick', Type: 'String', IsSensitive: true })
+      expect(result.Properties).toContainEqual({ Key: 'book', Language: 'en', Value: 'Moby Dick', Type: 'String', IsSensitive: false })
+    })
+
+    test("Sets IsSensitive true for fields annotated with @notification.sensitive", () => {
+      const def = {
+        ...baseEventDef,
+        elements: {
+          ...baseEventDef.elements,
+          book: { type: 'cds.String', '@notification.sensitive': true }
+        }
+      }
+      const result = buildNotificationFromEvent(def, baseData)
+      expect(result.Properties).toContainEqual(expect.objectContaining({ Key: 'book', IsSensitive: true }))
     })
 
     test("Does not include recipients in Properties", () => {

@@ -1,4 +1,5 @@
 const cds = require("@sap/cds/lib")
+const { buildNotificationFromEvent } = require('./lib/utils')
 
 cds.on("loaded", m => {
   for (const def of Object.values(m.definitions)) {
@@ -12,12 +13,12 @@ cds.on("loaded", m => {
 })
 
 cds.on('serving', service => {
-  if (service.name === 'notifications' || service === cds.db) return
+  if (service.name === 'notifications' || service instanceof cds.DatabaseService) return
   service.on('*', async (req, next) => {
-    const def = req.target ?? service.events?.[req.event]
+    let def = req.target ?? service.events?.[req.event]
     if (!def || def.kind !== 'event') return next()
     if (!Object.keys(def).some(k => k === '@notification' || k.startsWith('@notification.'))) return next()
-    const { buildNotificationFromEvent } = require('./lib/utils')
+    if (!def.name) def = { ...def, name: req.event }
     const notifications = await cds.connect.to('notifications')
     const notification = buildNotificationFromEvent(def, req.data)
     try {
