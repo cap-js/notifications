@@ -22,19 +22,6 @@ function makeEventWithHtml(html, file = 'srv/notifications.cds') {
 }
 
 describe("Notification Types from Model", () => {
-  let originalI18nDescriptor
-
-  beforeEach(() => {
-    originalI18nDescriptor = Object.getOwnPropertyDescriptor(require('@sap/cds'), 'i18n')
-  })
-
-  afterEach(() => {
-    if (originalI18nDescriptor) {
-      Object.defineProperty(require('@sap/cds'), 'i18n', originalI18nDescriptor)
-    }
-  })
-
-describe("Notification Types from Model", () => {
   test("Return empty array for null/undefined model", () => {
     expect(notificationTypesFromModel(null)).toEqual([])
     expect(notificationTypesFromModel(undefined)).toEqual([])
@@ -513,177 +500,20 @@ describe("HTML file resolution", () => {
   })
 })
 
-  test("Resolve {i18n>KEY} in subtitle field", () => {
-    Object.defineProperty(cds, 'i18n', {
-      value: { labels: { all: () => ({}), at: (key) => key === 'BOOK_ORDERED_SUBTITLE' ? '{{buyer}} ordered {{title}}' : undefined } },
-      configurable: true, writable: true
-    })
-    const model = makeModel({
-      "E": { kind: "event", name: "E", "@notification.template.title": "t", "@notification.template.subtitle": "{i18n>BOOK_ORDERED_SUBTITLE}" }
-    })
-    const [type] = notificationTypesFromModel(model)
-    expect(type.Templates[0].Subtitle).toBe("{{buyer}} ordered {{title}}")
-  })
-
-  test("Resolve {i18n>KEY} embedded within inline html string", () => {
-    const cds = require('@sap/cds')
-    Object.defineProperty(cds, 'i18n', {
-      value: { labels: { all: () => ({}), at: (key) => key === 'BOOK_ORDERED_SUBTITLE' ? '{{buyer}} ordered {{title}}' : undefined } },
-      configurable: true, writable: true
-    })
-    const model = makeModel({
-      "E": { kind: "event", name: "E", "@notification.template.email.html": "<p>{i18n>BOOK_ORDERED_SUBTITLE}</p>" }
-    })
-    const [type] = notificationTypesFromModel(model)
-    expect(type.Templates[0].EmailHtml).toBe("<p>{i18n>BOOK_ORDERED_SUBTITLE}</p>")
-  })
-})
-
-describe("defaultEmailDelivery config", () => {
-  const cds = require('@sap/cds')
-
-  afterEach(() => {
-    delete cds.env.requires?.notifications?.defaultEmailDelivery
-  })
-
-  test("Add MAIL delivery channel when defaultEmailDelivery is true and no channels annotated", () => {
-    cds.env.requires.notifications ??= {}
-    cds.env.requires.notifications.defaultEmailDelivery = true
-
-    const model = makeModel({
-      "E": { kind: "event", name: "E", "@notification.template.title": "t" }
-    })
-
-    const [type] = notificationTypesFromModel(model)
-    expect(type.DeliveryChannels).toEqual([{ Type: 'MAIL', Enabled: true, DefaultPreference: true, EditablePreference: true }])
-  })
-
-  test("Do not override explicit delivery channels when defaultEmailDelivery is true", () => {
-    cds.env.requires.notifications ??= {}
-    cds.env.requires.notifications.defaultEmailDelivery = true
-
+describe("Element name length validation", () => {
+  test("Throw when an element name exceeds 128 characters", () => {
+    const longName = 'a'.repeat(129)
     const model = makeModel({
       "E": {
         kind: "event",
         name: "E",
-        "@notification.template.title": "t",
-        "@notification.deliveryChannels": [{ channel: "Web", enabled: false }]
+        "@notification": {},
+        elements: { [longName]: { type: "cds.String" } }
       }
     })
-
-    const [type] = notificationTypesFromModel(model)
-    expect(type.DeliveryChannels).toEqual([{ Type: 'WEB', Enabled: false }])
+    expect(() => notificationTypesFromModel(model)).toThrow(longName)
+    expect(() => notificationTypesFromModel(model)).toThrow("'E'")
   })
-
-  test("Do not add delivery channels when defaultEmailDelivery is false", () => {
-    cds.env.requires.notifications ??= {}
-    cds.env.requires.notifications.defaultEmailDelivery = false
-
-    const model = makeModel({
-      "E": { kind: "event", name: "E", "@notification.template.title": "t" }
-    })
-
-    const [type] = notificationTypesFromModel(model)
-    expect(type.DeliveryChannels).toBeUndefined()
-  })
-
-  test("Do not add delivery channels when defaultEmailDelivery is not configured", () => {
-    const model = makeModel({
-      "E": { kind: "event", name: "E", "@notification.template.title": "t" }
-    })
-
-    const [type] = notificationTypesFromModel(model)
-    expect(type.DeliveryChannels).toBeUndefined()
-  })
-})
-
-describe("HTML file resolution", () => {
-  const cds = require('@sap/cds')
-
-  beforeEach(() => {
-    jest.clearAllMocks()
-  })
-
-  test("Read html file when annotation value starts with ./", () => {
-    existsSync.mockReturnValue(true)
-    readFileSync.mockReturnValue('<p>Hello {{buyer}}</p>')
-
-    const model = makeModel({ "E": makeEventWithHtml('./email.html') })
-    const [type] = notificationTypesFromModel(model)
-
-    expect(type.Templates[0].EmailHtml).toBe('<p>Hello {{buyer}}</p>')
-    expect(existsSync).toHaveBeenCalled()
-    expect(readFileSync).toHaveBeenCalled()
-  })
-
-  test("Read html file when annotation value starts with ../", () => {
-    existsSync.mockReturnValue(true)
-    readFileSync.mockReturnValue('<p>content</p>')
-
-    const model = makeModel({ "E": makeEventWithHtml('../templates/email.html') })
-    const [type] = notificationTypesFromModel(model)
-
-    expect(type.Templates[0].EmailHtml).toBe('<p>content</p>')
-  })
-
-  test("Pass through inline html unchanged (no file read)", () => {
-    const model = makeModel({ "E": makeEventWithHtml('<p>inline</p>') })
-    const [type] = notificationTypesFromModel(model)
-
-    expect(type.Templates[0].EmailHtml).toBe('<p>inline</p>')
-    expect(existsSync).not.toHaveBeenCalled()
-  })
-
-  test("Returns annotation value as-is when html file not found", () => {
-    existsSync.mockReturnValue(false)
-
-    const model = makeModel({ "E": makeEventWithHtml('./missing.html') })
-    const [type] = notificationTypesFromModel(model)
-
-    expect(type.Templates[0].EmailHtml).toBe('./missing.html')
-    expect(readFileSync).not.toHaveBeenCalled()
-  })
-
-  test("Resolves {i18n>KEY} placeholders inside html file content", () => {
-    Object.defineProperty(cds, 'i18n', {
-      value: { labels: { all: () => ({}), at: (key) => key === 'BOOK_ORDERED_DESCRIPTION' ? 'Book Ordered' : undefined } },
-      configurable: true, writable: true
-    })
-    existsSync.mockReturnValue(true)
-    readFileSync.mockReturnValue('<p>{i18n>BOOK_ORDERED_DESCRIPTION}</p>')
-
-    const model = makeModel({ "E": makeEventWithHtml('./email.html') })
-    const [type] = notificationTypesFromModel(model)
-
-    expect(type.Templates[0].EmailHtml).toBe('<p>{i18n>BOOK_ORDERED_DESCRIPTION}</p>')
-  })
-
-  test("Resolves html file path relative to the cds source file", () => {
-    existsSync.mockReturnValue(true)
-    readFileSync.mockReturnValue('<p>hi</p>')
-
-    const model = makeModel({ "E": makeEventWithHtml('./email.html', 'srv/notifications.cds') })
-    notificationTypesFromModel(model)
-
-    const calledPath = existsSync.mock.calls[0][0]
-    expect(calledPath).toMatch(/srv[/\\]email\.html$/)
-   })
- })
-
-  describe("Element name length validation", () => {
-    test("Throw when an element name exceeds 128 characters", () => {
-      const longName = 'a'.repeat(129)
-      const model = makeModel({
-        "E": {
-          kind: "event",
-          name: "E",
-          "@notification": {},
-          elements: { [longName]: { type: "cds.String" } }
-        }
-      })
-      expect(() => notificationTypesFromModel(model)).toThrow(longName)
-      expect(() => notificationTypesFromModel(model)).toThrow("'E'")
-    })
 
   test("No error for element names at exactly 128 characters", () => {
     const exactName = 'a'.repeat(128)
@@ -748,3 +578,4 @@ describe("HTML file resolution", () => {
     })
     expect(() => notificationTypesFromModel(model)).not.toThrow()
   })
+})
