@@ -1,4 +1,5 @@
 const cds = require("@sap/cds/lib")
+const { buildNotificationFromEvent } = require('./lib/utils')
 
 cds.on("loaded", m => {
   for (const def of Object.values(m.definitions)) {
@@ -11,6 +12,25 @@ cds.on("loaded", m => {
   }
 })
 
+cds.on('serving', service => {
+  if (service.name === 'notifications' || service instanceof cds.DatabaseService) return
+  service.on('*', async (req, next) => {
+    let def = req.target ?? service.events?.[req.event]
+    if (!def || def.kind !== 'event') return next()
+    if (!Object.keys(def).some(k => k === '@notification' || k.startsWith('@notification.'))) return next()
+    if (!def.name) def = { ...def, name: req.event }
+    const notifications = await cds.connect.to('notifications')
+    const notification = buildNotificationFromEvent(def, req.data)
+    try {
+      await notifications.notify(notification)
+    } catch (err) {
+      const LOG = cds.log('notifications')
+      LOG._error && LOG.error('Failed to send notification for event', def.name, err)
+    }
+    return next()
+  })
+})
+
 if (cds.cli.command === "build") {
   // register build plugin
   cds.build?.register?.('notifications', require("./lib/build"))
@@ -20,7 +40,6 @@ else cds.once("served", async () => {
   const { validateNotificationTypes, readFile } = require("./lib/utils")
   const { createNotificationTypesMap } = require("./lib/notificationTypes")
   const { notificationTypesFromModel } = require("./lib/compile")
-  const { path } = cds.utils
   const production = cds.env.profiles?.includes("production")
 
   const typesPath = cds.env.requires?.notifications?.types
