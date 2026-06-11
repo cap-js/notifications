@@ -24,6 +24,7 @@ module.exports = exports = class NotifyToRest extends NotificationService {
       const results = await Promise.allSettled(notificationData.map(n => this._postOne(n, notificationDestination, csrfHeaders)))
       const failures = results.filter(r => r.status === 'rejected')
       for (const f of failures) LOG._warn && LOG.warn('Batch notification failed:', f.reason?.message ?? f.reason)
+      if (failures.length === results.length) throw failures[0].reason
       return results
     }
     return this._postOne(notificationData, notificationDestination, csrfHeaders)

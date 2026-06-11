@@ -68,7 +68,7 @@ The same works for simple (default) notifications:
 
 ```js
 alert.notify([
-  { recipients: [ 'alice@example.com' ], title: 'Order confirmed', description: 'Your order has been is confirmed.' },
+  { recipients: [ 'alice@example.com' ], title: 'Order confirmed', description: 'Your order has been confirmed.' },
   { recipients: [ 'bob@example.com' ],   title: 'We have your order', description: 'Your order is now being worked on.' },
 ])
 ```

@@ -106,7 +106,7 @@ describe("Serving hook - notification handler registration", () => {
       NavigationTargetAction: 'manage',
       Recipients: [{ RecipientId: 'buyer@example.com' }],
       Properties: expect.arrayContaining([
-        expect.objectContaining({ Key: 'title', Value: 'Moby Dick', IsSensitive: false }),
+        expect.objectContaining({ Key: 'title', Value: 'Moby Dick', IsSensitive: true }),
       ]),
       TargetParameters: [{ Key: 'ID', Value: '123' }],
     }))

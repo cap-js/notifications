@@ -17,14 +17,14 @@ describe("Test utils", () => {
         Properties: [
           {
             Key: "title",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "Some Test Title",
             Type: "String"
           },
           {
             Key: "description",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "",
             Type: "String"
@@ -38,14 +38,14 @@ describe("Test utils", () => {
         Properties: [
           {
             Key: "title",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "Some Test Title",
             Type: "String"
           },
           {
             Key: "description",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "Some Test Description",
             Type: "String"
@@ -109,7 +109,7 @@ describe("Test utils", () => {
     describe("Custom notifications", () => {
       const properties = [{
         Key: "title",
-        IsSensitive: false,
+        IsSensitive: true,
         Language: "en",
         Value: "Some Test Title",
         Type: "String"
@@ -400,14 +400,14 @@ describe("Test utils", () => {
         Properties: [
           { 
             Key: "title",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "Some Test Title",
             Type: "String" 
           },
           { 
             Key: "description",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "Some Test Description",
             Type: "String" 
@@ -496,9 +496,9 @@ describe("Test utils", () => {
       expect(result.NotificationTypeVersion).toBe('1')
     })
 
-    test("Maps event data fields to Properties with IsSensitive false by default", () => {
+    test("Maps event data fields to Properties with IsSensitive true", () => {
       const result = buildNotificationFromEvent(baseEventDef, baseData)
-      expect(result.Properties).toContainEqual({ Key: 'book', Language: 'en', Value: 'Moby Dick', Type: 'String', IsSensitive: false })
+      expect(result.Properties).toContainEqual({ Key: 'book', Language: 'en', Value: 'Moby Dick', Type: 'String', IsSensitive: true })
     })
 
     test("Sets IsSensitive true for fields annotated with @notification.sensitive", () => {
