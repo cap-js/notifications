@@ -1,5 +1,5 @@
 const cds = require("@sap/cds")
-const { buildNotification, validateNotificationTypes, readFile, getNotificationDestination } = require("../../../lib/utils")
+const { buildNotification, validateNotificationTypes, readFile, getNotificationDestination, buildNotificationFromEvent, mapCdsTypeToANSType } = require("../../../lib/utils")
 const { existsSync, readFileSync } = require("fs")
 const { getDestination } = require("@sap-cloud-sdk/connectivity")
 
@@ -17,14 +17,14 @@ describe("Test utils", () => {
         Properties: [
           {
             Key: "title",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "Some Test Title",
             Type: "String"
           },
           {
             Key: "description",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "",
             Type: "String"
@@ -38,14 +38,14 @@ describe("Test utils", () => {
         Properties: [
           {
             Key: "title",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "Some Test Title",
             Type: "String"
           },
           {
             Key: "description",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "Some Test Description",
             Type: "String"
@@ -109,7 +109,7 @@ describe("Test utils", () => {
     describe("Custom notifications", () => {
       const properties = [{
         Key: "title",
-        IsSensitive: false,
+        IsSensitive: true,
         Language: "en",
         Value: "Some Test Title",
         Type: "String"
@@ -400,14 +400,14 @@ describe("Test utils", () => {
         Properties: [
           { 
             Key: "title",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "Some Test Title",
             Type: "String" 
           },
           { 
             Key: "description",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "Some Test Description",
             Type: "String" 
@@ -461,6 +461,165 @@ describe("Test utils", () => {
     test("Throw an error when the destination is not found", async () => {
       getDestination.mockReturnValue(undefined)
       await expect(() => getNotificationDestination()).rejects.toThrow("Failed to get destination: SAP_Notifications")
+    })
+  })
+
+  describe("Build notification from event", () => {
+    const baseEventDef = {
+      name: 'CatalogService.NewOrder',
+      kind: 'event',
+      '@notification': true,
+      elements: {
+        book:      { type: 'cds.String' },
+        quantity:  { type: 'cds.Integer' },
+        orderedAt: { type: 'cds.Date' },
+        ID:        { type: 'cds.UUID', key: true },
+        recipients: { items: { type: 'cds.String' } },
+      }
+    }
+
+    const baseData = {
+      book: 'Moby Dick',
+      quantity: 2,
+      orderedAt: '2024-01-15',
+      ID: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+      recipients: ['buyer@example.com'],
+    }
+
+    test("Sets NotificationTypeKey to the unqualified event name", () => {
+      const result = buildNotificationFromEvent(baseEventDef, baseData)
+      expect(result.NotificationTypeKey).toBe('NewOrder')
+    })
+
+    test("Sets NotificationTypeVersion to '1'", () => {
+      const result = buildNotificationFromEvent(baseEventDef, baseData)
+      expect(result.NotificationTypeVersion).toBe('1')
+    })
+
+    test("Maps event data fields to Properties with IsSensitive true", () => {
+      const result = buildNotificationFromEvent(baseEventDef, baseData)
+      expect(result.Properties).toContainEqual({ Key: 'book', Language: 'en', Value: 'Moby Dick', Type: 'String', IsSensitive: true })
+    })
+
+    test("Sets IsSensitive true for fields annotated with @notification.sensitive", () => {
+      const def = {
+        ...baseEventDef,
+        elements: {
+          ...baseEventDef.elements,
+          book: { type: 'cds.String', '@notification.sensitive': true }
+        }
+      }
+      const result = buildNotificationFromEvent(def, baseData)
+      expect(result.Properties).toContainEqual(expect.objectContaining({ Key: 'book', IsSensitive: true }))
+    })
+
+    test("Does not include recipients in Properties", () => {
+      const result = buildNotificationFromEvent(baseEventDef, baseData)
+      expect(result.Properties.map(p => p.Key)).not.toContain('recipients')
+    })
+
+    test("Maps key elements to TargetParameters", () => {
+      const result = buildNotificationFromEvent(baseEventDef, baseData)
+      expect(result.TargetParameters).toEqual([{ Key: 'ID', Value: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee' }])
+    })
+
+    test("Omits TargetParameters when no key elements exist", () => {
+      const defNoKeys = { ...baseEventDef, elements: { book: { type: 'cds.String' } } }
+      const result = buildNotificationFromEvent(defNoKeys, { book: 'Test', recipients: [] })
+      expect(result.TargetParameters).toBeUndefined()
+    })
+
+    test("Uses RecipientId for email-style recipients", () => {
+      const result = buildNotificationFromEvent(baseEventDef, baseData)
+      expect(result.Recipients).toEqual([{ RecipientId: 'buyer@example.com' }])
+    })
+
+    test("Uses GlobalUserId for GUID recipients", () => {
+      const data = { ...baseData, recipients: ['123e4567-e89b-12d3-a456-426614174000'] }
+      const result = buildNotificationFromEvent(baseEventDef, data)
+      expect(result.Recipients).toEqual([{ GlobalUserId: '123e4567-e89b-12d3-a456-426614174000' }])
+    })
+
+    test("Handles mixed GUID and email recipients", () => {
+      const data = { ...baseData, recipients: ['123e4567-e89b-12d3-a456-426614174000', 'email@example.com'] }
+      const result = buildNotificationFromEvent(baseEventDef, data)
+      expect(result.Recipients).toEqual([
+        { GlobalUserId: '123e4567-e89b-12d3-a456-426614174000' },
+        { RecipientId: 'email@example.com' },
+      ])
+    })
+
+    test("Defaults Priority to NEUTRAL when annotation is absent", () => {
+      const result = buildNotificationFromEvent(baseEventDef, baseData)
+      expect(result.Priority).toBe('NEUTRAL')
+    })
+
+    test("Resolves enum priority annotation (#High -> HIGH)", () => {
+      const def = { ...baseEventDef, '@notification.priority': { '#': 'High' } }
+      const result = buildNotificationFromEvent(def, baseData)
+      expect(result.Priority).toBe('HIGH')
+    })
+
+    test("Accepts plain string priority annotation", () => {
+      const def = { ...baseEventDef, '@notification.priority': 'LOW' }
+      const result = buildNotificationFromEvent(def, baseData)
+      expect(result.Priority).toBe('LOW')
+    })
+
+    test("Maps @Common.SemanticObject to NavigationTargetObject", () => {
+      const def = { ...baseEventDef, '@Common.SemanticObject': 'Orders' }
+      const result = buildNotificationFromEvent(def, baseData)
+      expect(result.NavigationTargetObject).toBe('Orders')
+    })
+
+    test("Maps @Common.SemanticObjectAction to NavigationTargetAction", () => {
+      const def = { ...baseEventDef, '@Common.SemanticObjectAction': 'manage' }
+      const result = buildNotificationFromEvent(def, baseData)
+      expect(result.NavigationTargetAction).toBe('manage')
+    })
+
+    test("Works with empty data and no recipients", () => {
+      const result = buildNotificationFromEvent(baseEventDef, {})
+      expect(result.Recipients).toEqual([])
+      expect(result.Properties).toEqual([])
+    })
+  })
+
+  describe("mapCdsTypeToANSType", () => {
+    test.each([
+      ['cds.String',    'String'],
+      ['cds.UUID',      'String'],
+      ['cds.Boolean',   'String'],
+      ['String',        'String'],
+    ])("%s -> %s", (cdsType, expected) => {
+      expect(mapCdsTypeToANSType(cdsType)).toBe(expected)
+    })
+
+    test.each([
+      ['cds.Integer',   'Integer'],
+      ['cds.Integer64', 'Integer'],
+      ['cds.Int16',     'Integer'],
+      ['cds.Int32',     'Integer'],
+      ['cds.Int64',     'Integer'],
+      ['cds.UInt8',     'Integer'],
+      ['cds.Decimal',   'String'],
+      ['cds.Double',    'String'],
+      ['cds.Float',     'String'],
+    ])("%s -> %s", (cdsType, expected) => {
+      expect(mapCdsTypeToANSType(cdsType)).toBe(expected)
+    })
+
+    test.each([
+      ['cds.Date',      'Date'],
+      ['cds.DateTime',  'Date'],
+      ['cds.Timestamp', 'Date'],
+      ['cds.Time',      'Date'],
+    ])("%s -> %s", (cdsType, expected) => {
+      expect(mapCdsTypeToANSType(cdsType)).toBe(expected)
+    })
+
+    test("Returns String for undefined type", () => {
+      expect(mapCdsTypeToANSType(undefined)).toBe('String')
     })
   })
 

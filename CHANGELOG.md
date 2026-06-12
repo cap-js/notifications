@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 
+- Batch notification API: pass an array as the second argument to `notify()` to send multiple notifications in a single outbox event. Each notification is dispatched independently, failures do not block the others.
 - Log full response body and headers when the `notifications` logger is enabled at debug level.
 - Return the full HTTP response from the REST notification handler.
   Note: With outbox enabled (default), the application's `await notify()` resolves when

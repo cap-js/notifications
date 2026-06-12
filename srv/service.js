@@ -7,7 +7,7 @@ class NotificationService extends cds.Service {
   /**
    * Emits a notification. Method notify can be used alternatively.
    * @param {string} [event] - The notification type.
-   * @param {object} message - The message object
+   * @param {object|object[]} message - The message object or array of message objects for batch
    */
   emit (event, message) {
     if (!event) {
@@ -18,6 +18,15 @@ class NotificationService extends cds.Service {
     if (event.event) return super.emit (event)
     // First argument is optional for convenience
     if (!message) [ message, event ] = [ event ]
+    // Batch: array of messages emitted as a single event
+    if (Array.isArray(message)) {
+      const type = event || 'Default'
+      const notifications = message.map(m => {
+        const n = event ? { ...m, type: event } : m
+        return buildNotification(n)
+      }).filter(Boolean)
+      return super.emit(type, notifications)
+    }
     // CAP events translate to notification types and vice versa
     if (event) message.type = event
     else event = message.type || message.NotificationTypeKey || 'Default'

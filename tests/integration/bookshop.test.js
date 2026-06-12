@@ -74,6 +74,26 @@ describe("Notifications Integration", () => {
     expect(en.Subtitle).toBe("{{buyer}} ordered {{title}}")
   })
 
+  test("Emitting a @notification event directly triggers a notification via the plugin", async () => {
+    const catalog = await cds.connect.to('CatalogService')
+    await catalog.emit('BookOrderedNotify', {
+      title: 'Moby Dick',
+      buyer: 'reader@bookshop.com',
+      recipients: ['reader@bookshop.com'],
+    })
+
+    expect(log.output).toContain("BookOrderedNotify")
+    expect(log.output).toContain("Moby Dick")
+  })
+
+  test("Submitting an order triggers a notification via the plugin auto-emit path", async () => {
+    const catalog = await cds.connect.to('CatalogService')
+    await catalog.send({ event: 'submitOrder', data: { book: '201', quantity: 1 }, user: new cds.User('reader@bookshop.com') })
+
+    expect(log.output).toContain("bookshop/BookOrderedNotify")
+    expect(log.output).toContain("Wuthering Heights")
+  })
+
   test("Throw when a notification event has an element name exceeding 128 characters", () => {
     const longName = 'a'.repeat(129)
     const model = cds.linked(cds.parse.cdl(`@notification event OversizedEvent { ${longName}: String; }`))
@@ -94,6 +114,31 @@ describe("Notifications Integration", () => {
     const de = type.Templates.find(t => t.Language === "de")
     expect(de.TemplateSensitive).toBe("Buch bestellt")
     expect(de.Subtitle).toBe("{{buyer}} hat {{title}} bestellt")
+  })
+
+  test("Batch of typed notifications logs each one to console", async () => {
+    await alert.notify("BookOrderedNotify", [
+      { recipients: ["reader1@bookshop.com"], data: { title: "Moby Dick",        buyer: "reader1@bookshop.com" } },
+      { recipients: ["reader2@bookshop.com"], data: { title: "Wuthering Heights", buyer: "reader2@bookshop.com" } },
+    ])
+
+    expect(log.output).toContain("reader1@bookshop.com")
+    expect(log.output).toContain("reader2@bookshop.com")
+    expect(log.output).toContain("Moby Dick")
+    expect(log.output).toContain("Wuthering Heights")
+    expect(log.output).not.toContain("is not in the notification types file")
+  })
+
+  test("Batch of default notifications logs each one to console", async () => {
+    await alert.notify([
+      { recipients: ["alice@bookshop.com"], title: "Order #1 confirmed", description: "Your order is on its way." },
+      { recipients: ["bob@bookshop.com"],   title: "Order #2 confirmed", description: "Your order is on its way." },
+    ])
+
+    expect(log.output).toContain("alice@bookshop.com")
+    expect(log.output).toContain("bob@bookshop.com")
+    expect(log.output).toContain("Order #1 confirmed")
+    expect(log.output).toContain("Order #2 confirmed")
   })
 
   test("Email html is loaded from file with i18n resolved", () => {
