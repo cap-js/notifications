@@ -22,8 +22,8 @@ class NotificationService extends cds.Service {
     if (Array.isArray(message)) {
       const type = event || 'Default'
       const notifications = message.map(m => {
-        if (event) m.type = event
-        return buildNotification(m)
+        const n = event ? { ...m, type: event } : m
+        return buildNotification(n)
       }).filter(Boolean)
       return super.emit(type, notifications)
     }

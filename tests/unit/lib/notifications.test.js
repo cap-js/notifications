@@ -69,6 +69,11 @@ describe("Test post notification", () => {
         expect(executeHttpRequest).toHaveBeenCalled()
     })
 
+    test("Batch: resolves with empty array when no notifications are passed", async () => {
+        const results = await alert.postNotification([])
+        expect(results).toEqual([])
+    })
+
     test("Batch: resolves when at least one notification succeeds", async () => {
         const error = new Error('failed')
         error.response = { message: 'failed', status: 500 }
