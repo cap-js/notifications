@@ -34,6 +34,6 @@ Content-Type: application/json
 Authorization: Basic {{username}}:{{password}}
 
 {
-  "book": "65402382-e029-4e04-8ea1-05e9264faa26",
-  "quantity": 94
+  "book": "201",
+  "quantity": 1
 }
