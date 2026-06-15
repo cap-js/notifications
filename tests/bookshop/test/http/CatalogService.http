@@ -36,7 +36,4 @@ Authorization: Basic {{username}}:{{password}}
 {
   "book": "201",
   "quantity": 1
-{
-  "book": "201",
-  "quantity": 1
 }
