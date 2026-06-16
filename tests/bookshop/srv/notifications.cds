@@ -9,7 +9,7 @@ extend service CatalogService with {
       subtitle     : '{i18n>BOOK_ORDERED_SUBTITLE}',
       groupedTitle : '{i18n>BOOK_ORDERED_GROUPED_TITLE}',
       email        : {
-        subject: 'Book Ordered: {{title}}',
+        subject: '{i18n>BOOK_ORDERED_EMAIL_SUBJECT}',
         html   : './book-ordered-email.html',
       }
     },
