@@ -1,5 +1,5 @@
 const cds = require("@sap/cds")
-const { buildNotification, validateNotificationTypes, readFile, getNotificationDestination, buildNotificationFromEvent, mapCdsTypeToANSType } = require("../../../lib/utils")
+const { buildNotification, validateNotificationTypes, readFile, getNotificationDestination, buildNotificationFromEvent, mapCdsTypeToANSType, applyValueLengthConstraints } = require("../../../lib/utils")
 const { existsSync, readFileSync } = require("fs")
 const { getDestination } = require("@sap-cloud-sdk/connectivity")
 
@@ -721,6 +721,67 @@ describe("Test utils", () => {
         }
       })
       expect(result).toBe("nonexistent-path-for-testing/TestType")
+    })
+  })
+
+  describe("applyValueLengthConstraints", () => {
+    const longValue251 = "a".repeat(251)
+    const longValue256 = "a".repeat(256)
+    const value255 = "a".repeat(255)
+    const value250 = "a".repeat(250)
+
+    test("Returns notification unchanged when all values are within limits", () => {
+      const notification = {
+        Properties: [{ Key: "k", Value: value255 }],
+        TargetParameters: [{ Key: "k", Value: value250 }],
+      }
+      expect(applyValueLengthConstraints(notification)).toBe(notification)
+    })
+
+    test("Throws when a Property value exceeds 255 characters", () => {
+      const notification = {
+        Properties: [{ Key: "k", Value: longValue256 }],
+      }
+      expect(() => applyValueLengthConstraints(notification)).toThrow("Property value exceeds the maximum length of 255 characters.")
+    })
+
+    test("Throws on the first Property value over 255 even when others are valid", () => {
+      const notification = {
+        Properties: [
+          { Key: "ok", Value: "short" },
+          { Key: "bad", Value: longValue256 },
+        ],
+      }
+      expect(() => applyValueLengthConstraints(notification)).toThrow("Property value exceeds the maximum length of 255 characters.")
+    })
+
+    test("Removes TargetParameter entries whose value exceeds 250 characters", () => {
+      const notification = {
+        TargetParameters: [
+          { Key: "short", Value: value250 },
+          { Key: "long", Value: longValue251 },
+        ],
+      }
+      const result = applyValueLengthConstraints(notification)
+      expect(result.TargetParameters).toEqual([{ Key: "short", Value: value250 }])
+    })
+
+    test("Removes all TargetParameters when all values exceed 250 characters", () => {
+      const notification = {
+        TargetParameters: [{ Key: "k", Value: longValue251 }],
+      }
+      const result = applyValueLengthConstraints(notification)
+      expect(result.TargetParameters).toEqual([])
+    })
+
+    test("Returns null/undefined unchanged", () => {
+      expect(applyValueLengthConstraints(null)).toBeNull()
+      expect(applyValueLengthConstraints(undefined)).toBeUndefined()
+    })
+
+    test("Handles notification with no Properties or TargetParameters", () => {
+      const notification = { NotificationTypeKey: "Test" }
+      expect(applyValueLengthConstraints(notification)).toBe(notification)
     })
   })
 })
