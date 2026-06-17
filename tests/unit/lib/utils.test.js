@@ -735,7 +735,7 @@ describe("Test utils", () => {
         Properties: [{ Key: "k", Value: value255 }],
         TargetParameters: [{ Key: "k", Value: value250 }],
       }
-      expect(applyValueLengthConstraints(notification)).toBe(notification)
+      expect(applyValueLengthConstraints(notification)).toStrictEqual(notification)
     })
 
     test("Throws when a Property value exceeds 255 characters", () => {
