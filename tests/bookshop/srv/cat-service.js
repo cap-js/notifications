@@ -19,6 +19,7 @@ module.exports = cds.service.impl(async function () {
     await this.emit('BookOrderedNotify', {
       title: book.title,
       buyer: req.user.id,
+      quantity: quantity,
       recipients: ['reader@bookshop.example'],
     })
 

@@ -79,6 +79,7 @@ describe("Notifications Integration", () => {
     await catalog.emit('BookOrderedNotify', {
       title: 'Moby Dick',
       buyer: 'reader@bookshop.com',
+      quantity: 1,
       recipients: ['reader@bookshop.com'],
     })
 
@@ -92,6 +93,55 @@ describe("Notifications Integration", () => {
 
     expect(log.output).toContain("bookshop/BookOrderedNotify")
     expect(log.output).toContain("Wuthering Heights")
+  })
+
+  test("Emitting a @notification event with dynamic xpr priority evaluates priority via db", async () => {
+    const catalog = await cds.connect.to('CatalogService')
+
+    // quantity > 5 → High
+    await catalog.emit('BookOrderedNotify', {
+      title: 'Bulk Order',
+      buyer: 'reader@bookshop.example',
+      quantity: 10,
+      recipients: ['reader@bookshop.example'],
+    })
+    expect(log.output).toContain('BookOrderedNotify')
+    expect(log.output).toContain("Priority: 'HIGH'")
+
+    log.clear()
+
+    // quantity <= 5 → Low
+    await catalog.emit('BookOrderedNotify', {
+      title: 'Small Order',
+      buyer: 'reader@bookshop.example',
+      quantity: 2,
+      recipients: ['reader@bookshop.example'],
+    })
+    expect(log.output).toContain("Priority: 'LOW'")
+  })
+
+  test("Dynamic priority using a db function (days_between) is evaluated by the database", async () => {
+    const catalog = await cds.connect.to('CatalogService')
+
+    // 30 days apart → High
+    await catalog.emit('LateDeliveryNotify', {
+      title: 'Late delivery',
+      orderDate: '2024-01-01',
+      deliveryDate: '2024-02-01',
+      recipients: ['reader@bookshop.example'],
+    })
+    expect(log.output).toContain("Priority: 'HIGH'")
+
+    log.clear()
+
+    // 3 days apart → Low
+    await catalog.emit('LateDeliveryNotify', {
+      title: 'On-time delivery',
+      orderDate: '2024-01-01',
+      deliveryDate: '2024-01-04',
+      recipients: ['reader@bookshop.example'],
+    })
+    expect(log.output).toContain("Priority: 'LOW'")
   })
 
   test("Throw when a notification event has an element name exceeding 128 characters", () => {

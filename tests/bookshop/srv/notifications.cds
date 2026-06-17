@@ -15,9 +15,19 @@ extend service CatalogService with {
     },
     deliveryChannels: [{ channel: 'MAIL', enabled: true, defaultPreference: true, editablePreference: true}]
   }
+  @notification.priority : (quantity > 5 ? #High : #Low)
   event BookOrderedNotify {
     title     : String;
     buyer     : String;
+    quantity  : Integer;
     recipients: array of String;
+  }
+
+  @notification.priority : (days_between(orderDate, deliveryDate) > 7 ? #High : #Low)
+  event LateDeliveryNotify {
+    title        : String;
+    orderDate    : Date;
+    deliveryDate : Date;
+    recipients   : array of String;
   }
 }

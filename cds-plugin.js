@@ -20,7 +20,7 @@ cds.on('serving', service => {
     if (!Object.keys(def).some(k => k === '@notification' || k.startsWith('@notification.'))) return next()
     if (!def.name) def = { ...def, name: req.event }
     const notifications = await cds.connect.to('notifications')
-    const notification = buildNotificationFromEvent(def, req.data)
+    const notification = await buildNotificationFromEvent(def, req.data)
     try {
       await notifications.notify(notification)
     } catch (err) {
