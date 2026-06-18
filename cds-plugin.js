@@ -20,10 +20,11 @@ cds.on('serving', service => {
     if (!def || def.kind !== 'event') return next()
     if (!Object.keys(def).some(k => k === '@notification' || k.startsWith('@notification.'))) return next()
     if (!def.name) def = { ...def, name: req.event }
-    notifications ??= await cds.connect.to('notifications')
+    notifications ??= cds.connect.to('notifications')
+    const svc = await notifications
     const notification = await buildNotificationFromEvent(def, req.data)
     try {
-      await notifications.notify(notification)
+      await svc.notify(notification)
     } catch (err) {
       const LOG = cds.log('notifications')
       LOG._error && LOG.error('Failed to send notification for event', def.name, err)
