@@ -249,6 +249,15 @@ Note, that in order for E-Mail Notifications to be sent for notifications publis
 
 For the Work Zone Authentication Identifier configuration details refer to: [Work Zone Subaccount Settings](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/subaccount-settings)
 
+### Value Length Constraints
+
+The ANS API enforces maximum lengths on `Properties` and `TargetParameters` values. The plugin validates these automatically when emitting a notification:
+
+- **`Properties`**: if any `Value` exceeds **255 characters**, an error is thrown and the notification is not sent.
+- **`TargetParameters`**: entries whose `Value` exceeds **250 characters** are silently removed before the notification is sent.
+
+These constraints are applied in the `on` handler before the notification reaches the transport layer.
+
 ### Low-level  Notifications API
 
 You can use these two signature to send the custom notification with pre-defined notification types.
