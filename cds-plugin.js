@@ -14,12 +14,11 @@ cds.on("loaded", m => {
 
 cds.on('serving', service => {
   if (service.name === 'notifications' || service instanceof cds.DatabaseService) return
-  let notifications
   service.on('*', async (req) => {
     const def = service.events?.[req.event]
     if (!def || def.kind !== 'event') return
     if (!Object.keys(def).some(k => k === '@notification' || k.startsWith('@notification.'))) return
-    notifications ??= await cds.connect.to('notifications')
+    const notifications = await cds.connect.to('notifications')
     const notification = buildNotificationFromEvent(def, req.data)
     try {
       await notifications.notify(notification)

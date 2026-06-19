@@ -82,6 +82,8 @@ describe("Notify to rest", () => {
   })
 
   describe("Before hook", () => {
+    let postedNotification
+
     beforeEach(() => {
       notifyToRest.postNotification = n => postedNotification = n
       notifyToRest.init()

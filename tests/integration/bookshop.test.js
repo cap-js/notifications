@@ -124,7 +124,7 @@ describe("Notifications Integration", () => {
     })
 
     afterEach(() => {
-      alert._handlers.before.length = beforeHandlers
+      alert._handlers.before.splice(beforeHandlers)
     })
 
     test("is called before a notification is sent and receives msg.event and msg.data", async () => {
