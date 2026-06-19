@@ -80,4 +80,26 @@ describe("Notify to rest", () => {
       expect(postedNotification).toMatchObject(expected)
     })
   })
+
+  describe("Before hook", () => {
+    beforeEach(() => {
+      notifyToRest.postNotification = n => postedNotification = n
+      notifyToRest.init()
+    })
+
+    test("before('*') hook receives msg.event and msg.data before notification is sent", async () => {
+      let capturedEvent, capturedData
+      notifyToRest.before('*', msg => {
+        capturedEvent = msg.event
+        capturedData = msg.data
+      })
+
+      const body = { recipients: ["user@example.com"], data: { title: "Test" } }
+      await notifyToRest.notify("IncidentResolved", body)
+
+      expect(capturedEvent).toBe("IncidentResolved")
+      expect(capturedData).toMatchObject(buildNotification({ type: "IncidentResolved", ...body }))
+      expect(postedNotification).toBeDefined()
+    })
+  })
 })
