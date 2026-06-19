@@ -15,6 +15,13 @@ module.exports = cds.service.impl(async function () {
       recipients: ['reader@bookshop.example'],
       data: { title: book.title, buyer: req.user.id }
     })
+
+    await this.emit('BookOrderedNotify', {
+      title: book.title,
+      buyer: req.user.id,
+      recipients: ['reader@bookshop.example'],
+    })
+
     return { stock: book.stock - quantity }
   })
 })

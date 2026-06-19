@@ -52,3 +52,88 @@ describe("Loaded hook - recipients injection", () => {
   })
 
 })
+
+describe("Serving hook - notification handler registration", () => {
+
+  let notifySpy, registeredHandler, service
+
+  beforeEach(async () => {
+    notifySpy = jest.fn()
+    jest.spyOn(cds.connect, 'to').mockResolvedValue({ notify: notifySpy })
+
+    registeredHandler = undefined
+    service = new cds.Service()
+    service.name = 'LazyService'
+    service.events = {}
+    jest.spyOn(service, 'on').mockImplementation((event, handler) => {
+      if (event === '*') registeredHandler = handler
+    })
+
+    await cds.emit('serving', service)
+  })
+
+  afterEach(() => jest.restoreAllMocks())
+
+  test("Does not attach a handler to the notifications service itself", async () => {
+    const service = new cds.Service()
+    service.name = 'notifications'
+    const onSpy = jest.spyOn(service, 'on')
+    await cds.emit('serving', service)
+    expect(onSpy).not.toHaveBeenCalled()
+  })
+
+  test("Registers a handler on lazily connected services", () => {
+    expect(registeredHandler).toBeDefined()
+  })
+
+  test("Calls notify for @notification events", async () => {
+    const eventDef = {
+      kind: 'event',
+      name: 'LazyService.OrderPlaced',
+      '@notification': true,
+      '@notification.priority': { '#': 'High' },
+      '@Common.SemanticObject': 'Orders',
+      '@Common.SemanticObjectAction': 'manage',
+      elements: { ID: { type: 'cds.String', key: true }, title: { type: 'cds.String' }, recipients: { items: { type: 'cds.String' } } }
+    }
+    service.events['OrderPlaced'] = eventDef
+    await registeredHandler({ event: 'OrderPlaced', data: { ID: '123', title: 'Moby Dick', recipients: ['buyer@example.com'] } })
+
+    expect(notifySpy).toHaveBeenCalledWith(expect.objectContaining({
+      NotificationTypeKey: 'OrderPlaced',
+      NotificationTypeVersion: '1',
+      Priority: 'HIGH',
+      NavigationTargetObject: 'Orders',
+      NavigationTargetAction: 'manage',
+      Recipients: [{ RecipientId: 'buyer@example.com' }],
+      Properties: expect.arrayContaining([
+        expect.objectContaining({ Key: 'title', Value: 'Moby Dick', IsSensitive: true }),
+      ]),
+      TargetParameters: [{ Key: 'ID', Value: '123' }],
+    }))
+  })
+
+  test("Skips plain events without @notification", async () => {
+    await registeredHandler({ event: 'PlainEvent', data: {} })
+
+    expect(notifySpy).not.toHaveBeenCalled()
+  })
+
+  test("Logs error when notify fails", async () => {
+    notifySpy.mockRejectedValue(new Error('Network error'))
+    const errorSpy = jest.fn()
+    jest.spyOn(cds, 'log').mockReturnValue({ _error: true, error: errorSpy })
+
+    const eventDef = {
+      kind: 'event',
+      name: 'LazyService.OrderPlaced',
+      '@notification': true,
+      elements: { recipients: { items: { type: 'cds.String' } } }
+    }
+    service.events['OrderPlaced'] = eventDef
+    await registeredHandler({ event: 'OrderPlaced', data: { recipients: ['buyer@example.com'] } })
+
+    expect(errorSpy).toHaveBeenCalledWith('Failed to send notification for event', expect.any(String), expect.any(Error))
+  })
+
+})

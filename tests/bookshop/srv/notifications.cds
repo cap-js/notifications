@@ -1,4 +1,6 @@
-service notificationService {
+using { CatalogService } from './cat-service';
+
+extend service CatalogService with {
   @description: '{i18n>BOOK_ORDERED_DESCRIPTION}'
   @notification: {
     template: {
@@ -7,7 +9,7 @@ service notificationService {
       subtitle     : '{i18n>BOOK_ORDERED_SUBTITLE}',
       groupedTitle : '{i18n>BOOK_ORDERED_GROUPED_TITLE}',
       email        : {
-        subject: 'Book Ordered: {{title}}',
+        subject: '{i18n>BOOK_ORDERED_EMAIL_SUBJECT}',
         html   : './book-ordered-email.html',
       }
     },

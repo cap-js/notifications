@@ -74,6 +74,26 @@ describe("Notifications Integration", () => {
     expect(en.Subtitle).toBe("{{buyer}} ordered {{title}}")
   })
 
+  test("Emitting a @notification event directly triggers a notification via the plugin", async () => {
+    const catalog = await cds.connect.to('CatalogService')
+    await catalog.emit('BookOrderedNotify', {
+      title: 'Moby Dick',
+      buyer: 'reader@bookshop.com',
+      recipients: ['reader@bookshop.com'],
+    })
+
+    expect(log.output).toContain("BookOrderedNotify")
+    expect(log.output).toContain("Moby Dick")
+  })
+
+  test("Submitting an order triggers a notification via the plugin auto-emit path", async () => {
+    const catalog = await cds.connect.to('CatalogService')
+    await catalog.send({ event: 'submitOrder', data: { book: '201', quantity: 1 }, user: new cds.User('reader@bookshop.com') })
+
+    expect(log.output).toContain("bookshop/BookOrderedNotify")
+    expect(log.output).toContain("Wuthering Heights")
+  })
+
   test("Throw when a notification event has an element name exceeding 128 characters", () => {
     const longName = 'a'.repeat(129)
     const model = cds.linked(cds.parse.cdl(`@notification event OversizedEvent { ${longName}: String; }`))
@@ -96,10 +116,15 @@ describe("Notifications Integration", () => {
     expect(de.Subtitle).toBe("{{buyer}} hat {{title}} bestellt")
   })
 
-  test("Email html is loaded from file with i18n resolved", () => {
+  test("Email html is loaded from file with i18n resolved per locale", () => {
     const type = cds.notifications.local.types["bookshop/BookOrderedNotify"]["1"]
-    expect(type.Templates[0].EmailHtml).toBe(
+    const en = type.Templates.find(t => t.Language === 'en')
+    const de = type.Templates.find(t => t.Language === 'de')
+    expect(en.EmailHtml).toBe(
       "<h1>Book Ordered</h1>\n<p>Hi {{buyer}}, your order for <b>{{title}}</b> has been placed.</p>\n"
+    )
+    expect(de.EmailHtml).toBe(
+      "<h1>Buch bestellt</h1>\n<p>Hallo {{buyer}}, deine Bestellung für <b>{{title}}</b> wurde aufgegeben.</p>\n"
     )
   })
 })
