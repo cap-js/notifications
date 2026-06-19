@@ -98,7 +98,7 @@ describe("Notifications Integration", () => {
   test("Emitting a @notification event with dynamic xpr priority evaluates priority via db", async () => {
     const catalog = await cds.connect.to('CatalogService')
 
-    // quantity > 5 → High
+    // quantity > 5 -> High
     await catalog.emit('BookOrderedNotify', {
       title: 'Bulk Order',
       buyer: 'reader@bookshop.example',
@@ -110,7 +110,7 @@ describe("Notifications Integration", () => {
 
     log.clear()
 
-    // quantity <= 5 → Low
+    // quantity <= 5 -> Low
     await catalog.emit('BookOrderedNotify', {
       title: 'Small Order',
       buyer: 'reader@bookshop.example',
