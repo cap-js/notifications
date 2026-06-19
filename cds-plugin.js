@@ -15,20 +15,18 @@ cds.on("loaded", m => {
 cds.on('serving', service => {
   if (service.name === 'notifications' || service instanceof cds.DatabaseService) return
   const notifications = cds.connect.to('notifications')
-  service.on('*', async (req, next) => {
-    let def = req.target ?? service.events?.[req.event]
-    if (!def || def.kind !== 'event') return next()
-    if (!Object.keys(def).some(k => k === '@notification' || k.startsWith('@notification.'))) return next()
-    if (!def.name) def = { ...def, name: req.event }
-    const notificationsSvc = await notifications
+  service.on('*', async (req) => {
+    const def = service.events?.[req.event]
+    if (!def || def.kind !== 'event') return
+    if (!Object.keys(def).some(k => k === '@notification' || k.startsWith('@notification.'))) return
+    const svc = await notifications
     const notification = buildNotificationFromEvent(def, req.data)
     try {
-      await notificationsSvc.notify(notification)
+      await svc.notify(notification)
     } catch (err) {
       const LOG = cds.log('notifications')
       LOG._error && LOG.error('Failed to send notification for event', def.name, err)
     }
-    return next()
   })
 })
 

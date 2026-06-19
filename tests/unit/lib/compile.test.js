@@ -451,7 +451,7 @@ describe("HTML file resolution", () => {
     expect(existsSync).not.toHaveBeenCalled()
   })
 
-  test("Returns annotation value as-is when html file not found", () => {
+  test("Return annotation value as-is when html file not found", () => {
     existsSync.mockReturnValue(false)
 
     const model = makeModel({ "E": makeEventWithHtml('./missing.html') })
@@ -461,21 +461,7 @@ describe("HTML file resolution", () => {
     expect(readFileSync).not.toHaveBeenCalled()
   })
 
-  test("Resolves {i18n>KEY} placeholders inside html file content", () => {
-    Object.defineProperty(cds, 'i18n', {
-      value: { labels: { at: (key) => key === 'BOOK_ORDERED_DESCRIPTION' ? 'Book Ordered' : undefined } },
-      configurable: true, writable: true
-    })
-    existsSync.mockReturnValue(true)
-    readFileSync.mockReturnValue('<p>{i18n>BOOK_ORDERED_DESCRIPTION}</p>')
-
-    const model = makeModel({ "E": makeEventWithHtml('./email.html') })
-    const [type] = notificationTypesFromModel(model)
-
-    expect(type.Templates[0].EmailHtml).toBe('<p>Book Ordered</p>')
-  })
-
-  test("Resolves html file path relative to the cds source file", () => {
+  test("Resolve html file path relative to the cds source file", () => {
     existsSync.mockReturnValue(true)
     readFileSync.mockReturnValue('<p>hi</p>')
 
@@ -486,8 +472,21 @@ describe("HTML file resolution", () => {
     expect(calledPath).toMatch(/srv[/\\]email\.html$/)
   })
 
+  test("Resolve {i18n>KEY} placeholders inside html file content", () => {
+    Object.defineProperty(cds, 'i18n', {
+      value: { labels: { all: () => ({ en: 'Book Ordered' }), at: (key) => key === 'BOOK_ORDERED_DESCRIPTION' ? 'Book Ordered' : undefined } },
+      configurable: true, writable: true
+    })
+    existsSync.mockReturnValue(true)
+    readFileSync.mockReturnValue('<h1>{i18n>BOOK_ORDERED_DESCRIPTION}</h1>')
+
+    const model = makeModel({ "E": makeEventWithHtml('./email.html') })
+    const [type] = notificationTypesFromModel(model)
+
+    expect(type.Templates[0].EmailHtml).toBe('<h1>Book Ordered</h1>')
+  })
+
   test("Resolve {i18n>KEY} embedded within inline html string", () => {
-    const cds = require('@sap/cds')
     Object.defineProperty(cds, 'i18n', {
       value: { labels: { all: () => ({}), at: (key) => key === 'BOOK_ORDERED_SUBTITLE' ? '{{buyer}} ordered {{title}}' : undefined } },
       configurable: true, writable: true

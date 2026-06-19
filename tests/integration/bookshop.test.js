@@ -141,10 +141,15 @@ describe("Notifications Integration", () => {
     expect(log.output).toContain("Order #2 confirmed")
   })
 
-  test("Email html is loaded from file with i18n resolved", () => {
+  test("Email html is loaded from file with i18n resolved per locale", () => {
     const type = cds.notifications.local.types["bookshop/BookOrderedNotify"]["1"]
-    expect(type.Templates[0].EmailHtml).toBe(
+    const en = type.Templates.find(t => t.Language === 'en')
+    const de = type.Templates.find(t => t.Language === 'de')
+    expect(en.EmailHtml).toBe(
       "<h1>Book Ordered</h1>\n<p>Hi {{buyer}}, your order for <b>{{title}}</b> has been placed.</p>\n"
+    )
+    expect(de.EmailHtml).toBe(
+      "<h1>Buch bestellt</h1>\n<p>Hallo {{buyer}}, deine Bestellung für <b>{{title}}</b> wurde aufgegeben.</p>\n"
     )
   })
 })
