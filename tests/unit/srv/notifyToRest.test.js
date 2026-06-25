@@ -47,9 +47,10 @@ describe("Notify to rest", () => {
   })
 
   describe("Error handling", () => {
-    const httpClient = require("@sap-cloud-sdk/http-client")
+    let httpClient
 
     beforeEach(() => {
+      httpClient = require("@sap-cloud-sdk/http-client")
       notifyToRest.init()
     })
 

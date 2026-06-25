@@ -13,12 +13,12 @@ describe("Notifications Integration", () => {
   let httpSpy
 
   beforeAll(async () => {
-    alert = await cds.connect.to("notifications")
-
     if (isHybrid) {
       const httpClient = require("@sap-cloud-sdk/http-client")
       httpSpy = jest.spyOn(httpClient, "executeHttpRequest")
     }
+
+    alert = await cds.connect.to("notifications")
   })
 
   afterEach(() => {
