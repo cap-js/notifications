@@ -1,7 +1,7 @@
 const NotificationService = require("./service")
 
 const { buildHeadersForDestination } = require("@sap-cloud-sdk/connectivity")
-const { executeHttpRequest } = require("@sap-cloud-sdk/http-client")
+const httpClient = require("@sap-cloud-sdk/http-client")
 const { getNotificationDestination } = require("../lib/utils")
 const cds = require("@sap/cds")
 const LOG = cds.log('notifications')
@@ -24,7 +24,7 @@ module.exports = exports = class NotifyToRest extends NotificationService {
       LOG._info && LOG.info(
         `Sending notification of key: ${notificationData.NotificationTypeKey} and version: ${notificationData.NotificationTypeVersion}`
       )
-      const response = await executeHttpRequest(notificationDestination, {
+      const response = await httpClient.executeHttpRequest(notificationDestination, {
         url: `${NOTIFICATIONS_API_ENDPOINT}/Notifications`,
         method: "post",
         data: notificationData,

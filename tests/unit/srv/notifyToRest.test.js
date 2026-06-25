@@ -2,6 +2,10 @@ const cds = require('@sap/cds')
 const { messages, buildNotification } = require("../../../lib/utils")
 const NotifyToRest = require("../../../srv/notifyToRest")
 
+jest.mock("@sap-cloud-sdk/connectivity", () => ({ buildHeadersForDestination: jest.fn().mockResolvedValue({}) }))
+jest.mock("@sap-cloud-sdk/http-client", () => ({ executeHttpRequest: jest.fn() }))
+jest.mock("../../../lib/utils", () => ({ ...jest.requireActual("../../../lib/utils"), getNotificationDestination: jest.fn().mockResolvedValue({}) }))
+
 describe("Notify to rest", () => {
   let log = cds.test.log()
   let notifyToRest
@@ -39,6 +43,46 @@ describe("Notify to rest", () => {
     test("Description isn't valid in default notification", async () => {
       notifyToRest.notify({ title: "abc", recipients: ["abc@abc.com"], priority: "low", description: true })
       expect(log.output).toContain(messages.DESCRIPTION_IS_NOT_STRING)
+    })
+  })
+
+  describe("Error handling", () => {
+    const httpClient = require("@sap-cloud-sdk/http-client")
+
+    beforeEach(() => {
+      notifyToRest.init()
+    })
+
+    test("Throws a cds.error with the ANS error message on failure", async () => {
+      httpClient.executeHttpRequest.mockRejectedValueOnce({
+        response: { status: 500, data: { error: { message: { value: "Internal Server Error" } } } }
+      })
+      await expect(notifyToRest.notify({ title: "abc", recipients: ["abc@abc.com"] }))
+        .rejects.toThrow("Internal Server Error")
+    })
+
+    test("Marks 4xx errors as unrecoverable", async () => {
+      httpClient.executeHttpRequest.mockRejectedValueOnce({
+        response: { status: 400, data: { error: { message: { value: "Bad Request" } } } }
+      })
+      const err = await notifyToRest.notify({ title: "abc", recipients: ["abc@abc.com"] }).catch(e => e)
+      expect(err.unrecoverable).toBe(true)
+    })
+
+    test("Does not mark 429 as unrecoverable", async () => {
+      httpClient.executeHttpRequest.mockRejectedValueOnce({
+        response: { status: 429, data: { error: { message: { value: "Too Many Requests" } } } }
+      })
+      const err = await notifyToRest.notify({ title: "abc", recipients: ["abc@abc.com"] }).catch(e => e)
+      expect(err.unrecoverable).toBeUndefined()
+    })
+
+    test("Does not mark 5xx errors as unrecoverable", async () => {
+      httpClient.executeHttpRequest.mockRejectedValueOnce({
+        response: { status: 500, data: { error: { message: { value: "Server Error" } } } }
+      })
+      const err = await notifyToRest.notify({ title: "abc", recipients: ["abc@abc.com"] }).catch(e => e)
+      expect(err.unrecoverable).toBeUndefined()
     })
   })
 
