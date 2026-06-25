@@ -22,12 +22,4 @@ extend service CatalogService with {
     quantity  : Integer;
     recipients: array of String;
   }
-
-  @notification.priority : (days_between(orderDate, deliveryDate) > 7 ? #High : #Low)
-  event LateDeliveryNotify {
-    title        : String;
-    orderDate    : Date;
-    deliveryDate : Date;
-    recipients   : array of String;
-  }
 }
