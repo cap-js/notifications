@@ -3,7 +3,7 @@ const { join } = cds.utils.path
 const { messages } = require("../../lib/utils")
 const { notificationTypesFromModel } = require("../../lib/compile")
 
-const isHybrid = ["hybrid", "production"].includes(process.env.CDS_ENV)
+const usesRestService = ["hybrid", "production"].includes(process.env.CDS_ENV)
 
 cds.test(join(__dirname, "../bookshop"))
 
@@ -13,7 +13,7 @@ describe("Notifications Integration", () => {
   let httpSpy
 
   beforeAll(async () => {
-    if (isHybrid) {
+    if (usesRestService) {
       const httpClient = require("@sap-cloud-sdk/http-client")
       httpSpy = jest.spyOn(httpClient, "executeHttpRequest")
     }
@@ -27,7 +27,7 @@ describe("Notifications Integration", () => {
 
   describe("Service implementation", () => {
     test("Resolves to correct implementation", () => {
-      if (!isHybrid) {
+      if (!usesRestService) {
         expect(alert.constructor.name).toBe("NotifyToConsole")
       } else {
         expect(alert.constructor.name).toBe("NotifyToRest")
@@ -87,7 +87,7 @@ describe("Notifications Integration", () => {
       await alert.notify()
 
       expect(log.output).toContain(messages.NO_OBJECT_FOR_NOTIFY)
-      if (!isHybrid) {
+      if (!usesRestService) {
         expect(log.output).not.toContain("Notification:")
       } else {
         expect(httpSpy).not.toHaveBeenCalled()
@@ -101,7 +101,7 @@ describe("Notifications Integration", () => {
         description: "A new book has been added to the catalogue"
       })
 
-      if (!isHybrid) {
+      if (!usesRestService) {
         expect(log.output).toContain("Notification:")
         expect(log.output).toContain("NotificationTypeKey: 'Default'")
         expect(log.output).toContain("RecipientId: 'reader@bookshop.com'")
@@ -127,7 +127,7 @@ describe("Notifications Integration", () => {
         data: { title: "Moby Dick", buyer: "reader@bookshop.com" }
       })
 
-      if (!isHybrid) {
+      if (!usesRestService) {
         expect(log.output).toContain("bookshop/BookOrderedNotify")
         expect(log.output).not.toContain("is not in the notification types file")
       } else {
@@ -141,7 +141,7 @@ describe("Notifications Integration", () => {
     })
 
     test("Sending a notification with unknown type key gives a warning (dev only)", async () => {
-      if (isHybrid) return
+      if (usesRestService) return
 
       await alert.notify("UnknownType", {
         recipients: ["reader@bookshop.com"],
@@ -161,7 +161,7 @@ describe("Notifications Integration", () => {
         recipients: ['reader@bookshop.com'],
       })
 
-      if (!isHybrid) {
+      if (!usesRestService) {
         expect(log.output).toContain("BookOrderedNotify")
         expect(log.output).toContain("Moby Dick")
       } else {
@@ -187,7 +187,7 @@ describe("Notifications Integration", () => {
       const catalog = await cds.connect.to('CatalogService')
       await catalog.send({ event: 'submitOrder', data: { book: '201', quantity: 1 }, user: new cds.User('reader@bookshop.com') })
 
-      if (!isHybrid) {
+      if (!usesRestService) {
         expect(log.output).toContain("bookshop/BookOrderedNotify")
         expect(log.output).toContain("Wuthering Heights")
       } else {
