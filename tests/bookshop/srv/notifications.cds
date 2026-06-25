@@ -22,4 +22,19 @@ extend service CatalogService with {
     quantity  : Integer;
     recipients: array of String;
   }
+
+  @notification: {
+    template: {
+      title        : 'Late Delivery',
+      publicTitle  : 'Late Delivery',
+      groupedTitle : 'Delivery Updates',
+    }
+  }
+  @notification.priority : (days_between(orderDate, deliveryDate) > 7 ? #High : #Low)
+  event LateDeliveryNotify {
+    title        : String;
+    orderDate    : Date;
+    deliveryDate : Date;
+    recipients   : array of String;
+  }
 }
