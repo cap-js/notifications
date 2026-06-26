@@ -213,7 +213,7 @@ Allowed values: `LOW`, `NEUTRAL` (default), `MEDIUM`, `HIGH`.
 **Dynamic priority** - priority is computed at emit time from event data using a CDS ternary expression. The expression is evaluated against the database at runtime:
 
 ```cds
-@notification.priority: (quantity > 5 ? #High : #Low)
+@notification.priority: (quantity > 5 ? #HIGH : #LOW)
 event BookOrdered {
   quantity : Integer;
   title    : String;
@@ -223,7 +223,7 @@ event BookOrdered {
 More complex expressions using CDS functions are also supported:
 
 ```cds
-@notification.priority: (days_between(orderDate, deliveryDate) > 7 ? #High : #Low)
+@notification.priority: (days_between(orderDate, deliveryDate) > 7 ? #HIGH : #LOW)
 event LateDelivery {
   orderDate    : Date;
   deliveryDate : Date;

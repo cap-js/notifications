@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
-## Version 1.0.0 - 2026-06-26
+## Version 1.0.0
 
 ### Added
 
@@ -15,7 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - Notification types are automatically registered and kept in sync with the notification service on application startup when running in hybrid or production mode.
 - Auto-emit: the plugin now intercepts `this.emit()` calls on `@notification`-annotated events and forwards them to ANS automatically, with no extra wiring needed in the service handler.
 - Batch notifications: `notify()` now accepts an array of notification objects. Each item is sent individually; partial failures are logged as warnings and the call only throws if all items fail.
-- Static and dynamic notification priority via `@notification.priority`. Accepts a fixed enum value (`#HIGH`, `#LOW`, etc.) or a CDS ternary expression evaluated against event data at runtime (e.g. `(quantity > 5 ? #High : #Low)`).
+- Static and dynamic notification priority via `@notification.priority`. Accepts a fixed enum value (`#HIGH`, `#LOW`, etc.) or a CDS ternary expression evaluated against event data at runtime (e.g. `(quantity > 5 ? #HIGH : #LOW)`).
 - `cds.env.requires.notifications.defaultEmailDelivery` option to enable email delivery for all notification types globally without per-event annotation.
 - `cds build` integration: annotated events are compiled and written to `notification-types.json` in the build output, merged with any types from the JSON file.
 - Log full response body and headers when the `notifications` logger is enabled at debug level.
@@ -24,7 +24,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Fixed
 
-- Fixed `#EnumValue` enum references in `@notification.deliveryChannels` — the `{ "#": "..." }` CSN form produced by the CDS compiler was not handled by `resolveEnum`, causing a `TypeError` at runtime.
+- Fixed `#EnumValue` enum references in `@notification.deliveryChannels`, the `{ "#": "..." }` CSN form produced by the CDS compiler was not handled by `resolveEnum`, causing a `TypeError` at runtime.
 - Improved error messages when notification type registration fails, now surfacing the ANS error detail instead of a raw HTTP error dump.
 - New default `auto` for `cds.env.requires.notifications.authenticationIdentifier`. Each recipient is inspected: UUID values are published with `GlobalUserId`, everything else with `RecipientId`, with a warning when a value is neither a UUID nor an email. The previous values `UserUUID` and `RecipientId` are still supported for an explicit choice.
 
