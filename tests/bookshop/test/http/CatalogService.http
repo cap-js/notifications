@@ -3,6 +3,18 @@
 @password=
 
 
+### submitOrder
+# @name submitOrder_POST
+POST {{server}}/odata/v4/catalog/submitOrder
+Content-Type: application/json
+Authorization: Basic {{username}}:{{password}}
+
+{
+  "book": "201",
+  "quantity": 1
+}
+
+
 ### ListOfBooks
 # @name ListOfBooks_GET
 GET {{server}}/odata/v4/catalog/ListOfBooks
@@ -26,14 +38,3 @@ Authorization: Basic {{username}}:{{password}}
 GET {{server}}/odata/v4/catalog/Currencies
 Authorization: Basic {{username}}:{{password}}
 
-
-### submitOrder
-# @name submitOrder_POST
-POST {{server}}/odata/v4/catalog/submitOrder
-Content-Type: application/json
-Authorization: Basic {{username}}:{{password}}
-
-{
-  "book": "201",
-  "quantity": 1
-}
