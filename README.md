@@ -378,6 +378,8 @@ await alert.notify([
 
 ### Simple notification
 
+For `notify({ recipients, title, ... })` no pre-defined notification type needed. The plugin uses a built-in `Default` template.
+
 | Parameter | Required | Description |
 |---|---|---|
 | `recipients` | yes | Array of recipient identifiers: email addresses or SAP BTP Global User IDs (UUIDs) |
@@ -386,6 +388,8 @@ await alert.notify([
 | `description` | no | Subtitle text |
 
 ### Named notification type
+
+For `notify('TypeKey', payload)` or `notify({ type: 'TypeKey', ... })` sends a notification using a pre-defined notification type.
 
 | Parameter | Required | Description |
 |---|---|---|
