@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 
+- Validation of `Properties` and `TargetParameters` value lengths when emitting notifications. Property values exceeding 255 characters throw an error; `TargetParameters` entries with values longer than 250 characters are silently dropped before the notification is sent.
 - Log full response body and headers when the `notifications` logger is enabled at debug level.
 - Return the full HTTP response from the REST notification handler.
   Note: With outbox enabled (default), the application's `await notify()` resolves when
