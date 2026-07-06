@@ -1,5 +1,5 @@
 const cds = require("@sap/cds")
-const { buildNotification, validateNotificationTypes, readFile, getNotificationDestination, buildNotificationFromEvent, mapCdsTypeToANSType, applyValueLengthConstraints } = require("../../../lib/utils")
+const { buildNotification, validateNotificationTypes, readFile, getNotificationDestination, buildNotificationFromEvent, mapCdsTypeToANSType, applyValueLengthConstraints, MAX_PROPERTY_VALUE_LENGTH, MAX_TARGET_PARAM_VALUE_LENGTH } = require("../../../lib/utils")
 const { existsSync, readFileSync } = require("fs")
 const { getDestination } = require("@sap-cloud-sdk/connectivity")
 
@@ -725,10 +725,10 @@ describe("Test utils", () => {
   })
 
   describe("applyValueLengthConstraints", () => {
-    const longValue251 = "a".repeat(251)
-    const longValue256 = "a".repeat(256)
-    const value255 = "a".repeat(255)
-    const value250 = "a".repeat(250)
+    const longValue251 = "a".repeat(MAX_TARGET_PARAM_VALUE_LENGTH + 1)
+    const longValue256 = "a".repeat(MAX_PROPERTY_VALUE_LENGTH + 1)
+    const value255 = "a".repeat(MAX_PROPERTY_VALUE_LENGTH)
+    const value250 = "a".repeat(MAX_TARGET_PARAM_VALUE_LENGTH)
 
     test("Returns notification unchanged when all values are within limits", () => {
       const notification = {
@@ -742,7 +742,7 @@ describe("Test utils", () => {
       const notification = {
         Properties: [{ Key: "k", Value: longValue256 }],
       }
-      expect(() => applyValueLengthConstraints(notification)).toThrow("Property value exceeds the maximum length of 255 characters.")
+      expect(() => applyValueLengthConstraints(notification)).toThrow(`Property value exceeds the maximum length of ${MAX_PROPERTY_VALUE_LENGTH} characters.`)
     })
 
     test("Throws on the first Property value over 255 even when others are valid", () => {
@@ -752,7 +752,7 @@ describe("Test utils", () => {
           { Key: "bad", Value: longValue256 },
         ],
       }
-      expect(() => applyValueLengthConstraints(notification)).toThrow("Property value exceeds the maximum length of 255 characters.")
+      expect(() => applyValueLengthConstraints(notification)).toThrow(`Property value exceeds the maximum length of ${MAX_PROPERTY_VALUE_LENGTH} characters.`)
     })
 
     test("Removes TargetParameter entries whose value exceeds 250 characters", () => {
