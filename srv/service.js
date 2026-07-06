@@ -1,4 +1,4 @@
-const { buildNotification, messages } = require("./../lib/utils")
+const { buildNotification, applyValueLengthConstraints, messages } = require("./../lib/utils")
 const cds = require('@sap/cds')
 const LOG = cds.log('notifications')
 
@@ -32,6 +32,7 @@ class NotificationService extends cds.Service {
     else event = message.type || message.NotificationTypeKey || 'Default'
     // Prepare and emit the notification
     message = buildNotification(message)
+    message = applyValueLengthConstraints(message)
     return super.emit (event, message)
   }
 

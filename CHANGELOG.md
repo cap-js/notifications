@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Added
 
 - Batch notification API: pass an array as the second argument to `notify()` to send multiple notifications in a single outbox event. Each notification is dispatched independently, failures do not block the others.
+- Validation of `Properties` and `TargetParameters` value lengths when emitting notifications. Property values exceeding 255 characters throw an error; `TargetParameters` entries with values longer than 250 characters are silently dropped before the notification is sent.
 - Log full response body and headers when the `notifications` logger is enabled at debug level.
 
 ### Changed
