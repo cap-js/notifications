@@ -36,7 +36,7 @@ describe("Notifications Integration", () => {
     await alert.notify({
       recipients: ["reader@bookshop.com"],
       title: "New book arrived",
-      description: "A new book has been added to the catalogue"
+      description: "A new book has been added to the catalog."
     })
 
     expect(log.output).toContain("Notification:")
