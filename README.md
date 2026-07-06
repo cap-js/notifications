@@ -44,7 +44,7 @@ alert.notify({
   recipients: [ ...readers() ],
   priority: "HIGH",
   title: "New book arrived!",
-  description: "Book 'Wuthering Heights' has been added to the catalogue."
+  description: "Book 'Wuthering Heights' has been added to the catalog."
 })
 ```
 
