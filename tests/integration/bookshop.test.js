@@ -166,6 +166,47 @@ describe("Notifications Integration", () => {
     expect(de.Subtitle).toBe("{{buyer}} hat {{title}} bestellt")
   })
 
+  describe("before('*') hook", () => {
+    let beforeHandlers
+
+    beforeEach(() => {
+      beforeHandlers = alert._handlers.before.length
+    })
+
+    afterEach(() => {
+      alert._handlers.before.splice(beforeHandlers)
+    })
+
+    test("is called before a notification is sent and receives msg.event and msg.data", async () => {
+      let capturedEvent, capturedData
+      alert.before('*', msg => {
+        capturedEvent = msg.event
+        capturedData = msg.data
+      })
+
+      await alert.notify("BookOrderedNotify", {
+        recipients: ["reader@bookshop.com"],
+        data: { title: "Moby Dick", buyer: "reader@bookshop.com" }
+      })
+
+      expect(capturedEvent).toBe("BookOrderedNotify")
+      expect(capturedData).toMatchObject({
+        NotificationTypeKey: expect.stringContaining("BookOrderedNotify"),
+        Recipients: expect.arrayContaining([expect.objectContaining({ RecipientId: "reader@bookshop.com" })]),
+      })
+    })
+
+    test("can suppress a notification by throwing", async () => {
+      alert.before('*', () => { throw new cds.error("Recipient not eligible") })
+
+      await expect(
+        alert.notify({ recipients: ["reader@bookshop.com"], title: "New book arrived" })
+      ).rejects.toThrow("Recipient not eligible")
+
+      expect(log.output).not.toContain("Notification:")
+    })
+  })
+
   test("Email html is loaded from file with i18n resolved per locale", () => {
     const type = cds.notifications.local.types["bookshop/BookOrderedNotify"]["1"]
     const en = type.Templates.find(t => t.Language === 'en')
