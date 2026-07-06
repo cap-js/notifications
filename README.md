@@ -507,6 +507,17 @@ This adds a `MAIL` delivery channel (enabled, default preference on, user-editab
 
 By default the notification service uses an outbox (`outbox: true`): `notify()` resolves as soon as the message is queued, not when it has been sent to ANS. This means the HTTP response from ANS is not returned.
 
+### Value Length Constraints
+
+The ANS API enforces maximum lengths on `Properties` and `TargetParameters` values. The plugin validates these automatically when emitting a notification:
+
+- **`Properties`**: if any `Value` exceeds **255 characters**, an error is thrown and the notification is not sent.
+- **`TargetParameters`**: entries whose `Value` exceeds **250 characters** are silently removed before the notification is sent.
+
+These constraints are applied in the `on` handler before the notification reaches the transport layer.
+
+### Low-level  Notifications API
+
 To send synchronously and receive the HTTP response:
 
 ```json

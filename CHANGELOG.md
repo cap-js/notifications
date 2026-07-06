@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Added
 
 - Support for defining notification types via CDS `@notification` annotations as an alternative to `srv/notification-types.json`. The plugin discovers annotated events at startup and registers them automatically.
+- Validation of `Properties` and `TargetParameters` value lengths when emitting notifications. Property values exceeding 255 characters throw an error; `TargetParameters` entries with values longer than 250 characters are silently dropped before the notification is sent.
 - Support for email delivery channels via `@notification.deliveryChannels` in CDS annotations and `DeliveryChannels` in the JSON format.
 - Support for email templates via `@notification.template.email.subject` and `@notification.template.email.html` in CDS annotations, and `EmailSubject` / `EmailHtml` in JSON templates. The `email.html` annotation accepts an inline HTML string or a path to an `.html` file relative to the `.cds` source file.
 - i18n support for CDS annotation string values using `{i18n>key}` syntax. Templates are generated for each locale where at least one translation differs from the default language.
