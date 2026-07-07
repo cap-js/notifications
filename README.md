@@ -52,7 +52,7 @@ npm install
 cds watch
 ```
 
-The server starts at `http://localhost:4004`. In development mode the plugin is active and notifications are printed to the console, no BTP account needed yet.
+The server starts at [http://localhost:4004](http://localhost:4004). During local development, the plugin prints the notifications to the console thus no BTP account is yet needed.
 
 ### 2. Trigger a notification
 
@@ -91,14 +91,14 @@ Save the file and `cds watch` reloads automatically. Send the request again and 
 
 ### 4. Connect to SAP Build Work Zone
 
-To see the notification appear in the Work Zone bell icon, you need a BTP subaccount with SAP Build Work Zone and the SAP Alert Notification service configured.
+To see the notification appear in the Work Zone under the bell icon, you need a BTP subaccount with SAP Build Work Zone and the SAP Alert Notification service configured.
 
 1. Follow the [SAP Build Work Zone setup guide](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/enabling-notifications-for-custom-apps-on-sap-btp-cloud-foundry) to subscribe to the service and configure the required `SAP_Notifications` destination in your subaccount.
 2. Bind your local environment to the destination service instance in CF using `cds bind`, then run `cds watch --profile hybrid` to connect to BTP destinations from your local machine.
 
-On startup the plugin registers your notification types automatically. Submitting an order will now deliver a notification to the Work Zone bell for the recipient.
+On startup the plugin registers your notification types automatically. Submitting an order will now deliver a notification to the bell in Work Zone for the recipient.
 
-> **Note:** The bookshop sample uses in-app (bell) notifications by default. The Work Zone bell shows notifications for recipients identified by their SAP BTP Global User ID (UUID). If you want to test email delivery as well, that requires additional setup. See [Email delivery](#email-delivery) and [Default Email Delivery](#default-email-delivery) for how to enable it, and the [SMTP mail destination guide](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/configuring-smtp-mail-destination) for the BTP configuration required.
+> **Note:** The bookshop sample uses in-app notifications by default. The Work Zone bell icon shows notifications for recipients identified by their SAP BTP Global User ID (UUID). To test email delivery as well, additional setup is required. For enabling, see [email delivery](#email-delivery) and [Default Email Delivery](#default-email-delivery). For required BTP configuration see the [SMTP mail destination guide](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/configuring-smtp-mail-destination).
 
 
 ## Define Notification Types
@@ -236,7 +236,7 @@ Running `cds build` also processes `@notification`-annotated events and writes a
 
 ### Option B: JSON file
 
-As an alternative (or in addition) to CDS annotations, define types statically in `srv/notification-types.json` (this is the default expected location, see [Custom Notification Types Path](#custom-notification-types-path) to use a different path):
+As an alternative to CDS annotations, types can be definted statically in `srv/notification-types.json` or custom path (see [Custom Notification Types Path](#custom-notification-types-path)):
 
 ```json
 [
@@ -596,4 +596,4 @@ We as members, contributors, and leaders pledge to make participation in our com
 
 ## Licensing
 
-Copyright 2023–2026 SAP SE or an SAP affiliate company and contributors. Please see our [LICENSE](LICENSE) for copyright and license information. Detailed information including third-party components and their licensing/copyright information is available [via the REUSE tool](https://api.reuse.software/info/github.com/cap-js/notifications).
+Copyright 2026 SAP SE or an SAP affiliate company and contributors. Please see our [LICENSE](LICENSE) for copyright and license information. Detailed information including third-party components and their licensing/copyright information is available [via the REUSE tool](https://api.reuse.software/info/github.com/cap-js/notifications).
