@@ -362,9 +362,18 @@ await alert.notify('BookOrdered', {
 
 ### Batch notifications
 
-Pass an array to `notify()` to send multiple notifications in a single call. Each notification is sent individually. If some items fail, the successful ones are still delivered. Failures are logged as warnings, and the call only throws if *all* items fail.
+Pass an array to `notify()` to send multiple notifications in a single call. Each notification is sent individually. This triggers only one outbox event, reducing the number of transactions when notifying many recipients. If some items fail, the successful ones are still delivered. Failures are logged as warnings, and the call only throws if *all* items fail.
 
 > **Note:** Batch sending is only available via `notify([...])`. `this.emit()` dispatches one event per call by design.
+
+```js
+alert.notify('BookOrdered', [
+  { recipients: [ buyer1.id ], data: { title: book.title, buyer: buyer1.name } },
+  { recipients: [ buyer2.id ], data: { title: book.title, buyer: buyer2.name } },
+])
+```
+
+Alternatively, the default notification template can be harnessed as well. 
 
 ```js
 await alert.notify([
@@ -372,7 +381,6 @@ await alert.notify([
   { type: 'BookOrdered', recipients: [buyer2.id], data: { title: book2.title, buyer: buyer2.name } },
 ])
 ```
-
 
 ## API Reference
 

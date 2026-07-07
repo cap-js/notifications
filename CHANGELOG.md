@@ -9,7 +9,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Added
 
 - Support for defining notification types via CDS `@notification` annotations as an alternative to `srv/notification-types.json`. The plugin discovers annotated events at startup and registers them automatically.
+- Batch notification API: pass an array as the second argument to `notify()` to send multiple notifications in a single outbox event. Each notification is dispatched independently, failures do not block the others.
 - Validation of `Properties` and `TargetParameters` value lengths when emitting notifications. Property values exceeding 255 characters throw an error; `TargetParameters` entries with values longer than 250 characters are silently dropped before the notification is sent.
+- Log full response body and headers when the `notifications` logger is enabled at debug level.
+
+### Changed
+
+- `IsSensitive` is now set to `true` for all notification properties.
+- Return the full HTTP response from the REST notification handler.
+  Note: With outbox enabled (default), the application's `await notify()` resolves when
+  the message is queued; the return value is only available when `outbox: false`.
 - Support for email delivery channels via `@notification.deliveryChannels` in CDS annotations and `DeliveryChannels` in the JSON format.
 - Support for email templates via `@notification.template.email.subject` and `@notification.template.email.html` in CDS annotations, and `EmailSubject` / `EmailHtml` in JSON templates. The `email.html` annotation accepts an inline HTML string or a path to an `.html` file relative to the `.cds` source file.
 - i18n support for CDS annotation string values using `{i18n>key}` syntax. Templates are generated for each locale where at least one translation differs from the default language.
