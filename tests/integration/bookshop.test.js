@@ -37,6 +37,14 @@ describe("Notifications Integration", () => {
     })
   })
 
+  test("Sending a default notification logs to console", async () => {
+    await alert.notify({
+      recipients: ["reader@bookshop.com"],
+      title: "New book arrived",
+      description: "A new book has been added to the catalog."
+    })
+  })
+
   describe("i18n", () => {
     test("Notification type templates have resolved i18n values", () => {
       const type = cds.notifications.local.types["bookshop/BookOrderedNotify"]["1"]
@@ -157,6 +165,43 @@ describe("Notifications Integration", () => {
     })
   })
 
+  test("Batch of typed notifications logs each one to console", async () => {
+    await alert.notify("BookOrderedNotify", [
+      { recipients: ["reader1@bookshop.com"], data: { title: "Moby Dick",        buyer: "reader1@bookshop.com" } },
+      { recipients: ["reader2@bookshop.com"], data: { title: "Wuthering Heights", buyer: "reader2@bookshop.com" } },
+    ])
+
+    expect(log.output).toContain("reader1@bookshop.com")
+    expect(log.output).toContain("reader2@bookshop.com")
+    expect(log.output).toContain("Moby Dick")
+    expect(log.output).toContain("Wuthering Heights")
+    expect(log.output).not.toContain("is not in the notification types file")
+  })
+
+  test("Batch of default notifications logs each one to console", async () => {
+    await alert.notify([
+      { recipients: ["alice@bookshop.com"], title: "Order #1 confirmed", description: "Your order is on its way." },
+      { recipients: ["bob@bookshop.com"],   title: "Order #2 confirmed", description: "Your order is on its way." },
+    ])
+
+    expect(log.output).toContain("alice@bookshop.com")
+    expect(log.output).toContain("bob@bookshop.com")
+    expect(log.output).toContain("Order #1 confirmed")
+    expect(log.output).toContain("Order #2 confirmed")
+  })
+
+  test("Email html is loaded from file with i18n resolved per locale", () => {
+    const type = cds.notifications.local.types["bookshop/BookOrderedNotify"]["1"]
+    const en = type.Templates.find(t => t.Language === 'en')
+    const de = type.Templates.find(t => t.Language === 'de')
+    expect(en.EmailHtml).toBe(
+      "<h1>Book Ordered</h1>\n<p>Hi {{buyer}}, your order for <b>{{title}}</b> has been placed.</p>\n"
+    )
+    expect(de.EmailHtml).toBe(
+      "<h1>Buch bestellt</h1>\n<p>Hallo {{buyer}}, deine Bestellung für <b>{{title}}</b> wurde aufgegeben.</p>\n"
+    )
+  })
+  
   describe("before('*') hook", () => {
     let beforeHandlers
 
@@ -196,17 +241,5 @@ describe("Notifications Integration", () => {
 
       expect(log.output).not.toContain("Notification:")
     })
-  })
-
-  test("Email html is loaded from file with i18n resolved per locale", () => {
-    const type = cds.notifications.local.types["bookshop/BookOrderedNotify"]["1"]
-    const en = type.Templates.find(t => t.Language === 'en')
-    const de = type.Templates.find(t => t.Language === 'de')
-    expect(en.EmailHtml).toBe(
-      "<h1>Book Ordered</h1>\n<p>Hi {{buyer}}, your order for <b>{{title}}</b> has been placed.</p>\n"
-    )
-    expect(de.EmailHtml).toBe(
-      "<h1>Buch bestellt</h1>\n<p>Hallo {{buyer}}, deine Bestellung für <b>{{title}}</b> wurde aufgegeben.</p>\n"
-    )
   })
 })

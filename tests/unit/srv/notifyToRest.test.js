@@ -124,6 +124,34 @@ describe("Notify to rest", () => {
       await notifyToRest.notify(body)
       expect(postedNotification).toMatchObject(expected)
     })
+
+    test("Notify is called with type and array of messages for batch", async () => {
+      const messages = [
+        { recipients: ["alice@example.com"], data: { title: "Batch 1" } },
+        { recipients: ["bob@example.com"], data: { title: "Batch 2" } },
+      ]
+      let postedNotifications = []
+      notifyToRest.postNotification = n => { postedNotifications = n }
+      await notifyToRest.notify("IncidentResolved", messages)
+      expect(Array.isArray(postedNotifications)).toBe(true)
+      expect(postedNotifications).toHaveLength(2)
+      expect(postedNotifications[0]).toMatchObject(buildNotification({ type: "IncidentResolved", recipients: ["alice@example.com"], data: { title: "Batch 1" } }))
+      expect(postedNotifications[1]).toMatchObject(buildNotification({ type: "IncidentResolved", recipients: ["bob@example.com"], data: { title: "Batch 2" } }))
+    })
+
+    test("Notify is called with array of default notifications for batch", async () => {
+      const messages = [
+        { recipients: ["alice@example.com"], title: "Hello Alice" },
+        { recipients: ["bob@example.com"], title: "Hello Bob" },
+      ]
+      let postedNotifications = []
+      notifyToRest.postNotification = n => { postedNotifications = n }
+      await notifyToRest.notify(messages)
+      expect(Array.isArray(postedNotifications)).toBe(true)
+      expect(postedNotifications).toHaveLength(2)
+      expect(postedNotifications[0]).toMatchObject(buildNotification({ recipients: ["alice@example.com"], title: "Hello Alice" }))
+      expect(postedNotifications[1]).toMatchObject(buildNotification({ recipients: ["bob@example.com"], title: "Hello Bob" }))
+    })
   })
 
   describe("Before hook", () => {

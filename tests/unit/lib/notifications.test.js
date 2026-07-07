@@ -15,14 +15,14 @@ const expectedCustomNotification = {
     Properties: [
         {
             Key: "title",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "Some Text Title",
             Type: "String"
         },
         {
             Key: "description",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "Some Text Description",
             Type: "String"
@@ -67,5 +67,34 @@ describe("Test post notification", () => {
 
         expect(log.output).toContain("Sending notification of key: Custom and version: 1")
         expect(executeHttpRequest).toHaveBeenCalled()
+    })
+
+    test("Batch: resolves with empty array when no notifications are passed", async () => {
+        const results = await alert.postNotification([])
+        expect(results).toEqual([])
+    })
+
+    test("Batch: resolves when at least one notification succeeds", async () => {
+        const error = new Error('failed')
+        error.response = { message: 'failed', status: 500 }
+        executeHttpRequest
+            .mockRejectedValueOnce(error)
+            .mockReturnValueOnce(expectedCustomNotification)
+
+        const results = await alert.postNotification([expectedCustomNotification, expectedCustomNotification])
+        expect(results).toHaveLength(2)
+        expect(results[0].status).toBe('rejected')
+        expect(results[1].status).toBe('fulfilled')
+        expect(log.output).toContain('Batch notification failed:')
+    })
+
+    test("Batch: throws when all notifications fail", async () => {
+        const error = new Error('all failed')
+        error.response = { message: 'all failed', status: 500 }
+        executeHttpRequest.mockRejectedValue(error)
+
+        await expect(
+            alert.postNotification([expectedCustomNotification, expectedCustomNotification])
+        ).rejects.toThrow('all failed')
     })
 })

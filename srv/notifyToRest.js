@@ -16,10 +16,22 @@ module.exports = exports = class NotifyToRest extends NotificationService {
 
   async postNotification(notificationData) {
     const notificationDestination = await getNotificationDestination()
+
+    if (Array.isArray(notificationData)) {
+      const results = await Promise.allSettled(notificationData.map(n => this._postOne(n, notificationDestination)))
+      const failures = results.filter(r => r.status === 'rejected')
+      for (const f of failures) LOG._warn && LOG.warn('Batch notification failed:', f.reason?.message ?? f.reason)
+      if (results.length === 0) return results
+      if (failures.length === results.length) throw failures[0].reason
+      return results
+    }
+    return this._postOne(notificationData, notificationDestination)
+  }
+
+  async _postOne(notificationData, notificationDestination) {
     const csrfHeaders = await buildHeadersForDestination(notificationDestination, {
       url: NOTIFICATIONS_API_ENDPOINT,
     })
-
     try {
       LOG._info && LOG.info(
         `Sending notification of key: ${notificationData.NotificationTypeKey} and version: ${notificationData.NotificationTypeVersion}`
