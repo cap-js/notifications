@@ -138,6 +138,8 @@ Set a fixed priority using an enum value:
 event BookOrdered { ... }
 ```
 
+The priority states for ANS are: LOW, NEUTRAL, MEDIUM, and HIGH.
+
 #### Dynamic priority
 
 The priority can be a CDS expression evaluated at runtime against the event payload. References to event fields are substituted with the actual values when the event is emitted, and the expression is forwarded to the database for evaluation. This means you can use any expression the database supports, including built-in functions:
