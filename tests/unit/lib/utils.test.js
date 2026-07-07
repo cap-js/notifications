@@ -17,14 +17,14 @@ describe("Test utils", () => {
         Properties: [
           {
             Key: "title",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "Some Test Title",
             Type: "String"
           },
           {
             Key: "description",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "",
             Type: "String"
@@ -38,14 +38,14 @@ describe("Test utils", () => {
         Properties: [
           {
             Key: "title",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "Some Test Title",
             Type: "String"
           },
           {
             Key: "description",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "Some Test Description",
             Type: "String"
@@ -109,7 +109,7 @@ describe("Test utils", () => {
     describe("Custom notifications", () => {
       const properties = [{
         Key: "title",
-        IsSensitive: false,
+        IsSensitive: true,
         Language: "en",
         Value: "Some Test Title",
         Type: "String"
@@ -400,14 +400,14 @@ describe("Test utils", () => {
         Properties: [
           { 
             Key: "title",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "Some Test Title",
             Type: "String" 
           },
           { 
             Key: "description",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "Some Test Description",
             Type: "String" 
