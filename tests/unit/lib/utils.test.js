@@ -1,5 +1,5 @@
 const cds = require("@sap/cds")
-const { buildNotification, validateNotificationTypes, readFile, getNotificationDestination, buildNotificationFromEvent, mapCdsTypeToANSType } = require("../../../lib/utils")
+const { buildNotification, validateNotificationTypes, readFile, getNotificationDestination, buildNotificationFromEvent, mapCdsTypeToANSType, applyValueLengthConstraints, MAX_PROPERTY_VALUE_LENGTH, MAX_TARGET_PARAM_VALUE_LENGTH } = require("../../../lib/utils")
 const { existsSync, readFileSync } = require("fs")
 const { getDestination } = require("@sap-cloud-sdk/connectivity")
 
@@ -17,14 +17,14 @@ describe("Test utils", () => {
         Properties: [
           {
             Key: "title",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "Some Test Title",
             Type: "String"
           },
           {
             Key: "description",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "",
             Type: "String"
@@ -38,14 +38,14 @@ describe("Test utils", () => {
         Properties: [
           {
             Key: "title",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "Some Test Title",
             Type: "String"
           },
           {
             Key: "description",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "Some Test Description",
             Type: "String"
@@ -109,7 +109,7 @@ describe("Test utils", () => {
     describe("Custom notifications", () => {
       const properties = [{
         Key: "title",
-        IsSensitive: false,
+        IsSensitive: true,
         Language: "en",
         Value: "Some Test Title",
         Type: "String"
@@ -400,14 +400,14 @@ describe("Test utils", () => {
         Properties: [
           { 
             Key: "title",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "Some Test Title",
             Type: "String" 
           },
           { 
             Key: "description",
-            IsSensitive: false,
+            IsSensitive: true,
             Language: "en",
             Value: "Some Test Description",
             Type: "String" 
@@ -721,6 +721,67 @@ describe("Test utils", () => {
         }
       })
       expect(result).toBe("nonexistent-path-for-testing/TestType")
+    })
+  })
+
+  describe("applyValueLengthConstraints", () => {
+    const longValue251 = "a".repeat(MAX_TARGET_PARAM_VALUE_LENGTH + 1)
+    const longValue256 = "a".repeat(MAX_PROPERTY_VALUE_LENGTH + 1)
+    const value255 = "a".repeat(MAX_PROPERTY_VALUE_LENGTH)
+    const value250 = "a".repeat(MAX_TARGET_PARAM_VALUE_LENGTH)
+
+    test("Returns notification unchanged when all values are within limits", () => {
+      const notification = {
+        Properties: [{ Key: "k", Value: value255 }],
+        TargetParameters: [{ Key: "k", Value: value250 }],
+      }
+      expect(applyValueLengthConstraints(notification)).toStrictEqual(notification)
+    })
+
+    test("Throws when a Property value exceeds 255 characters", () => {
+      const notification = {
+        Properties: [{ Key: "k", Value: longValue256 }],
+      }
+      expect(() => applyValueLengthConstraints(notification)).toThrow(`Property value exceeds the maximum length of ${MAX_PROPERTY_VALUE_LENGTH} characters.`)
+    })
+
+    test("Throws on the first Property value over 255 even when others are valid", () => {
+      const notification = {
+        Properties: [
+          { Key: "ok", Value: "short" },
+          { Key: "bad", Value: longValue256 },
+        ],
+      }
+      expect(() => applyValueLengthConstraints(notification)).toThrow(`Property value exceeds the maximum length of ${MAX_PROPERTY_VALUE_LENGTH} characters.`)
+    })
+
+    test("Removes TargetParameter entries whose value exceeds 250 characters", () => {
+      const notification = {
+        TargetParameters: [
+          { Key: "short", Value: value250 },
+          { Key: "long", Value: longValue251 },
+        ],
+      }
+      const result = applyValueLengthConstraints(notification)
+      expect(result.TargetParameters).toEqual([{ Key: "short", Value: value250 }])
+    })
+
+    test("Removes all TargetParameters when all values exceed 250 characters", () => {
+      const notification = {
+        TargetParameters: [{ Key: "k", Value: longValue251 }],
+      }
+      const result = applyValueLengthConstraints(notification)
+      expect(result.TargetParameters).toEqual([])
+    })
+
+    test("Returns null/undefined unchanged", () => {
+      expect(applyValueLengthConstraints(null)).toBeNull()
+      expect(applyValueLengthConstraints(undefined)).toBeUndefined()
+    })
+
+    test("Handles notification with no Properties or TargetParameters", () => {
+      const notification = { NotificationTypeKey: "Test" }
+      expect(applyValueLengthConstraints(notification)).toBe(notification)
     })
   })
 })

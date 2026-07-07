@@ -36,7 +36,7 @@ describe("Notifications Integration", () => {
     await alert.notify({
       recipients: ["reader@bookshop.com"],
       title: "New book arrived",
-      description: "A new book has been added to the catalogue"
+      description: "A new book has been added to the catalog."
     })
 
     expect(log.output).toContain("Notification:")
@@ -116,6 +116,31 @@ describe("Notifications Integration", () => {
     expect(de.Subtitle).toBe("{{buyer}} hat {{title}} bestellt")
   })
 
+  test("Batch of typed notifications logs each one to console", async () => {
+    await alert.notify("BookOrderedNotify", [
+      { recipients: ["reader1@bookshop.com"], data: { title: "Moby Dick",        buyer: "reader1@bookshop.com" } },
+      { recipients: ["reader2@bookshop.com"], data: { title: "Wuthering Heights", buyer: "reader2@bookshop.com" } },
+    ])
+
+    expect(log.output).toContain("reader1@bookshop.com")
+    expect(log.output).toContain("reader2@bookshop.com")
+    expect(log.output).toContain("Moby Dick")
+    expect(log.output).toContain("Wuthering Heights")
+    expect(log.output).not.toContain("is not in the notification types file")
+  })
+
+  test("Batch of default notifications logs each one to console", async () => {
+    await alert.notify([
+      { recipients: ["alice@bookshop.com"], title: "Order #1 confirmed", description: "Your order is on its way." },
+      { recipients: ["bob@bookshop.com"],   title: "Order #2 confirmed", description: "Your order is on its way." },
+    ])
+
+    expect(log.output).toContain("alice@bookshop.com")
+    expect(log.output).toContain("bob@bookshop.com")
+    expect(log.output).toContain("Order #1 confirmed")
+    expect(log.output).toContain("Order #2 confirmed")
+  })
+
   test("Email html is loaded from file with i18n resolved per locale", () => {
     const type = cds.notifications.local.types["bookshop/BookOrderedNotify"]["1"]
     const en = type.Templates.find(t => t.Language === 'en')
@@ -126,5 +151,46 @@ describe("Notifications Integration", () => {
     expect(de.EmailHtml).toBe(
       "<h1>Buch bestellt</h1>\n<p>Hallo {{buyer}}, deine Bestellung für <b>{{title}}</b> wurde aufgegeben.</p>\n"
     )
+  })
+  
+  describe("before('*') hook", () => {
+    let beforeHandlers
+
+    beforeEach(() => {
+      beforeHandlers = alert._handlers.before.length
+    })
+
+    afterEach(() => {
+      alert._handlers.before.splice(beforeHandlers)
+    })
+
+    test("is called before a notification is sent and receives msg.event and msg.data", async () => {
+      let capturedEvent, capturedData
+      alert.before('*', msg => {
+        capturedEvent = msg.event
+        capturedData = msg.data
+      })
+
+      await alert.notify("BookOrderedNotify", {
+        recipients: ["reader@bookshop.com"],
+        data: { title: "Moby Dick", buyer: "reader@bookshop.com" }
+      })
+
+      expect(capturedEvent).toBe("BookOrderedNotify")
+      expect(capturedData).toMatchObject({
+        NotificationTypeKey: expect.stringContaining("BookOrderedNotify"),
+        Recipients: expect.arrayContaining([expect.objectContaining({ RecipientId: "reader@bookshop.com" })]),
+      })
+    })
+
+    test("can suppress a notification by throwing", async () => {
+      alert.before('*', () => { throw new cds.error("Recipient not eligible") })
+
+      await expect(
+        alert.notify({ recipients: ["reader@bookshop.com"], title: "New book arrived" })
+      ).rejects.toThrow("Recipient not eligible")
+
+      expect(log.output).not.toContain("Notification:")
+    })
   })
 })

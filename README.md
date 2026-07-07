@@ -362,9 +362,18 @@ await alert.notify('BookOrdered', {
 
 ### Batch notifications
 
-Pass an array to `notify()` to send multiple notifications in a single call. Each notification is sent individually. If some items fail, the successful ones are still delivered. Failures are logged as warnings, and the call only throws if *all* items fail.
+Pass an array to `notify()` to send multiple notifications in a single call. Each notification is sent individually. This triggers only one outbox event, reducing the number of transactions when notifying many recipients. If some items fail, the successful ones are still delivered. Failures are logged as warnings, and the call only throws if *all* items fail.
 
 > **Note:** Batch sending is only available via `notify([...])`. `this.emit()` dispatches one event per call by design.
+
+```js
+alert.notify('BookOrdered', [
+  { recipients: [ buyer1.id ], data: { title: book.title, buyer: buyer1.name } },
+  { recipients: [ buyer2.id ], data: { title: book.title, buyer: buyer2.name } },
+])
+```
+
+Alternatively, the default notification template can be harnessed as well. 
 
 ```js
 await alert.notify([
@@ -372,7 +381,6 @@ await alert.notify([
   { type: 'BookOrdered', recipients: [buyer2.id], data: { title: book2.title, buyer: buyer2.name } },
 ])
 ```
-
 
 ## API Reference
 
@@ -506,6 +514,17 @@ This adds a `MAIL` delivery channel (enabled, default preference on, user-editab
 ### Outbox Behavior
 
 By default the notification service uses an outbox (`outbox: true`): `notify()` resolves as soon as the message is queued, not when it has been sent to ANS. This means the HTTP response from ANS is not returned.
+
+### Value Length Constraints
+
+The ANS API enforces maximum lengths on `Properties` and `TargetParameters` values. The plugin validates these automatically when emitting a notification:
+
+- **`Properties`**: if any `Value` exceeds **255 characters**, an error is thrown and the notification is not sent.
+- **`TargetParameters`**: entries whose `Value` exceeds **250 characters** are silently removed before the notification is sent.
+
+These constraints are applied in the `on` handler before the notification reaches the transport layer.
+
+### Low-level  Notifications API
 
 To send synchronously and receive the HTTP response:
 
