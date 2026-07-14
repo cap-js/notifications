@@ -73,7 +73,7 @@ Notification: BookOrderedNotify {
 ---------------------------------------------------------------
 ```
 
-The priority is `LOW` because the order quantity (1) did not exceed the threshold of 5. Change `"quantity"` to `10` in the `.http` file, send again, and it becomes `HIGH`.
+The priority is `LOW` because the order quantity (1) did not exceed the threshold of 5. Change `"quantity"` to `10` in the `.http` file, send again, and it will become `HIGH`.
 
 ### 3. Customize the notification type
 
