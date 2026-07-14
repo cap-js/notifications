@@ -42,7 +42,7 @@ In this guide, we use the [Bookshop reference sample app](https://github.com/cap
 
 ## Getting Started
 
-This section uses the Bookshop sample included in this repository. Everything is already wired up, you just need to run it, trigger a notification, and then make a change to see how the plugin responds.
+This section uses the Bookshop sample included in this repository. Everything is already wired up. You just need to run it, trigger a notification, and then make a change to see how the plugin responds.
 
 ### 1. Run the sample app
 
@@ -98,12 +98,12 @@ To see the notification appear in the Work Zone under the bell icon, you need a 
 
 On startup the plugin registers your notification types automatically. Submitting an order will now deliver a notification to the bell in Work Zone for the recipient.
 
-> **Note:** The bookshop sample uses in-app notifications by default. The Work Zone bell icon shows notifications for recipients identified by their SAP BTP Global User ID (UUID). To test email delivery as well, additional setup is required. For enabling, see [email delivery](#email-delivery) and [Default Email Delivery](#default-email-delivery). For required BTP configuration see the [SMTP mail destination guide](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/configuring-smtp-mail-destination).
+> **Note:** The bookshop sample uses in-app notifications by default. The Work Zone bell icon shows notifications for recipients identified by their SAP BTP Global User ID (UUID). To test email delivery as well, additional setup is required. For enabling, see [email delivery](#email-delivery) and [default email delivery](#default-email-delivery). For required BTP configuration see the [SMTP mail destination guide](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/configuring-smtp-mail-destination).
 
 
 ## Define Notification Types
 
-Notifications are based on *notification types* - templates that define how a notification looks, including titles, subtitles, and email content. There are two ways to define them. Both can be used together and are merged at startup.
+Notifications are based on *notification types*: templates that define how a notification looks, including titles, subtitles, and email content. These types can be defined two ways, both of which can be used together and are merged at startup.
 
 ### Option A: CDS Annotations (recommended)
 
@@ -135,11 +135,11 @@ extend service CatalogService with {
 }
 ```
 
-Any event with at least one `@notification` annotation (the bare `@notification` flag or any `@notification.*` property) is picked up. The notification type key is derived from the event name. Namespace prefixes are stripped, so `my.bookshop.BookOrdered` becomes `BookOrdered`.
+Any event with at least one `@notification` annotation (the bare `@notification` flag or any `@notification.*` property) is picked up. The notification type key is derived from the event name. Namespace prefixes are stripped, `my.bookshop.BookOrdered` becomes `BookOrdered`.
 
 > **Note:** The plugin automatically injects a `recipients` element into every notification event at model-load time; you don't need to declare it yourself.
 
-> **Note:** The event must be contained within a service either by defining it directly inside a `service`, or by using `extend service` / `using` to include it in one.
+> **Note:** The event must be contained within a service either by defining it directly inside a `service` or by using `extend service` / `using` to include it in an existing one.
 
 The following annotations are supported:
 
@@ -362,9 +362,9 @@ await alert.notify('BookOrdered', {
 
 ### Batch notifications
 
-Pass an array to `notify()` to send multiple notifications in a single call. Each notification is sent individually. This triggers only one outbox event, reducing the number of transactions when notifying many recipients. If some items fail, the successful ones are still delivered. Failures are logged as warnings, and the call only throws if *all* items fail.
+It is possibl to pass an array to `notify()` to send multiple notifications in a single call. Each notification is sent individually. This triggers only one outbox event, reducing the number of transactions when notifying many recipients. If some items fail, the successful ones are still delivered. Failures are logged as warnings, and the call only throws if **all** items fail.
 
-> **Note:** Batch sending is only available via `notify([...])`. `this.emit()` dispatches one event per call by design.
+> **Note:** Batch sending is only available via `notify([...])`. CDS event emission dispatches one event per call by design.
 
 ```js
 alert.notify('BookOrdered', [
@@ -384,9 +384,9 @@ await alert.notify([
 
 ## API Reference
 
-### Simple notification
+### Simple Notification
 
-For `notify({ recipients, title, ... })` no pre-defined notification type needed. The plugin uses a built-in `Default` template.
+For `notify({ recipients, title, ... })`, no pre-defined notification type is needed. The plugin uses a built-in `Default` template.
 
 | Parameter | Required | Description |
 |---|---|---|
@@ -395,9 +395,9 @@ For `notify({ recipients, title, ... })` no pre-defined notification type needed
 | `priority` | no | `LOW`, `NEUTRAL` (default), `MEDIUM`, or `HIGH` |
 | `description` | no | Subtitle text |
 
-### Named notification type
+### Named Notification Type
 
-For `notify('TypeKey', payload)` or `notify({ type: 'TypeKey', ... })` sends a notification using a pre-defined notification type.
+For `notify('TypeKey', payload)` or `notify({ type: 'TypeKey', ... })`, a notification using a pre-defined notification type is sent.
 
 | Parameter | Required | Description |
 |---|---|---|
@@ -406,7 +406,7 @@ For `notify('TypeKey', payload)` or `notify({ type: 'TypeKey', ... })` sends a n
 | `data` | no | Key-value pairs used to fill mustache placeholders in the type template |
 | `priority` | no | `LOW`, `NEUTRAL` (default), `MEDIUM`, or `HIGH` |
 
-> **Note:** Recipients can be email addresses (e.g. `user@example.com`) or SAP BTP Global User IDs (UUID format, e.g. `a1b2c3d4-...`). In `auto` mode (the default), the plugin detects the format per recipient and uses the correct key automatically. See [Authentication Identifier](#authentication-identifier) for details.
+> **Note:** Recipients can be email addresses (e.g. `user@example.com`) or SAP BTP Global User IDs (UUID format, e.g. `a1b2c3d4-...`). In `auto` mode (default), the plugin detects the format per recipient and uses the correct key automatically. See [Authentication Identifier](#authentication-identifier) for details.
 
 ### Validation
 
@@ -417,7 +417,7 @@ For `notify('TypeKey', payload)` or `notify({ type: 'TypeKey', ... })` sends a n
 
 ## Test-drive Locally
 
-In a local (development) environment, notifications are mocked to the console, no external service is required.
+In a local (development) environment, notifications are mocked to the console; no external service is required.
 
 <img width="700" alt="Notify to console" style="border-radius:0.5rem" src="_assets/notifyToConsole.png">
 
