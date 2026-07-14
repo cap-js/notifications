@@ -39,7 +39,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - New default `auto` for `cds.env.requires.notifications.authenticationIdentifier`. Each recipient is inspected: UUID values are published with `GlobalUserId`, everything else with `RecipientId`, with a warning when a value is neither a UUID nor an email. The previous values `UserUUID` and `RecipientId` are still supported for an explicit choice.
 
 
-## Version 0.3.0 - 2026/1/9
+## Version 0.3.0 - 2026-01-09
 
 ### Added
 
@@ -49,47 +49,47 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 - Plugin now correctly works in a hybrid setup
 
-## Version 0.2.5 - 2025/6/5
+## Version 0.2.5 - 2025-06-05
 
 ### Fixed
 
 - Add Apache-2.0
 
-## Version 0.2.4 - 2025/5/29
+## Version 0.2.4 - 2025-05-29
 
 ### Fixed
 
 - Fix versions
 
 
-## Version 0.2.3 - 2024/10/22
+## Version 0.2.3 - 2024-10-22
 
 ### Fixed
 
 - Fix cds build failure
 
 
-## Version 0.2.2 - 2024/10/21
+## Version 0.2.2 - 2024-10-21
 
 ### Fixed
 
 - Build issues fixed
 
 
-## Version 0.2.1 - 2024/9/16
+## Version 0.2.1 - 2024-09-16
 
 ### Fixed
 
 - Compatibility to `@sap/cds` 8
 
 
-## Version 0.2.0 - 2024/3/29
+## Version 0.2.0 - 2024-03-29
 
 ### Fixed
 
 - Fixed code smells and Dependabot alerts
 
-## Version 0.1.0 - 2023/10/30
+## Version 0.1.0 - 2023-10-30
 
 ### Added
 
