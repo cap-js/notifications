@@ -626,6 +626,24 @@ describe("Test utils", () => {
           xpr: ['case', 'when', { xpr: [{ val: 0 }, '<', { val: 1 }] }, 'then', { val: 'High' }, 'end']
         })
     })
+
+    test("Replaces refs inside list nodes", () => {
+      const expr = { list: [{ ref: ['a'] }, { ref: ['b'] }] }
+      expect(replaceRefsInExpr(expr, { a: 1, b: 2 }))
+        .toEqual({ list: [{ val: 1 }, { val: 2 }] })
+    })
+
+    test("Replaces refs in named function args", () => {
+      const func = { func: 'foo', args: { p: { ref: ['x'] } } }
+      expect(replaceRefsInExpr(func, { x: 42 }))
+        .toEqual({ func: 'foo', args: { p: { val: 42 } } })
+    })
+
+    test("Leaves multi-segment refs unchanged — path traversal is not supported", () => {
+      const expr = { ref: ['assoc', 'field'] }
+      expect(replaceRefsInExpr(expr, { assoc: 'something' }))
+        .toEqual({ ref: ['assoc', 'field'] })
+    })
   })
 
   describe("mapCdsTypeToANSType", () => {
