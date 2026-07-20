@@ -1,5 +1,5 @@
 const cds = require("@sap/cds")
-const { buildNotification, validateNotificationTypes, readFile, getNotificationDestination, buildNotificationFromEvent, mapCdsTypeToANSType, applyValueLengthConstraints, MAX_PROPERTY_VALUE_LENGTH, MAX_TARGET_PARAM_VALUE_LENGTH } = require("../../../lib/utils")
+const { buildNotification, validateNotificationTypes, readFile, getNotificationDestination, buildNotificationFromEvent, mapCdsTypeToANSType, replaceRefsInExpr, applyValueLengthConstraints, MAX_PROPERTY_VALUE_LENGTH, MAX_TARGET_PARAM_VALUE_LENGTH } = require("../../../lib/utils")
 const { existsSync, readFileSync } = require("fs")
 const { getDestination } = require("@sap-cloud-sdk/connectivity")
 
@@ -486,90 +486,182 @@ describe("Test utils", () => {
       recipients: ['buyer@example.com'],
     }
 
-    test("Sets NotificationTypeKey to the unqualified event name", () => {
-      const result = buildNotificationFromEvent(baseEventDef, baseData)
+    test("Sets NotificationTypeKey to the unqualified event name", async () => {
+      const result = await buildNotificationFromEvent(baseEventDef, baseData)
       expect(result.NotificationTypeKey).toBe('NewOrder')
     })
 
-    test("Sets NotificationTypeVersion to '1'", () => {
-      const result = buildNotificationFromEvent(baseEventDef, baseData)
+    test("Sets NotificationTypeVersion to '1'", async () => {
+      const result = await buildNotificationFromEvent(baseEventDef, baseData)
       expect(result.NotificationTypeVersion).toBe('1')
     })
 
-    test("Maps event data fields to Properties with IsSensitive true", () => {
-      const result = buildNotificationFromEvent(baseEventDef, baseData)
+    test("Maps event data fields to Properties with IsSensitive true", async () => {
+      const result = await buildNotificationFromEvent(baseEventDef, baseData)
       expect(result.Properties).toContainEqual({ Key: 'book', Language: 'en', Value: 'Moby Dick', Type: 'String', IsSensitive: true })
     })
 
-    test("Does not include recipients in Properties", () => {
-      const result = buildNotificationFromEvent(baseEventDef, baseData)
+    test("Does not include recipients in Properties", async () => {
+      const result = await buildNotificationFromEvent(baseEventDef, baseData)
       expect(result.Properties.map(p => p.Key)).not.toContain('recipients')
     })
 
-    test("Maps key elements to TargetParameters", () => {
-      const result = buildNotificationFromEvent(baseEventDef, baseData)
+    test("Maps key elements to TargetParameters", async () => {
+      const result = await buildNotificationFromEvent(baseEventDef, baseData)
       expect(result.TargetParameters).toEqual([{ Key: 'ID', Value: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee' }])
     })
 
-    test("Omits TargetParameters when no key elements exist", () => {
+    test("Omits TargetParameters when no key elements exist", async () => {
       const defNoKeys = { ...baseEventDef, elements: { book: { type: 'cds.String' } } }
-      const result = buildNotificationFromEvent(defNoKeys, { book: 'Test', recipients: [] })
+      const result = await buildNotificationFromEvent(defNoKeys, { book: 'Test', recipients: [] })
       expect(result.TargetParameters).toBeUndefined()
     })
 
-    test("Uses RecipientId for email-style recipients", () => {
-      const result = buildNotificationFromEvent(baseEventDef, baseData)
+    test("Uses RecipientId for email-style recipients", async () => {
+      const result = await buildNotificationFromEvent(baseEventDef, baseData)
       expect(result.Recipients).toEqual([{ RecipientId: 'buyer@example.com' }])
     })
 
-    test("Uses GlobalUserId for GUID recipients", () => {
+    test("Uses GlobalUserId for GUID recipients", async () => {
       const data = { ...baseData, recipients: ['123e4567-e89b-12d3-a456-426614174000'] }
-      const result = buildNotificationFromEvent(baseEventDef, data)
+      const result = await buildNotificationFromEvent(baseEventDef, data)
       expect(result.Recipients).toEqual([{ GlobalUserId: '123e4567-e89b-12d3-a456-426614174000' }])
     })
 
-    test("Handles mixed GUID and email recipients", () => {
+    test("Handles mixed GUID and email recipients", async () => {
       const data = { ...baseData, recipients: ['123e4567-e89b-12d3-a456-426614174000', 'email@example.com'] }
-      const result = buildNotificationFromEvent(baseEventDef, data)
+      const result = await buildNotificationFromEvent(baseEventDef, data)
       expect(result.Recipients).toEqual([
         { GlobalUserId: '123e4567-e89b-12d3-a456-426614174000' },
         { RecipientId: 'email@example.com' },
       ])
     })
 
-    test("Defaults Priority to NEUTRAL when annotation is absent", () => {
-      const result = buildNotificationFromEvent(baseEventDef, baseData)
+    test("Defaults Priority to NEUTRAL when annotation is absent", async () => {
+      const result = await buildNotificationFromEvent(baseEventDef, baseData)
       expect(result.Priority).toBe('NEUTRAL')
     })
 
-    test("Resolves enum priority annotation (#High -> HIGH)", () => {
+    test("Resolves enum priority annotation (#High -> HIGH)", async () => {
       const def = { ...baseEventDef, '@notification.priority': { '#': 'High' } }
-      const result = buildNotificationFromEvent(def, baseData)
+      const result = await buildNotificationFromEvent(def, baseData)
       expect(result.Priority).toBe('HIGH')
     })
 
-    test("Accepts plain string priority annotation", () => {
+    test("Accepts plain string priority annotation", async () => {
       const def = { ...baseEventDef, '@notification.priority': 'LOW' }
-      const result = buildNotificationFromEvent(def, baseData)
+      const result = await buildNotificationFromEvent(def, baseData)
       expect(result.Priority).toBe('LOW')
     })
 
-    test("Maps @Common.SemanticObject to NavigationTargetObject", () => {
+    describe("Invalid static priority annotation", () => {
+      const log = cds.test.log()
+      beforeEach(() => log.clear())
+
+      test("Falls back to NEUTRAL and warns when plain string priority is invalid", async () => {
+        const def = { ...baseEventDef, '@notification.priority': 'CRITICAL' }
+        const result = await buildNotificationFromEvent(def, baseData)
+        expect(result.Priority).toBe('NEUTRAL')
+        expect(log.output).toMatch(/invalid|CRITICAL/i)
+      })
+
+      test("Falls back to NEUTRAL and warns when enum priority annotation resolves to invalid value", async () => {
+        const def = { ...baseEventDef, '@notification.priority': { '#': 'CRITICAL' } }
+        const result = await buildNotificationFromEvent(def, baseData)
+        expect(result.Priority).toBe('NEUTRAL')
+        expect(log.output).toMatch(/invalid|CRITICAL/i)
+      })
+    })
+
+    test("Maps @Common.SemanticObject to NavigationTargetObject", async () => {
       const def = { ...baseEventDef, '@Common.SemanticObject': 'Orders' }
-      const result = buildNotificationFromEvent(def, baseData)
+      const result = await buildNotificationFromEvent(def, baseData)
       expect(result.NavigationTargetObject).toBe('Orders')
     })
 
-    test("Maps @Common.SemanticObjectAction to NavigationTargetAction", () => {
+    test("Maps @Common.SemanticObjectAction to NavigationTargetAction", async () => {
       const def = { ...baseEventDef, '@Common.SemanticObjectAction': 'manage' }
-      const result = buildNotificationFromEvent(def, baseData)
+      const result = await buildNotificationFromEvent(def, baseData)
       expect(result.NavigationTargetAction).toBe('manage')
     })
 
-    test("Works with empty data and no recipients", () => {
-      const result = buildNotificationFromEvent(baseEventDef, {})
+    test("Works with empty data and no recipients", async () => {
+      const result = await buildNotificationFromEvent(baseEventDef, {})
       expect(result.Recipients).toEqual([])
       expect(result.Properties).toEqual([])
+    })
+  })
+
+  describe("replaceRefsInExpr", () => {
+    test("Passes through val nodes unchanged", () => {
+      expect(replaceRefsInExpr({ val: 42 }, {})).toEqual({ val: 42 })
+    })
+
+    test("Passes through string operators unchanged", () => {
+      expect(replaceRefsInExpr('>', {})).toBe('>')
+    })
+
+    test("Replaces {ref} with {val} when key exists in data", () => {
+      expect(replaceRefsInExpr({ ref: ['quantity'] }, { quantity: 10 })).toEqual({ val: 10 })
+    })
+
+    test("Leaves {ref} unchanged when key is not in data", () => {
+      expect(replaceRefsInExpr({ ref: ['unknown'] }, { quantity: 10 })).toEqual({ ref: ['unknown'] })
+    })
+
+    test("Does not replace binding parameters ({ref, param: true})", () => {
+      const param = { ref: ['?'], param: true }
+      expect(replaceRefsInExpr(param, { '?': 'something' })).toEqual(param)
+    })
+
+    test("Recursively replaces refs in flat xpr array", () => {
+      const xpr = [{ ref: ['quantity'] }, '>', { val: 5 }]
+      expect(replaceRefsInExpr(xpr, { quantity: 10 }))
+        .toEqual([{ val: 10 }, '>', { val: 5 }])
+    })
+
+    test("Recursively replaces refs in nested xpr object", () => {
+      const expr = { xpr: [{ ref: ['quantity'] }, '>', { val: 5 }] }
+      expect(replaceRefsInExpr(expr, { quantity: 10 }))
+        .toEqual({ xpr: [{ val: 10 }, '>', { val: 5 }] })
+    })
+
+    test("Converts enum symbol {'#': value} to {val: value}", () => {
+      expect(replaceRefsInExpr({ '#': 'High' }, {})).toEqual({ val: 'High' })
+    })
+
+    test("Replaces refs in function call args", () => {
+      const func = { func: 'days_between', args: [{ ref: ['startDate'] }, { ref: ['endDate'] }] }
+      expect(replaceRefsInExpr(func, { startDate: '2024-01-01', endDate: '2024-06-01' }))
+        .toEqual({ func: 'days_between', args: [{ val: '2024-01-01' }, { val: '2024-06-01' }] })
+    })
+
+    test("Handles deep nesting: xpr containing xpr containing refs", () => {
+      const expr = {
+        xpr: ['case', 'when', { xpr: [{ ref: ['a'] }, '<', { val: 1 }] }, 'then', { ref: ['b'] }, 'end']
+      }
+      expect(replaceRefsInExpr(expr, { a: 0, b: 'High' }))
+        .toEqual({
+          xpr: ['case', 'when', { xpr: [{ val: 0 }, '<', { val: 1 }] }, 'then', { val: 'High' }, 'end']
+        })
+    })
+
+    test("Replaces refs inside list nodes", () => {
+      const expr = { list: [{ ref: ['a'] }, { ref: ['b'] }] }
+      expect(replaceRefsInExpr(expr, { a: 1, b: 2 }))
+        .toEqual({ list: [{ val: 1 }, { val: 2 }] })
+    })
+
+    test("Replaces refs in named function args", () => {
+      const func = { func: 'foo', args: { p: { ref: ['x'] } } }
+      expect(replaceRefsInExpr(func, { x: 42 }))
+        .toEqual({ func: 'foo', args: { p: { val: 42 } } })
+    })
+
+    test("Leaves multi-segment refs unchanged — path traversal is not supported", () => {
+      const expr = { ref: ['assoc', 'field'] }
+      expect(replaceRefsInExpr(expr, { assoc: 'something' }))
+        .toEqual({ ref: ['assoc', 'field'] })
     })
   })
 

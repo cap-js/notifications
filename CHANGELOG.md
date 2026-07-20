@@ -23,6 +23,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - Support for email templates via `@notification.template.email.subject` and `@notification.template.email.html` in CDS annotations, and `EmailSubject` / `EmailHtml` in JSON templates.
 - i18n support for CDS annotation string values using `{i18n>key}` syntax.
 - Notification types are automatically registered and kept in sync with the notification service on application startup when running in hybrid or production mode.
+- Support for dynamic `@notification.priority` expressions on CDS events (e.g. `@notification.priority: (quantity > 5 ? #High : #Low)`). The annotation value can be any CDS expression, including ternary operators and database functions such as `days_between`.
+- Key elements (annotated with `key` in the event definition) are now included in `TargetParameters` only and excluded from `Properties`, matching ANS API expectations.
 
 ### Fixed
 
@@ -30,6 +32,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - Improved error messages when notification type registration fails, now surfacing the ANS error detail instead of a raw HTTP error dump.
 - New default `auto` for `cds.env.requires.notifications.authenticationIdentifier`. Each recipient is inspected: UUID values are published with `GlobalUserId`, everything else with `RecipientId`, with a warning when a value is neither a UUID nor an email. The previous values `UserUUID` and `RecipientId` are still supported for an explicit choice.
   In practice this means the plugin "just works" without configuration: applications can pass emails, UUIDs, or a mix of both, and the correct recipient key is chosen per value — no upfront configuration about Work Zone's authentication identifier required.
+- `buildNotificationFromEvent` now respects `authenticationIdentifier` config when resolving recipient keys, consistent with the rest of the API.
 
 ## Version 0.3.0
 
