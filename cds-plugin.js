@@ -40,12 +40,8 @@ else cds.once("served", async () => {
   const { validateNotificationTypes, readFile } = require("./lib/utils")
   const { createNotificationTypesMap } = require("./lib/notificationTypes")
   const { notificationTypesFromModel } = require("./lib/compile")
-  const production = cds.env.profiles?.includes("production")
-
   const typesPath = cds.env.requires?.notifications?.types
   const kind = cds.env.requires?.notifications?.kind
-  const needsProcessing = kind === 'notify-to-rest' || !production
-  if (!needsProcessing) return
 
   const model = cds.context?.model ?? cds.model
   const notificationTypes = [
@@ -54,13 +50,12 @@ else cds.once("served", async () => {
   ]
 
   if (validateNotificationTypes(notificationTypes)) {
+    const notificationTypesMap = createNotificationTypesMap(JSON.parse(JSON.stringify(notificationTypes)), true)
+    cds.notifications = { local: { types: notificationTypesMap } }
+
     if (kind === 'notify-to-rest') {
       const { processNotificationTypes } = require('./lib/notificationTypes')
-      // deploy automatically on startup
       await processNotificationTypes(notificationTypes)
-    } else if (!production) {
-      const notificationTypesMap = createNotificationTypesMap(notificationTypes, true)
-      cds.notifications = { local: { types: notificationTypesMap } }
     }
   }
 

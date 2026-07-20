@@ -1,0 +1,114 @@
+name: "Integration tests"
+description: "Run tests with BTP services being bound"
+inputs:
+  CF_API:
+    description: "Cloud Foundry API endpoint"
+    required: true
+  CF_USERNAME:
+    description: "Cloud Foundry username"
+    required: true
+  CF_PASSWORD:
+    description: "Cloud Foundry password"
+    required: true
+  CF_ORG:
+    description: "Cloud Foundry organization"
+    required: true
+  CF_SPACE:
+    description: "Cloud Foundry space"
+    required: true
+  NODE_VERSION:
+    description: "Node.js version to use for tests"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Install dependencies and Cloud Foundry CLI (v8.9.0)
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libc6 wget tar
+        wget "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=8.9.0&source=github-rel" -O cf-cli.tar.gz
+        tar -xvzf cf-cli.tar.gz
+        sudo mv cf /usr/local/bin/
+        sudo mv cf8 /usr/local/bin/
+        cf --version
+
+    - name: Authenticate with Cloud Foundry
+      shell: bash
+      env:
+        CF_API: ${{ inputs.CF_API }}
+        CF_USERNAME: ${{ inputs.CF_USERNAME }}
+        CF_PASSWORD: ${{ inputs.CF_PASSWORD }}
+        CF_ORG: ${{ inputs.CF_ORG }}
+        CF_SPACE: ${{ inputs.CF_SPACE }}
+      run: |
+        for i in {1..5}; do
+          cf api "$CF_API" && \
+          cf auth && \
+          cf target -o "$CF_ORG" -s "$CF_SPACE" && break
+          echo "cf login failed, retrying ($i/5)..."
+          sleep 10
+          if [ "$i" -eq 5 ]; then
+            echo "❌ cf login failed after 5 attempts."
+            exit 1
+          fi
+        done
+
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+    - name: Use Node.js ${{ inputs.NODE_VERSION }}
+      uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+      with:
+        node-version: ${{ inputs.NODE_VERSION }}
+    - run: npm i -g @sap/cds-dk
+      shell: bash
+    - run: npm i
+      shell: bash
+    - name: Set node env for HANA
+      run: echo "NODE_VERSION_HANA=$(echo ${{ inputs.NODE_VERSION }} | tr . _)" >> $GITHUB_ENV
+      shell: bash
+    - name: CDS Versions being used
+      run: cds v -i
+      shell: bash
+
+    - name: Create HDI Container
+      shell: bash
+      run: cf create-service hana hdi-shared cap-js-notifications-hana-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA
+
+    - name: Deploy model to HANA
+      shell: bash
+      run: cd tests/bookshop && cds deploy --to hana:cap-js-notifications-hana-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA
+
+    - name: Create HDI Container service key
+      shell: bash
+      run: cf create-service-key cap-js-notifications-hana-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA cap-js-notifications-hana-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA-key
+
+    - name: Bind services
+      shell: bash
+      run: |
+        cds bind db -2 cap-js-notifications-hana-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA -o tests/bookshop/package.json
+        cds bind -2 incidents-testing-destination -o tests/bookshop/package.json
+
+    - name: Run integration tests
+      shell: bash
+      run: CDS_ENV=hybrid npx jest --silent
+
+    - name: Delete HDI Container Key
+      if: ${{ always() }}
+      shell: bash
+      run: cf delete-service-key cap-js-notifications-hana-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA cap-js-notifications-hana-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA-key -f
+
+    - name: Delete HDI Container
+      if: ${{ always() }}
+      shell: bash
+      run: |
+        for i in {1..5}; do
+          cf delete-service cap-js-notifications-hana-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA -f && break
+          echo "HDI container delete failed, retrying ($i/5)..."
+          sleep 10
+          if [ "$i" -eq 5 ]; then
+            echo "❌ HDI container delete failed after 5 attempts."
+            exit 1
+          fi
+        done
