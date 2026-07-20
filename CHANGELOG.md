@@ -31,12 +31,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - Log full response body and headers when the `notifications` logger is enabled at debug level.
 - Return the full HTTP response from the REST notification handler when `outbox:false` 
 - Validation of ANS length constraints at emit time: `Properties` values exceeding 255 characters throw an error; `TargetParameters` values exceeding 250 characters are silently dropped. Event element names exceeding 128 characters are caught at `cds build` time.
+- Key elements (annotated with `key` in the event definition) are now included in `TargetParameters` only and excluded from `Properties`, matching ANS API expectations.
 
 ### Fixed
 
 - Fixed `#EnumValue` enum references in `@notification.deliveryChannels`. The `{ "#": "..." }` CSN form produced by the CDS compiler was not handled by `resolveEnum`, causing a `TypeError` at runtime.
 - Improved error messages when notification type registration fails, now surfacing the ANS error detail instead of a raw HTTP error dump.
 - New default `auto` for `cds.env.requires.notifications.authenticationIdentifier`. Each recipient is inspected: UUID values are published with `GlobalUserId`, everything else with `RecipientId`, with a warning when a value is neither a UUID nor an email. The previous values `UserUUID` and `RecipientId` are still supported for an explicit choice.
+  In practice this means the plugin "just works" without configuration: applications can pass emails, UUIDs, or a mix of both, and the correct recipient key is chosen per value — no upfront configuration about Work Zone's authentication identifier required.
+- `buildNotificationFromEvent` now respects `authenticationIdentifier` config when resolving recipient keys, consistent with the rest of the API.
 
 
 ## Version 0.3.0 - 2026-01-09
