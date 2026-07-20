@@ -125,8 +125,50 @@ The following annotations are supported:
 | `@notification.template.email.html` | `EmailHtml` |
 | `@Common.SemanticObject` | `NavigationTargetObject` |
 | `@Common.SemanticObjectAction` | `NavigationTargetAction` |
+| `@notification.priority` | `Priority` |
 
 Annotation values support `{i18n>key}` syntax. Keys are resolved against your project's `_i18n/i18n.properties` English labels at startup:
+
+#### Static priority
+
+Set a fixed priority using an enum value:
+
+```cds
+@notification.priority: #High
+event BookOrdered { ... }
+```
+
+The priority states for ANS are: LOW, NEUTRAL, MEDIUM, and HIGH.
+
+#### Dynamic priority
+
+The priority can be a CDS expression evaluated at runtime against the event payload. References to event fields are substituted with the actual values when the event is emitted, and the expression is forwarded to the database for evaluation. This means you can use any expression the database supports, including built-in functions:
+
+```cds
+@notification.priority: (quantity > 5 ? #High : #Low)
+event BookOrdered {
+  title    : String;
+  quantity : Integer;
+}
+```
+
+```cds
+@notification.priority: (days_between(orderDate, deliveryDate) > 7 ? #High : #Low)
+event LateDelivery {
+  orderDate    : Date;
+  deliveryDate : Date;
+}
+```
+
+Dynamic priority requires the event to be emitted via `this.emit(...)` on the service, so the plugin can intercept it and access the payload:
+
+```js
+await this.emit('BookOrdered', {
+  title: book.title,
+  quantity: quantity,
+  recipients: [buyer],
+})
+```
 
 ```cds
 @notification.template.title:    '{i18n>BOOK_ORDERED_TITLE}'
