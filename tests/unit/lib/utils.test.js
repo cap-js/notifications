@@ -554,6 +554,25 @@ describe("Test utils", () => {
       expect(result.Priority).toBe('LOW')
     })
 
+    describe("Invalid static priority annotation", () => {
+      const log = cds.test.log()
+      beforeEach(() => log.clear())
+
+      test("Falls back to NEUTRAL and warns when plain string priority is invalid", async () => {
+        const def = { ...baseEventDef, '@notification.priority': 'CRITICAL' }
+        const result = await buildNotificationFromEvent(def, baseData)
+        expect(result.Priority).toBe('NEUTRAL')
+        expect(log.output).toMatch(/invalid|CRITICAL/i)
+      })
+
+      test("Falls back to NEUTRAL and warns when enum priority annotation resolves to invalid value", async () => {
+        const def = { ...baseEventDef, '@notification.priority': { '#': 'CRITICAL' } }
+        const result = await buildNotificationFromEvent(def, baseData)
+        expect(result.Priority).toBe('NEUTRAL')
+        expect(log.output).toMatch(/invalid|CRITICAL/i)
+      })
+    })
+
     test("Maps @Common.SemanticObject to NavigationTargetObject", async () => {
       const def = { ...baseEventDef, '@Common.SemanticObject': 'Orders' }
       const result = await buildNotificationFromEvent(def, baseData)
