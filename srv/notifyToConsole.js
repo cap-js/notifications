@@ -17,7 +17,8 @@ module.exports = class NotifyToConsole extends NotificationService {
       )
 
       const { NotificationTypeKey, NotificationTypeVersion } = notification
-      const types = cds.notifications.local.types // REVISIT: what is this?
+      const types = cds.notifications?.local?.types
+      if (!types) return
 
       if (!(NotificationTypeKey in types)) {
         LOG._warn && LOG.warn(

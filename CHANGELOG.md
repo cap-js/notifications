@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - Support for email templates via `@notification.template.email.subject` and `@notification.template.email.html` in CDS annotations, and `EmailSubject` / `EmailHtml` in JSON templates.
 - i18n support for CDS annotation string values using `{i18n>key}` syntax.
 - Notification types are automatically registered and kept in sync with the notification service on application startup when running in hybrid or production mode.
+- Support for disabling the plugin via `cds.env.requires.notifications.enabled: false`.
 
 ### Fixed
 
