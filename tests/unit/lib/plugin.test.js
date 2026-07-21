@@ -97,7 +97,7 @@ describe("Serving hook - notification handler registration", () => {
       elements: { ID: { type: 'cds.String', key: true }, title: { type: 'cds.String' }, recipients: { items: { type: 'cds.String' } } }
     }
     service.events['OrderPlaced'] = eventDef
-    await registeredHandler({ event: 'OrderPlaced', data: { ID: '123', title: 'Moby Dick', recipients: ['buyer@example.com'] } })
+    await registeredHandler({ event: 'OrderPlaced', data: { ID: '123', title: 'Moby Dick', recipients: ['buyer@example.com'] } }, jest.fn())
 
     expect(notifySpy).toHaveBeenCalledWith(expect.objectContaining({
       NotificationTypeKey: 'OrderPlaced',
@@ -114,7 +114,7 @@ describe("Serving hook - notification handler registration", () => {
   })
 
   test("Skips plain events without @notification", async () => {
-    await registeredHandler({ event: 'PlainEvent', data: {} })
+    await registeredHandler({ event: 'PlainEvent', data: {} }, jest.fn())
 
     expect(notifySpy).not.toHaveBeenCalled()
   })
@@ -131,7 +131,7 @@ describe("Serving hook - notification handler registration", () => {
       elements: { recipients: { items: { type: 'cds.String' } } }
     }
     service.events['OrderPlaced'] = eventDef
-    await registeredHandler({ event: 'OrderPlaced', data: { recipients: ['buyer@example.com'] } })
+    await registeredHandler({ event: 'OrderPlaced', data: { recipients: ['buyer@example.com'] } }, jest.fn())
 
     expect(errorSpy).toHaveBeenCalledWith('Failed to send notification for event', expect.any(String), expect.any(Error))
   })

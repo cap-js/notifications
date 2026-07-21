@@ -44,7 +44,7 @@ alert.notify({
   recipients: [ ...readers() ],
   priority: "HIGH",
   title: "New book arrived!",
-  description: "Book 'Wuthering Heights' has been added to the catalogue."
+  description: "Book 'Wuthering Heights' has been added to the catalog."
 })
 ```
 
@@ -52,6 +52,28 @@ alert.notify({
 
 * **priority** - Priority of the notification, this argument is optional, it defaults to NEUTRAL
 * **description** - Subtitle for the notification, this argument is optional
+
+### Batch Notifications
+
+You can send multiple notifications of the same type in a single call by passing an array as the second argument. This triggers only one outbox event, reducing the number of transactions when notifying many recipients.
+
+```js
+alert.notify('BookOrdered', [
+  { recipients: [ buyer1.id ], data: { title: book.title, buyer: buyer1.name } },
+  { recipients: [ buyer2.id ], data: { title: book.title, buyer: buyer2.name } },
+])
+```
+
+The same works for simple (default) notifications:
+
+```js
+alert.notify([
+  { recipients: [ 'alice@example.com' ], title: 'Order confirmed', description: 'Your order has been confirmed.' },
+  { recipients: [ 'bob@example.com' ],   title: 'We have your order', description: 'Your order is now being worked on.' },
+])
+```
+
+Each notification in the batch is sent independently. If one fails, the others still go through.
 
 
 ## Use Notification Types
@@ -103,8 +125,50 @@ The following annotations are supported:
 | `@notification.template.email.html` | `EmailHtml` |
 | `@Common.SemanticObject` | `NavigationTargetObject` |
 | `@Common.SemanticObjectAction` | `NavigationTargetAction` |
+| `@notification.priority` | `Priority` |
 
 Annotation values support `{i18n>key}` syntax. Keys are resolved against your project's `_i18n/i18n.properties` English labels at startup:
+
+#### Static priority
+
+Set a fixed priority using an enum value:
+
+```cds
+@notification.priority: #High
+event BookOrdered { ... }
+```
+
+The priority states for ANS are: LOW, NEUTRAL, MEDIUM, and HIGH.
+
+#### Dynamic priority
+
+The priority can be a CDS expression evaluated at runtime against the event payload. References to event fields are substituted with the actual values when the event is emitted, and the expression is forwarded to the database for evaluation. This means you can use any expression the database supports, including built-in functions:
+
+```cds
+@notification.priority: (quantity > 5 ? #High : #Low)
+event BookOrdered {
+  title    : String;
+  quantity : Integer;
+}
+```
+
+```cds
+@notification.priority: (days_between(orderDate, deliveryDate) > 7 ? #High : #Low)
+event LateDelivery {
+  orderDate    : Date;
+  deliveryDate : Date;
+}
+```
+
+Dynamic priority requires the event to be emitted via `this.emit(...)` on the service, so the plugin can intercept it and access the payload:
+
+```js
+await this.emit('BookOrdered', {
+  title: book.title,
+  quantity: quantity,
+  recipients: [buyer],
+})
+```
 
 ```cds
 @notification.template.title:    '{i18n>BOOK_ORDERED_TITLE}'
@@ -266,6 +330,15 @@ To disable the plugin without removing it, set `enabled: false` in your CDS conf
 This prevents the plugin from registering its hooks — no automatic `this.emit()` interception, no notification type registration, and no build task. This is useful for modules where notifications should not be active.
 
 > **Note:** Direct calls to `cds.connect.to('notifications')` and `notify()` are not affected by this flag, as the underlying notifications service is loaded independently by CDS. The approach of `this.emit()` is recommended over `notify()` directly, so that `enabled: false` can fully suppress notification behavior.
+
+### Value Length Constraints
+
+The ANS API enforces maximum lengths on `Properties` and `TargetParameters` values. The plugin validates these automatically when emitting a notification:
+
+- **`Properties`**: if any `Value` exceeds **255 characters**, an error is thrown and the notification is not sent.
+- **`TargetParameters`**: entries whose `Value` exceeds **250 characters** are silently removed before the notification is sent.
+
+These constraints are applied in the `on` handler before the notification reaches the transport layer.
 
 ### Low-level  Notifications API
 
