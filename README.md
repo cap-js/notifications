@@ -249,6 +249,24 @@ Note, that in order for E-Mail Notifications to be sent for notifications publis
 
 For the Work Zone Authentication Identifier configuration details refer to: [Work Zone Subaccount Settings](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/subaccount-settings)
 
+### Disabling the Plugin
+
+To disable the plugin without removing it, set `enabled: false` in your CDS configuration:
+
+```json
+"cds": {
+  "requires": {
+    "notifications": {
+      "enabled": false
+    }
+  }
+}
+```
+
+This prevents the plugin from registering its hooks — no automatic `this.emit()` interception, no notification type registration, and no build task. This is useful for modules where notifications should not be active.
+
+> **Note:** Direct calls to `cds.connect.to('notifications')` and `notify()` are not affected by this flag, as the underlying notifications service is loaded independently by CDS. The approach of `this.emit()` is recommended over `notify()` directly, so that `enabled: false` can fully suppress notification behavior.
+
 ### Low-level  Notifications API
 
 You can use these two signature to send the custom notification with pre-defined notification types.
