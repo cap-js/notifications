@@ -1,4 +1,4 @@
-const cds = require("@sap/cds/lib")
+const cds = require('@sap/cds')
 if (!cds.env.requires?.notifications?.enabled) return 
 
 const { buildNotificationFromEvent } = require('./lib/utils')
