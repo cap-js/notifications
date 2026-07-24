@@ -557,6 +557,24 @@ This adds a `MAIL` delivery channel (enabled, default preference on, user-editab
 
 By default the notification service uses an outbox (`outbox: true`): `notify()` resolves as soon as the message is queued, not when it has been sent to ANS. This means the HTTP response from ANS is not returned.
 
+### Disabling the Plugin
+
+To disable the plugin without removing it, set `enabled: false` in your CDS configuration:
+
+```json
+"cds": {
+  "requires": {
+    "notifications": {
+      "enabled": false
+    }
+  }
+}
+```
+
+This prevents the plugin from registering its hooks — no automatic `this.emit()` interception, no notification type registration, and no build task. This is useful for modules where notifications should not be active.
+
+> **Note:** Direct calls to `cds.connect.to('notifications')` and `notify()` are not affected by this flag, as the underlying notifications service is loaded independently by CDS. The approach of `this.emit()` is recommended over `notify()` directly, so that `enabled: false` can fully suppress notification behavior.
+
 ### Value Length Constraints
 
 The ANS API enforces maximum lengths on `Properties` and `TargetParameters` values. The plugin validates these automatically when emitting a notification:

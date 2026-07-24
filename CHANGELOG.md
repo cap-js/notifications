@@ -32,6 +32,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - Return the full HTTP response from the REST notification handler when `outbox:false` 
 - Validation of ANS length constraints at emit time: `Properties` values exceeding 255 characters throw an error; `TargetParameters` values exceeding 250 characters are silently dropped. Event element names exceeding 128 characters are caught at `cds build` time.
 - Key elements (annotated with `key` in the event definition) are now included in `TargetParameters` only and excluded from `Properties`, matching ANS API expectations.
+- Support for disabling the plugin via `cds.requires.notifications.enabled: false`.
 
 ### Fixed
 
