@@ -1,13 +1,13 @@
 using {
   Currency,
   managed,
-  cuid,
   sap
 } from '@sap/cds/common';
 
 namespace sap.capire.bookshop;
 
-entity Books : managed, cuid {
+entity Books : managed {
+  key ID   : Integer;
   title    : localized String(111)  @mandatory;
   descr    : localized String(1111);
   author   : Association to Authors @mandatory;
@@ -17,7 +17,8 @@ entity Books : managed, cuid {
   currency : Currency;
 }
 
-entity Authors : managed, cuid {
+entity Authors : managed {
+  key ID       : Integer;
   name         : String(111) @mandatory;
   dateOfBirth  : Date;
   dateOfDeath  : Date;
