@@ -1,10 +1,10 @@
 const cds = require("@sap/cds/lib")
-const { buildNotificationFromEvent } = require('./lib/utils')
+if (!cds.env.requires?.notifications?.enabled) return 
 
-const isEnabled = () => cds.env.requires?.notifications?.enabled !== false
+const { buildNotificationFromEvent } = require('./lib/utils')
+cds.build?.register?.('notifications', require("./lib/build"))
 
 cds.on("loaded", m => {
-  if (!isEnabled()) return
   for (const def of Object.values(m.definitions)) {
     if (def.kind !== 'event') continue
     if (!Object.keys(def).some(k => k === '@notification' || k.startsWith('@notification.'))) continue
@@ -16,7 +16,6 @@ cds.on("loaded", m => {
 })
 
 cds.on('serving', service => {
-  if (!isEnabled()) return
   if (service.name === 'notifications' || service instanceof cds.DatabaseService) return
   service.on('*', async (req, next) => {
     let def = req.target ?? service.events?.[req.event]
@@ -35,13 +34,7 @@ cds.on('serving', service => {
   })
 })
 
-if (cds.cli.command === "build") {
-  // register build plugin
-  cds.build?.register?.('notifications', require("./lib/build"))
-}
-
-else cds.once("served", async () => {
-  if (!isEnabled()) return
+cds.once("served", async () => {
   const { validateNotificationTypes, readFile } = require("./lib/utils")
   const { createNotificationTypesMap } = require("./lib/notificationTypes")
   const { notificationTypesFromModel } = require("./lib/compile")
