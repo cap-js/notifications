@@ -1,5 +1,5 @@
 const cds = require("@sap/cds")
-const { join } = cds.utils.path
+const { join } = require("path")
 const { messages } = require("../../lib/utils")
 const { notificationTypesFromModel } = require("../../lib/compile")
 

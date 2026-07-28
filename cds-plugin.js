@@ -1,5 +1,8 @@
-const cds = require("@sap/cds/lib")
+const cds = require('@sap/cds')
+if (!cds.env.requires?.notifications?.enabled) return 
+
 const { buildNotificationFromEvent } = require('./lib/utils')
+cds.build?.register?.('notifications', require("./lib/build"))
 
 cds.on("loaded", m => {
   for (const def of Object.values(m.definitions)) {
@@ -31,12 +34,7 @@ cds.on('serving', service => {
   })
 })
 
-if (cds.cli.command === "build") {
-  // register build plugin
-  cds.build?.register?.('notifications', require("./lib/build"))
-}
-
-else cds.once("served", async () => {
+cds.once("served", async () => {
   const { validateNotificationTypes, readFile } = require("./lib/utils")
   const { createNotificationTypesMap } = require("./lib/notificationTypes")
   const { notificationTypesFromModel } = require("./lib/compile")

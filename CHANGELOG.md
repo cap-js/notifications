@@ -25,6 +25,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - Notification types are automatically registered and kept in sync with the notification service on application startup when running in hybrid or production mode.
 - Support for dynamic `@notification.priority` expressions on CDS events (e.g. `@notification.priority: (quantity > 5 ? #High : #Low)`). The annotation value can be any CDS expression, including ternary operators and database functions such as `days_between`.
 - Key elements (annotated with `key` in the event definition) are now included in `TargetParameters` only and excluded from `Properties`, matching ANS API expectations.
+- Support for disabling the plugin via `cds.requires.notifications.enabled: false`.
 
 ### Fixed
 
