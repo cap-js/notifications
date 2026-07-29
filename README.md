@@ -8,6 +8,7 @@ The `@cap-js/notifications` package is a [CDS plugin](https://cap.cloud.sap/docs
 
 - [Setup](#setup)
 - [Getting Started](#getting-started)
+- [Running the Sample](#running-the-sample)
 - [Define Notification Types](#define-notification-types)
 - [Send Notifications](#send-notifications)
 - [API Reference](#api-reference)
@@ -20,6 +21,7 @@ The `@cap-js/notifications` package is a [CDS plugin](https://cap.cloud.sap/docs
   - [Authentication Identifier](#authentication-identifier)
   - [Default Email Delivery](#default-email-delivery)
   - [Outbox Behavior](#outbox-behavior)
+  - [Disabling the Plugin](#disabling-the-plugin)
   - [Low-level Notifications API](#low-level-notifications-api)
 - [Contributing](#contributing)
 - [Code of Conduct](#code-of-conduct)
@@ -92,23 +94,70 @@ this.on('submitOrder', async req => {
 
 The plugin intercepts the event and sends the notification automatically. During local development, notifications are printed to the console. No BTP connection required.
 
-To explore a complete working example, see the [Bookshop sample](https://github.com/cap-js/notifications/tree/main/tests/bookshop) in `tests/bookshop`.
+## Running the Sample
 
----
+This section uses the Bookshop sample included in this repository.
+
+### 1. Start the sample app
+
+```sh
+cd tests/bookshop
+npm install
+cds watch
+```
+
+The server starts at [http://localhost:4004](http://localhost:4004). During local development, the plugin prints the notifications to the console thus no BTP account is yet needed.
+
+### 2. Trigger a notification
+
+The bookshop's `submitOrder` action reduces book stock and emits a `BookOrderedNotify` event. The plugin intercepts that event and sends a notification.
+
+Open `tests/bookshop/test/http/CatalogService.http` in VS Code and click **Send Request** above the `submitOrder` block. This file has the server URL and credentials pre-configured.
+
+In the server console you will see the notification printed to confirm the notification was successful.
+
+### 3. Customize the notification type
+
+Open `tests/bookshop/srv/notifications.cds`. This file defines the `BookOrderedNotify` event and all of its `@notification` annotations. Change the subtitle template to include the quantity:
+
+```cds
+// Before
+subtitle: '{i18n>BOOK_ORDERED_SUBTITLE}',
+
+// After
+subtitle: '{{buyer}} ordered {{quantity}}x {{title}}',
+```
+
+Save the file and `cds watch` reloads automatically. Send the request again and the updated subtitle appears in the console output. From here, try adjusting the priority expression, adding a `@description`, or exploring the other annotations on the event.
+
+### 4. Connect to SAP Build Work Zone
+
+To see the notification appear in the Work Zone, you need a BTP subaccount with SAP Build Work Zone and the SAP Alert Notification service configured.
+
+1. Follow the [SAP Build Work Zone setup guide](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/enabling-notifications-for-custom-apps-on-sap-btp-cloud-foundry) to subscribe to the service and configure the required `SAP_Notifications` destination in your subaccount.
+2. Bind your local environment to the destination service instance in CF using `cds bind`, then run `cds watch --profile hybrid` to connect to BTP destinations from your local machine.
+
+On startup the plugin registers your notification types automatically. Submitting an order will now deliver a notification to the bell in Work Zone for the recipient.
+
+> [!Note]
+> The bookshop sample uses in-app notifications by default. The Work Zone bell icon shows notifications for recipients identified by their SAP BTP Global User ID (UUID). To test email delivery as well, additional setup is required. For enabling, see [email delivery](#email-delivery) and [default email delivery](#default-email-delivery). For required BTP configuration see the [SMTP mail destination guide](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/configuring-smtp-mail-destination).
 
 
 ## Define Notification Types
 
-Notifications are based on *notification types*: templates that define the structure of notifications with titles, subtitles, and email content. These types can be defined in two ways, both of which can be used together and are merged at startup.
+Notifications are based on *notification types*: templates that define how a notification looks, including titles, subtitles, and email content. These types can be defined in two ways, both of which can be used together and are merged at startup.
 
-### 1. CDS Annotations (recommended)
+### Option A: CDS Annotations (recommended)
 
 The recommended approach is to define the notification type directly in your service model by annotating events with `@notification`. The plugin discovers and registers them automatically during startup.
+
+Define an event in your `srv/` model:
 
 ```cds
 using { CatalogService } from './cat-service';
 
 extend service CatalogService with {
+
   @description: 'Sent when a book is ordered'
   @notification: {
     template: {
@@ -124,15 +173,16 @@ extend service CatalogService with {
     title : String;
     buyer : String;
   }
+
 }
 ```
 
-The notification type key is derived from the event name. Namespace prefixes are stripped, `my.bookshop.BookOrdered` becomes `BookOrdered`.
+Any event with at least one `@notification` annotation (the bare `@notification` flag or any `@notification.*` property) is picked up. The notification type key is derived from the event name. Namespace prefixes are stripped, `my.bookshop.BookOrdered` becomes `BookOrdered`.
 
 > [!Note]
-> The plugin automatically injects a `recipients` element into every notification event at model-load time. You don't need to declare it yourself.
+> The plugin automatically injects a `recipients` element into every notification event at model-load time; you don't need to declare it yourself.
 
-> [!IMPORTANT]
+> [!Important]
 > The event must be contained within a service either by defining it directly inside a `service` or by using `extend service` / `using` to include it in an existing one.
 
 **Common annotations:**
@@ -156,10 +206,9 @@ event BookOrdered { ... }
 
 For a complete list of supported annotations and their mappings, see [Annotation Reference](#annotation-reference).
 
-#### i18n support
+#### i18n support (Option A only)
 
-The `@notification` annotation values support `{i18n>key}` syntax. The keys are automatically resolved against your project's i18n bundles at startup. Templates are generated for each locale where at least one translation differs from the default language.
-
+The `@notification` annotation values support `{i18n>key}` syntax. Keys are automatically resolved against your project's i18n bundles at startup. Templates are generated for each locale where at least one translation differs from the default language.
 
 ```cds
 @notification.template.title:    '{i18n>BOOK_ORDERED_TITLE}'
@@ -167,7 +216,23 @@ The `@notification` annotation values support `{i18n>key}` syntax. The keys are 
 event BookOrdered { ... }
 ```
 
-#### Priority
+#### HTML email templates (Option A only)
+
+The `email.html` annotation accepts either an inline HTML string or a path to an `.html` file relative to the `.cds` source file. The file is read at startup and i18n placeholders within it are resolved.
+
+```cds
+@notification: {
+  template: {
+    email: {
+      subject: 'Your order: {{title}}',
+      html   : './book-ordered-email.html'
+    }
+  }
+}
+event BookOrdered { ... }
+```
+
+#### Priority (Option A only)
 
 Notifications can be assigned different priority levels: `LOW`, `NEUTRAL` (default), `MEDIUM`, or `HIGH`. These priorities affect how notifications are displayed and sorted in SAP Build Work Zone.
 
@@ -204,29 +269,13 @@ event LateDelivery {
 
 Dynamic priority requires the event to be emitted via `this.emit(...)` so the plugin can intercept and evaluate it.
 
-#### HTML email templates
-
-The `email.html` annotation accepts either an inline HTML string or a path to an `.html` file relative to the `.cds` source file:
-
-```cds
-@notification: {
-  template: {
-    email: {
-      subject: 'Your order: {{title}}',
-      html   : './book-ordered-email.html'
-    }
-  }
-}
-event BookOrdered { ... }
-```
-
 #### Build integration
 
 Running `cds build` processes all `@notification` annotated events and generates a merged `notification-types.json` to the build output, combining types from CDS annotations with any types from the JSON file.
 
-### 2. JSON file
+### Option B: JSON file
 
-An alternative approach is to define notification types statically in `srv/notification-types.json` or a custom path (see [Custom Notification Types Path](#custom-notification-types-path)):
+An alternative approach is to define notification types statically in `srv/notification-types.json` or custom path (see [Custom Notification Types Path](#custom-notification-types-path)):
 
 ```json
 [
@@ -247,18 +296,15 @@ An alternative approach is to define notification types statically in `srv/notif
 ]
 ```
 
-> [!Warning]
->
-> i18n resolution, HTML file paths, and priority annotations (`@notification.priority`) are only available when using CDS annotations. The JSON file format uses pre-resolved strings.
+> [!Note]
+> i18n resolution, HTML file paths, and priority annotations (`@notification.priority`) are only available when using CDS annotations (Option A). The JSON file format uses pre-resolved strings.
 
 ### Email delivery
 
-Email delivery can be configured for notification types in both approaches. It requires the SAP Alert Notification service with the `business-notifications` plan and a configured [SMTP mail destination](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/configuring-smtp-mail-destination).
+Email delivery can be configured for notification types in both approaches. It requires the SAP Alert Notification Service with the `business-notifications` plan and a configured [SMTP mail destination](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/configuring-smtp-mail-destination).
 
 > [!Warning]
->
 > The `business-notifications` plan validates **all** of your notification types at registration time, not only the ones with email. This means every notification type in your app, even purely in-app ones, must have `TemplatePublic` (mapped from `publicTitle`) and `TemplateGrouped` (mapped from `groupedTitle`) set, or startup registration will fail.
-
 
 **Via CDS annotations:**
 
@@ -308,7 +354,7 @@ There are two patterns for sending notifications.
 
 ### Pattern 1: Emit a CDS event (recommended)
 
-If you defined your notification type as a CDS event with `@notification` annotation, you can simply emit the event from your service handler:
+If you defined your notification type as a CDS event with a `@notification` annotation, the plugin hooks into your service automatically. Simply emit the event from your service handler.
 
 ```js
 this.on('submitOrder', async req => {
@@ -322,7 +368,7 @@ this.on('submitOrder', async req => {
 })
 ```
 
-The plugin registers an event handler which forwards the notification to ANS. In addition, you can still register your own event handlers if you need to process the event yourself. The plugin's handler runs alongside it.
+The plugin registers an event handler which forwards the notification to ANS. You can still register your own event handlers if you need to process the event yourself. The plugin's handler runs alongside them.
 
 ### Pattern 2: Call notify() directly
 
@@ -337,12 +383,11 @@ await alert.notify({
   recipients: [ ...readers() ],
   priority: "HIGH",
   title: "New book arrived!",
-  description: "Book 'Wuthering Heights' has been added to the catalogue."
+  description: "Book 'Wuthering Heights' has been added to the catalog."
 })
 ```
 
-> [!Warning]
->
+> [!Note]
 > The simple API supports only `recipients`, `priority`, `title`, and `description`. For advanced properties use a named notification type or the [low-level API](#low-level-notifications-api).
 
 **Named notification type:**
@@ -359,7 +404,7 @@ await alert.notify('BookOrdered', {
 
 ### Batch notifications
 
-Pass an array to `notify()` to send multiple notifications in a single call. This triggers only one outbox event, reducing the number of transactions. If some notifications fail, successful ones are still delivered. Failures are logged as warnings, and the call only throws if **all** notifications fail.
+It is possible to pass an array to `notify()` to send multiple notifications in a single call. This triggers only one outbox event, reducing the number of transactions when notifying many recipients. If some items fail, the successful ones are still delivered. Failures are logged as warnings, and the call only throws if **all** items fail.
 
 ```js
 alert.notify('BookOrdered', [
@@ -369,10 +414,9 @@ alert.notify('BookOrdered', [
 ```
 
 > [!Warning]
->
 > Batch sending is only available via `notify([...])`. CDS event emission dispatches one event per call.
 
-Alternatively, you can use the default notification template:
+Alternatively, the default notification template can be used: 
 
 ```js
 await alert.notify([
@@ -380,8 +424,6 @@ await alert.notify([
   { type: 'BookOrdered', recipients: [buyer2.id], data: { title: book2.title, buyer: buyer2.name } },
 ])
 ```
-
----
 
 ## API Reference
 
@@ -432,7 +474,6 @@ Complete mapping of CDS annotations to notification fields:
 | `@Common.SemanticObjectAction` | `NavigationTargetAction` | Navigation action |
 | `@notification.priority` | `Priority` | `LOW`, `NEUTRAL`, `MEDIUM`, or `HIGH` |
 
-
 ## Test-drive Locally
 
 During local development, notifications are mocked and printed to the console. No external service is required.
@@ -442,13 +483,17 @@ During local development, notifications are mocked and printed to the console. N
 
 ## Run in Production
 
-### Prerequisites
+### Notification Destination
 
-Configure a [destination](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/enabling-notifications-for-custom-apps-on-sap-btp-cloud-foundry#configure-the-destination-to-the-notifications-service) named `SAP_Notifications` in your BTP subaccount. The plugin uses this destination to connect to the notification service in hybrid and production environments.
+As a prerequisite, configure a [destination](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/enabling-notifications-for-custom-apps-on-sap-btp-cloud-foundry#configure-the-destination-to-the-notifications-service) named `SAP_Notifications` in your BTP subaccount. The plugin uses this destination by default to connect to the notification service in hybrid and production environments.
 
-Notification types are automatically registered and kept in sync with the notification service each time the application starts. Any additions, changes, or removals to your notification types are applied on the next startup—no manual deployment step required.
+### Notification Type Registration
 
-Once deployed and integrated with SAP Build Work Zone, notifications appear under the Fiori notifications icon.
+Notification types are automatically registered and kept in sync with the notification service each time the application starts. Any additions, changes, or removals to your notification types, whether from CDS annotations or the JSON file, are applied on the next startup. No manual `cds build` or content deployment step is required.
+
+### Integrate with SAP Build Work Zone
+
+Once the application is deployed and integrated with SAP Build Work Zone, notifications appear under the Fiori notifications icon.
 
 <img width="1300" alt="Sample Application Demo" style="border-radius:0.5rem;" src="_assets/incidentsNotificationDemo.gif">
 
@@ -505,7 +550,6 @@ To override the default `SAP_Notifications` destination name:
 - `UserUUID`: always use `GlobalUserId`. Use this when the Work Zone authentication identifier is set to `User ID`.
 - `RecipientId`: always use `RecipientId`. Use this when recipients are identified by email or login name.
 
-
 > [!NOTE]
 > For email notifications sent with a User ID, a destination to the Identity Directory Service (IDS) must be configured for the email address lookup.
 
@@ -529,7 +573,7 @@ This adds a `MAIL` delivery channel (enabled, default preference on, user-editab
 
 ### Outbox Behavior
 
-By default the notification service uses an outbox (`outbox: true`): `notify()` resolves as soon as the message is queued, not when it has been sent to ANS. To send synchronously and receive the HTTP response:
+By default, the notification service uses an outbox (`outbox: true`): `notify()` resolves as soon as the message is queued, not when it has been sent to ANS. This means the HTTP response from ANS is not returned. To send synchronously and receive the HTTP response:
 
 ```json
 "cds": {
