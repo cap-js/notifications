@@ -15,8 +15,8 @@ function makeEventWithHtml(html, file = 'srv/notifications.cds') {
   return {
     kind: 'event',
     name: 'E',
-    '@notification.template.title': 't',
-    '@notification.template.email.html': html,
+    '@notification.title': 't',
+    '@notification.email.html': html,
     $location: { file, line: 1, col: 1 },
   }
 }
@@ -58,12 +58,12 @@ describe("Notification Types from Model", () => {
         "@description": "Book Ordered",
         "@Common.SemanticObject": "Book",
         "@Common.SemanticObjectAction": "display",
-        "@notification.template.title": "Book '{{title}}' Ordered",
-        "@notification.template.publicTitle": "Book Ordered",
-        "@notification.template.subtitle": "{{buyer}} ordered {{title}}",
-        "@notification.template.groupedTitle": "Bookshop Updates",
-        "@notification.template.email.subject": "Your order",
-        "@notification.deliveryChannels": [{ channel: { "=": "Mail" }, enabled: true }]
+        "@notification.title": "Book '{{title}}' Ordered",
+        "@notification.publicTitle": "Book Ordered",
+        "@notification.subtitle": "{{buyer}} ordered {{title}}",
+        "@notification.groupedTitle": "Bookshop Updates",
+        "@notification.email.subject": "Your order",
+        "@notification.channels": [{ "=": "email" }]
       }
     })
 
@@ -84,7 +84,7 @@ describe("Notification Types from Model", () => {
     expect(tmpl.TemplateGrouped).toBe("Bookshop Updates")
     expect(tmpl.EmailSubject).toBe("Your order")
 
-    expect(type.DeliveryChannels).toEqual([{ Type: "MAIL", Enabled: true }])
+    expect(type.DeliveryChannels).toEqual([{ Type: "MAIL", Enabled: true, DefaultPreference: true, EditablePreference: true }])
   })
 
   test("Handle minimal annotation (only @notification present)", () => {
@@ -92,7 +92,7 @@ describe("Notification Types from Model", () => {
       "SimpleEvent": {
         kind: "event",
         name: "SimpleEvent",
-        "@notification.template.title": "Hello"
+        "@notification.title": "Hello"
       }
     })
 
@@ -119,13 +119,13 @@ describe("Notification Types from Model", () => {
     expect(type.NotificationTypeKey).toBe("BookOrderedNotify")
   })
 
-  test("Unwrap hash-form enum references in deliveryChannels", () => {
+  test("Unwrap hash-form enum references in channels", () => {
     const model = makeModel({
       "E": {
         kind: "event",
         name: "E",
-        "@notification.template.title": "t",
-        "@notification.deliveryChannels": [{ channel: { "#": "Mail" }, enabled: true }]
+        "@notification.title": "t",
+        "@notification.channels": [{ "#": "email" }]
       }
     })
 
@@ -134,19 +134,19 @@ describe("Notification Types from Model", () => {
     expect(type.DeliveryChannels[0].Enabled).toBe(true)
   })
 
-  test("Unwrap plain string enum values in deliveryChannels", () => {
+  test("Unwrap plain string enum values in channels", () => {
     const model = makeModel({
       "E": {
         kind: "event",
         name: "E",
-        "@notification.template.title": "t",
-        "@notification.deliveryChannels": [{ channel: "Web", enabled: false }]
+        "@notification.title": "t",
+        "@notification.channels": ["workzone"]
       }
     })
 
     const [type] = notificationTypesFromModel(model)
     expect(type.DeliveryChannels[0].Type).toBe("WEB")
-    expect(type.DeliveryChannels[0].Enabled).toBe(false)
+    expect(type.DeliveryChannels[0].Enabled).toBe(true)
   })
 
   test("Return all events with @notification from a mixed model", () => {
@@ -162,18 +162,13 @@ describe("Notification Types from Model", () => {
     expect(types.map(t => t.NotificationTypeKey)).toEqual(expect.arrayContaining(["A", "C"]))
   })
 
-  test("Include defaultPreference and editablePreference from deliveryChannels when present", () => {
+  test("Always include Enabled, DefaultPreference, EditablePreference as true for plain enum channels", () => {
     const model = makeModel({
       "E": {
         kind: "event",
         name: "E",
-        "@notification.template.title": "t",
-        "@notification.deliveryChannels": [{
-          channel: "Mail",
-          enabled: true,
-          defaultPreference: true,
-          editablePreference: false
-        }]
+        "@notification.title": "t",
+        "@notification.channels": ["email"]
       }
     })
 
@@ -182,17 +177,35 @@ describe("Notification Types from Model", () => {
       Type: "MAIL",
       Enabled: true,
       DefaultPreference: true,
-      EditablePreference: false
+      EditablePreference: true
     })
   })
 
-  test("Skip deliveryChannel entry when channel is missing", () => {
+  test("Allow per-channel overrides via object form", () => {
     const model = makeModel({
       "E": {
         kind: "event",
         name: "E",
-        "@notification.template.title": "t",
-        "@notification.deliveryChannels": [{ enabled: true }]
+        "@notification.title": "t",
+        "@notification.channels": [
+          "email",
+          { channel: "workzone", enabled: false, defaultPreference: false }
+        ]
+      }
+    })
+
+    const [type] = notificationTypesFromModel(model)
+    expect(type.DeliveryChannels[0]).toEqual({ Type: "MAIL", Enabled: true, DefaultPreference: true, EditablePreference: true })
+    expect(type.DeliveryChannels[1]).toEqual({ Type: "WEB", Enabled: false, DefaultPreference: false, EditablePreference: true })
+  })
+
+  test("Skip channel entry when value is not a string", () => {
+    const model = makeModel({
+      "E": {
+        kind: "event",
+        name: "E",
+        "@notification.title": "t",
+        "@notification.channels": [null]
       }
     })
 
@@ -223,7 +236,7 @@ describe("i18n integration", () => {
     mockLabels(() => ({}), () => undefined)
 
     const model = makeModel({
-      "E": { kind: "event", name: "E", "@notification.template.title": "Hello" }
+      "E": { kind: "event", name: "E", "@notification.title": "Hello" }
     })
     const [type] = notificationTypesFromModel(model)
     expect(type.Templates).toHaveLength(1)
@@ -235,7 +248,7 @@ describe("i18n integration", () => {
     mockLabels(() => ({ en: 'Hello', de: 'Hallo' }),
       (_, locale) => locale === 'de' ? 'Hallo' : 'Hello')
 
-    const model = makeModel({ "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>TITLE}" } })
+    const model = makeModel({ "E": { kind: "event", name: "E", "@notification.title": "{i18n>TITLE}" } })
     const [type] = notificationTypesFromModel(model)
     expect(type.Templates).toHaveLength(2)
     expect(type.Templates.find(t => t.Language === 'en').TemplateSensitive).toBe('Hello')
@@ -245,7 +258,7 @@ describe("i18n integration", () => {
   test("Resolve {i18n>KEY} references from i18n.properties file", () => {
     mockLabels(() => ({ en: 'Book Ordered' }), () => 'Book Ordered')
 
-    const model = makeModel({ "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>BOOK_ORDERED_TITLE}" } })
+    const model = makeModel({ "E": { kind: "event", name: "E", "@notification.title": "{i18n>BOOK_ORDERED_TITLE}" } })
     const [type] = notificationTypesFromModel(model)
     expect(type.Templates[0].TemplateSensitive).toBe("Book Ordered")
   })
@@ -254,7 +267,7 @@ describe("i18n integration", () => {
     mockLabels(() => ({ en: 'Book Ordered', de: 'Buch bestellt' }),
       (_, locale) => locale === 'de' ? 'Buch bestellt' : 'Book Ordered')
 
-    const model = makeModel({ "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>BOOK_ORDERED_TITLE}" } })
+    const model = makeModel({ "E": { kind: "event", name: "E", "@notification.title": "{i18n>BOOK_ORDERED_TITLE}" } })
     const [type] = notificationTypesFromModel(model)
     expect(type.Templates.find(t => t.Language === 'en').TemplateSensitive).toBe("Book Ordered")
     expect(type.Templates.find(t => t.Language === 'de').TemplateSensitive).toBe("Buch bestellt")
@@ -264,7 +277,7 @@ describe("i18n integration", () => {
     mockLabels(() => ({}), () => undefined)
 
     const model = makeModel({
-      "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>MISSING_KEY}" }
+      "E": { kind: "event", name: "E", "@notification.title": "{i18n>MISSING_KEY}" }
     })
     const [type] = notificationTypesFromModel(model)
     expect(type.Templates[0].TemplateSensitive).toBe("{i18n>MISSING_KEY}")
@@ -274,7 +287,7 @@ describe("i18n integration", () => {
     mockLabels(() => ({}), () => undefined)
 
     const model = makeModel({
-      "E": { kind: "event", name: "E", "@notification.template.title": "Plain Title" }
+      "E": { kind: "event", name: "E", "@notification.title": "Plain Title" }
     })
     const [type] = notificationTypesFromModel(model)
     expect(type.Templates[0].TemplateSensitive).toBe("Plain Title")
@@ -284,7 +297,7 @@ describe("i18n integration", () => {
     mockLabels(() => ({ en: 'Resolved Subtitle' }), () => 'Resolved Subtitle')
 
     const model = makeModel({
-      "E": { kind: "event", name: "E", "@notification.template.title": "t", "@notification.template.subtitle": "{i18n>SUBTITLE_KEY}" }
+      "E": { kind: "event", name: "E", "@notification.title": "t", "@notification.subtitle": "{i18n>SUBTITLE_KEY}" }
     })
     const [type] = notificationTypesFromModel(model)
     expect(type.Templates[0].Subtitle).toBe("Resolved Subtitle")
@@ -293,7 +306,7 @@ describe("i18n integration", () => {
   test("Exclude locale when none of its keys differ from English", () => {
     mockLabels(() => ({ en: 'Hello' }), () => 'Hello')
 
-    const model = makeModel({ "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>TITLE}" } })
+    const model = makeModel({ "E": { kind: "event", name: "E", "@notification.title": "{i18n>TITLE}" } })
     const [type] = notificationTypesFromModel(model)
     expect(type.Templates).toHaveLength(1)
     expect(type.Templates[0].Language).toBe('en')
@@ -302,7 +315,7 @@ describe("i18n integration", () => {
   test("Exclude locale when its translation is identical to English", () => {
     mockLabels(() => ({ en: 'Hello', de: 'Hello' }), () => 'Hello')
 
-    const model = makeModel({ "E": { kind: "event", name: "E", "@notification.template.title": "{i18n>TITLE}" } })
+    const model = makeModel({ "E": { kind: "event", name: "E", "@notification.title": "{i18n>TITLE}" } })
     const [type] = notificationTypesFromModel(model)
     expect(type.Templates).toHaveLength(1)
     expect(type.Templates[0].Language).toBe('en')
@@ -313,8 +326,8 @@ describe("i18n integration", () => {
       (key, locale) => key === 'TITLE' ? (locale === 'de' ? 'Hallo' : 'Hello') : 'Same')
 
     const model = makeModel({ "E": { kind: "event", name: "E",
-      "@notification.template.title": "{i18n>TITLE}",
-      "@notification.template.subtitle": "{i18n>SUBTITLE}"
+      "@notification.title": "{i18n>TITLE}",
+      "@notification.subtitle": "{i18n>SUBTITLE}"
     }})
     const [type] = notificationTypesFromModel(model)
     expect(type.Templates).toHaveLength(2)
@@ -327,8 +340,8 @@ describe("i18n integration", () => {
       (key, locale) => key === 'A_TITLE' ? (locale === 'de' ? 'A auf Deutsch' : 'A in English') : 'B in English')
 
     const model = makeModel({
-      "A": { kind: "event", name: "A", "@notification.template.title": "{i18n>A_TITLE}" },
-      "B": { kind: "event", name: "B", "@notification.template.title": "{i18n>B_TITLE}" },
+      "A": { kind: "event", name: "A", "@notification.title": "{i18n>A_TITLE}" },
+      "B": { kind: "event", name: "B", "@notification.title": "{i18n>B_TITLE}" },
     })
     const [typeA, typeB] = notificationTypesFromModel(model)
     expect(typeA.Templates).toHaveLength(2)
@@ -341,7 +354,7 @@ describe("i18n integration", () => {
       configurable: true, writable: true
     })
     const model = makeModel({
-      "E": { kind: "event", name: "E", "@notification.template.title": "t", "@notification.template.subtitle": "{i18n>BOOK_ORDERED_SUBTITLE}" }
+      "E": { kind: "event", name: "E", "@notification.title": "t", "@notification.subtitle": "{i18n>BOOK_ORDERED_SUBTITLE}" }
     })
     const [type] = notificationTypesFromModel(model)
     expect(type.Templates[0].Subtitle).toBe("{{buyer}} ordered {{title}}")
@@ -362,7 +375,7 @@ describe("defaultEmailDelivery config", () => {
     cds.env.requires.notifications.defaultEmailDelivery = true
 
     const model = makeModel({
-      "E": { kind: "event", name: "E", "@notification.template.title": "t" }
+      "E": { kind: "event", name: "E", "@notification.title": "t" }
     })
 
     const [type] = notificationTypesFromModel(model)
@@ -377,13 +390,13 @@ describe("defaultEmailDelivery config", () => {
       "E": {
         kind: "event",
         name: "E",
-        "@notification.template.title": "t",
-        "@notification.deliveryChannels": [{ channel: "Web", enabled: false }]
+        "@notification.title": "t",
+        "@notification.channels": ["workzone"]
       }
     })
 
     const [type] = notificationTypesFromModel(model)
-    expect(type.DeliveryChannels).toEqual([{ Type: 'WEB', Enabled: false }])
+    expect(type.DeliveryChannels).toEqual([{ Type: 'WEB', Enabled: true, DefaultPreference: true, EditablePreference: true }])
   })
 
   test("Do not add delivery channels when defaultEmailDelivery is false", () => {
@@ -391,7 +404,7 @@ describe("defaultEmailDelivery config", () => {
     cds.env.requires.notifications.defaultEmailDelivery = false
 
     const model = makeModel({
-      "E": { kind: "event", name: "E", "@notification.template.title": "t" }
+      "E": { kind: "event", name: "E", "@notification.title": "t" }
     })
 
     const [type] = notificationTypesFromModel(model)
@@ -400,7 +413,7 @@ describe("defaultEmailDelivery config", () => {
 
   test("Do not add delivery channels when defaultEmailDelivery is not configured", () => {
     const model = makeModel({
-      "E": { kind: "event", name: "E", "@notification.template.title": "t" }
+      "E": { kind: "event", name: "E", "@notification.title": "t" }
     })
 
     const [type] = notificationTypesFromModel(model)
@@ -492,7 +505,7 @@ describe("HTML file resolution", () => {
       configurable: true, writable: true
     })
     const model = makeModel({
-      "E": { kind: "event", name: "E", "@notification.template.email.html": "<p>{i18n>BOOK_ORDERED_SUBTITLE}</p>" }
+      "E": { kind: "event", name: "E", "@notification.email.html": "<p>{i18n>BOOK_ORDERED_SUBTITLE}</p>" }
     })
     const [type] = notificationTypesFromModel(model)
     expect(type.Templates[0].EmailHtml).toBe("<p>{{buyer}} ordered {{title}}</p>")
