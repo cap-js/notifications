@@ -66,10 +66,8 @@ using { CatalogService } from './cat-service';
 
 extend service CatalogService with {
   @notification: {
-    template: {
-      title: 'Book {{title}} Ordered',
-      subtitle: '{{buyer}} ordered {{title}}'
-    }
+    title: 'Book {{title}} Ordered',
+    subtitle: '{{buyer}} ordered {{title}}'
   }
   event BookOrdered {
     title : String;
@@ -160,12 +158,10 @@ extend service CatalogService with {
 
   @description: 'Sent when a book is ordered'
   @notification: {
-    template: {
-      title        : 'Book {{title}} Ordered',
-      publicTitle  : 'Book Ordered',
-      subtitle     : '{{buyer}} ordered {{title}}',
-      groupedTitle : 'Bookshop Updates'
-    }
+    title        : 'Book {{title}} Ordered',
+    publicTitle  : 'Book Ordered',
+    subtitle     : '{{buyer}} ordered {{title}}',
+    groupedTitle : 'Bookshop Updates'
   }
   @Common.SemanticObject: 'Books'
   @Common.SemanticObjectAction: 'display'
@@ -189,15 +185,13 @@ Any event with at least one `@notification` annotation (the bare `@notification`
 
 ```cds
 @notification: {
-  template: {
-    title        : 'Book {{title}} Ordered',
-    publicTitle  : 'Book Ordered',
-    subtitle     : '{{buyer}} ordered {{title}}',
-    groupedTitle : 'Bookshop Updates', // Group header for multiple notifications
-    email: {
-      subject: 'Your order: {{title}}',
-      html   : './email-template.html' // Path to HTML template or inline HTML
-    }
+  title        : 'Book {{title}} Ordered',
+  publicTitle  : 'Book Ordered',
+  subtitle     : '{{buyer}} ordered {{title}}',
+  groupedTitle : 'Bookshop Updates', // Group header for multiple notifications
+  email: {
+    subject: 'Your order: {{title}}',
+    html   : './email-template.html' // Path to HTML template or inline HTML
   },
   priority: #HIGH // Priority: LOW, NEUTRAL, MEDIUM, HIGH
 }
@@ -206,13 +200,33 @@ event BookOrdered { ... }
 
 For a complete list of supported annotations and their mappings, see [Annotation Reference](#annotation-reference).
 
+#### Delivery channels (Option A only)
+
+Use `@notification.channels` to specify which channels a notification type is delivered through:
+
+```cds
+@notification: {
+  title   : 'Book Ordered',
+  channels: [#email]
+}
+event BookOrdered { ... }
+```
+
+The supported values are `#email` (SAP Mail) and `#workzone` (SAP Build Work Zone). `Enabled`, `DefaultPreference`, and `EditablePreference` all default to `true`. To override any of them for a specific channel, use the object form:
+
+```cds
+channels: [#email, { channel: #workzone, enabled: false }]
+```
+
+Only the fields you specify are overridden; the rest remain `true`. You can mix plain enum values and objects in the same array.
+
 #### i18n support (Option A only)
 
 The `@notification` annotation values support `{i18n>key}` syntax. Keys are automatically resolved against your project's i18n bundles at startup. Templates are generated for each locale where at least one translation differs from the default language.
 
 ```cds
-@notification.template.title:    '{i18n>BOOK_ORDERED_TITLE}'
-@notification.template.subtitle: '{i18n>BOOK_ORDERED_SUBTITLE}'
+@notification.title:    '{i18n>BOOK_ORDERED_TITLE}'
+@notification.subtitle: '{i18n>BOOK_ORDERED_SUBTITLE}'
 event BookOrdered { ... }
 ```
 
@@ -222,11 +236,9 @@ The `email.html` annotation accepts either an inline HTML string or a path to an
 
 ```cds
 @notification: {
-  template: {
-    email: {
-      subject: 'Your order: {{title}}',
-      html   : './book-ordered-email.html'
-    }
+  email: {
+    subject: 'Your order: {{title}}',
+    html   : './book-ordered-email.html'
   }
 }
 event BookOrdered { ... }
@@ -310,17 +322,15 @@ Email delivery can be configured for notification types in both approaches. It r
 
 ```cds
 @notification: {
-  template: {
-    title        : 'Book {{title}} Ordered',
-    publicTitle  : 'Book Ordered',
-    subtitle     : '{{buyer}} ordered {{title}}',
-    groupedTitle : 'Bookshop Updates',
-    email: {
-      subject: 'Your order: {{title}}',
-      html   : './book-ordered-email.html'
-    }
-  },
-  deliveryChannels: [{ channel: #Mail, enabled: true, defaultPreference: true, editablePreference: true }]
+  title        : 'Book {{title}} Ordered',
+  publicTitle  : 'Book Ordered',
+  subtitle     : '{{buyer}} ordered {{title}}',
+  groupedTitle : 'Bookshop Updates',
+  email: {
+    subject: 'Your order: {{title}}',
+    html   : './book-ordered-email.html'
+  }
+  channels: [#email]
 }
 event BookOrdered { ... }
 ```
@@ -464,12 +474,12 @@ Complete mapping of CDS annotations to notification fields:
 | Annotation | ANS Field | Description |
 |---|---|---|
 | `@description` | `Description` | Notification type description |
-| `@notification.template.title` | `TemplateSensitive` | Main notification title (supports placeholders) |
-| `@notification.template.publicTitle` | `TemplatePublic` | Public fallback title |
-| `@notification.template.subtitle` | `Subtitle` | Subtitle text |
-| `@notification.template.groupedTitle` | `TemplateGrouped` | Group header for multiple notifications |
-| `@notification.template.email.subject` | `EmailSubject` | Email subject line |
-| `@notification.template.email.html` | `EmailHtml` | Inline HTML or path to `.html` file |
+| `@notification.title` | `TemplateSensitive` | Main notification title (supports placeholders) |
+| `@notification.publicTitle` | `TemplatePublic` | Public fallback title |
+| `@notification.subtitle` | `Subtitle` | Subtitle text |
+| `@notification.groupedTitle` | `TemplateGrouped` | Group header for multiple notifications |
+| `@notification.email.subject` | `EmailSubject` | Email subject line |
+| `@notification.email.html` | `EmailHtml` | Inline HTML or path to `.html` file |
 | `@Common.SemanticObject` | `NavigationTargetObject` | Navigation target object |
 | `@Common.SemanticObjectAction` | `NavigationTargetAction` | Navigation action |
 | `@notification.priority` | `Priority` | `LOW`, `NEUTRAL`, `MEDIUM`, or `HIGH` |
@@ -569,7 +579,7 @@ To enable email delivery for all notification types without annotating each one 
 }
 ```
 
-This adds a `MAIL` delivery channel (enabled, default preference on, user-editable) to every notification type that does not already have a `deliveryChannels` annotation.
+This adds an email channel (enabled, default preference on, user-editable) to every notification type that does not already have a `channels` annotation.
 
 ### Outbox Behavior
 
