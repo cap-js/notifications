@@ -329,7 +329,7 @@ Email delivery can be configured for notification types in both approaches. It r
   email: {
     subject: 'Your order: {{title}}',
     html   : './book-ordered-email.html'
-  }
+  },
   channels: [#email]
 }
 event BookOrdered { ... }
