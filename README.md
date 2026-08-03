@@ -218,7 +218,7 @@ The supported values are `#email` (SAP Mail) and `#workzone` (SAP Build Work Zon
 channels: [#email, { channel: #workzone, enabled: false }]
 ```
 
-Only the fields you specify are overridden; the rest remain `true`. You can mix plain enum values and objects in the same array.
+Only the fields you specify are overridden, the rest remain `true`. You can mix plain enum values and objects in the same array.
 
 #### i18n support (Option A only)
 
