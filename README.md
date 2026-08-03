@@ -20,6 +20,7 @@ The `@cap-js/notifications` package is a [CDS plugin](https://cap.cloud.sap/docs
   - [Custom Destination Name](#custom-destination-name)
   - [Authentication Identifier](#authentication-identifier)
   - [Default Channels](#default-channels)
+  - [Channel Options](#channel-options)
   - [Outbox Behavior](#outbox-behavior)
   - [Disabling the Plugin](#disabling-the-plugin)
   - [Low-level Notifications API](#low-level-notifications-api)
@@ -212,13 +213,7 @@ Use `@notification.channels` to specify which channels a notification type is de
 event BookOrdered { ... }
 ```
 
-The supported values are `email` (SAP Mail) and `workzone` (SAP Build Work Zone). If no channel is specified, the channel defauls to workzone. `Enabled`, `DefaultPreference`, and `EditablePreference` all default to `true`. To override `DefaultPreference`or `EditablePreference` for a specific channel, use the object form:
-
-```cds
-channels: ['email', { channel: 'workzone', editablePreference: false }]
-```
-
-Only the fields you specify are overridden, the rest remain `true`. You can mix plain enum values and objects in the same array.
+The supported values are `email` (SAP Mail) and `workzone` (SAP Build Work Zone). If no channel is specified, the channel defauls to workzone. See [channel options](#channel-options) for more information on advanced channel setup options.
 
 #### i18n support (Option A only)
 
@@ -588,6 +583,16 @@ Multiple channels are also supported:
 ```
 
 Per-event `channels` annotations always take precedence over this global default.
+
+### Channel Options
+
+For message delivery channels, the variables `Enabled`, `DefaultPreference`, and `EditablePreference` all default to `true`. To override `DefaultPreference`or `EditablePreference` for a specific channel, use the object form:
+
+```cds
+channels: ['email', { channel: 'workzone', editablePreference: false }]
+```
+
+Only the fields you specify are overridden, the rest remain `true`. You can mix plain string values and objects in the same array.
 
 ### Outbox Behavior
 
