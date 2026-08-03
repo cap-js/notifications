@@ -63,7 +63,7 @@ describe("Notification Types from Model", () => {
         "@notification.subtitle": "{{buyer}} ordered {{title}}",
         "@notification.groupedTitle": "Bookshop Updates",
         "@notification.email.subject": "Your order",
-        "@notification.channels": [{ "=": "email" }]
+        "@notification.channels": ["email"]
       }
     })
 
@@ -119,13 +119,13 @@ describe("Notification Types from Model", () => {
     expect(type.NotificationTypeKey).toBe("BookOrderedNotify")
   })
 
-  test("Unwrap hash-form enum references in channels", () => {
+  test("Map 'email' string to MAIL channel type", () => {
     const model = makeModel({
       "E": {
         kind: "event",
         name: "E",
         "@notification.title": "t",
-        "@notification.channels": [{ "#": "email" }]
+        "@notification.channels": ["email"]
       }
     })
 

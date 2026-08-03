@@ -207,15 +207,15 @@ Use `@notification.channels` to specify which channels a notification type is de
 ```cds
 @notification: {
   title   : 'Book Ordered',
-  channels: [#email]
+  channels: ['email']
 }
 event BookOrdered { ... }
 ```
 
-The supported values are `#email` (SAP Mail) and `#workzone` (SAP Build Work Zone). `Enabled`, `DefaultPreference`, and `EditablePreference` all default to `true`. To override any of them for a specific channel, use the object form:
+The supported values are `email` (SAP Mail) and `workzone` (SAP Build Work Zone). If no channel is specified, the channel defauls to workzone. `Enabled`, `DefaultPreference`, and `EditablePreference` all default to `true`. To override any of them for a specific channel, use the object form:
 
 ```cds
-channels: [#email, { channel: #workzone, enabled: false }]
+channels: ['email', { channel: 'workzone', enabled: false }]
 ```
 
 Only the fields you specify are overridden, the rest remain `true`. You can mix plain enum values and objects in the same array.
@@ -330,7 +330,7 @@ Email delivery can be configured for notification types in both approaches. It r
     subject: 'Your order: {{title}}',
     html   : './book-ordered-email.html'
   },
-  channels: [#email]
+  channels: ['email']
 }
 event BookOrdered { ... }
 ```

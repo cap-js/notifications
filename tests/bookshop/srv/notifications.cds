@@ -11,7 +11,7 @@ extend service CatalogService with {
       subject: '{i18n>BOOK_ORDERED_EMAIL_SUBJECT}',
       html   : './book-ordered-email.html',
     },
-    channels: [#email]
+    channels: ['email']
   }
   @notification.priority : (quantity > 5 ? #High : #Low)
   event BookOrderedNotify {
