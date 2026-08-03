@@ -103,7 +103,7 @@ describe("Notification Types from Model", () => {
     expect(type.Templates[0].TemplateSensitive).toBe("Hello")
     expect(type.Templates[0].TemplatePublic).toBeUndefined()
     expect(type.NavigationTargetObject).toBeUndefined()
-    expect(type.DeliveryChannels).toBeUndefined()
+    expect(type.DeliveryChannels).toEqual([{ Type: 'WEB', Enabled: true, DefaultPreference: true, EditablePreference: true }])
   })
 
   test("Strip namespace prefix from event name", () => {
@@ -189,14 +189,14 @@ describe("Notification Types from Model", () => {
         "@notification.title": "t",
         "@notification.channels": [
           "email",
-          { channel: "workzone", enabled: false, defaultPreference: false }
+          { channel: "workzone", defaultPreference: false }
         ]
       }
     })
 
     const [type] = notificationTypesFromModel(model)
     expect(type.DeliveryChannels[0]).toEqual({ Type: "MAIL", Enabled: true, DefaultPreference: true, EditablePreference: true })
-    expect(type.DeliveryChannels[1]).toEqual({ Type: "WEB", Enabled: false, DefaultPreference: false, EditablePreference: true })
+    expect(type.DeliveryChannels[1]).toEqual({ Type: "WEB", Enabled: true, DefaultPreference: false, EditablePreference: true })
   })
 
   test("Skip channel entry when value is not a string", () => {
@@ -361,18 +361,18 @@ describe("i18n integration", () => {
   })
 })
 
-describe("defaultEmailDelivery config", () => {
+describe("default channels config", () => {
   const cds = require('@sap/cds')
 
   afterEach(() => {
     if (cds.env.requires?.notifications) {
-      delete cds.env.requires.notifications.defaultEmailDelivery
+      delete cds.env.requires.notifications.channels
     }
   })
 
-  test("Add MAIL delivery channel when defaultEmailDelivery is true and no channels annotated", () => {
+  test("Add configured default channels when no channels annotated", () => {
     cds.env.requires.notifications ??= {}
-    cds.env.requires.notifications.defaultEmailDelivery = true
+    cds.env.requires.notifications.channels = ['email']
 
     const model = makeModel({
       "E": { kind: "event", name: "E", "@notification.title": "t" }
@@ -382,9 +382,24 @@ describe("defaultEmailDelivery config", () => {
     expect(type.DeliveryChannels).toEqual([{ Type: 'MAIL', Enabled: true, DefaultPreference: true, EditablePreference: true }])
   })
 
-  test("Do not override explicit delivery channels when defaultEmailDelivery is true", () => {
+  test("Support multiple default channels", () => {
     cds.env.requires.notifications ??= {}
-    cds.env.requires.notifications.defaultEmailDelivery = true
+    cds.env.requires.notifications.channels = ['email', 'workzone']
+
+    const model = makeModel({
+      "E": { kind: "event", name: "E", "@notification.title": "t" }
+    })
+
+    const [type] = notificationTypesFromModel(model)
+    expect(type.DeliveryChannels).toEqual([
+      { Type: 'MAIL', Enabled: true, DefaultPreference: true, EditablePreference: true },
+      { Type: 'WEB', Enabled: true, DefaultPreference: true, EditablePreference: true }
+    ])
+  })
+
+  test("Do not override explicit channels annotation with default channels", () => {
+    cds.env.requires.notifications ??= {}
+    cds.env.requires.notifications.channels = ['email']
 
     const model = makeModel({
       "E": {
@@ -399,25 +414,13 @@ describe("defaultEmailDelivery config", () => {
     expect(type.DeliveryChannels).toEqual([{ Type: 'WEB', Enabled: true, DefaultPreference: true, EditablePreference: true }])
   })
 
-  test("Do not add delivery channels when defaultEmailDelivery is false", () => {
-    cds.env.requires.notifications ??= {}
-    cds.env.requires.notifications.defaultEmailDelivery = false
-
+  test("Default to workzone channel when channels config is not set", () => {
     const model = makeModel({
       "E": { kind: "event", name: "E", "@notification.title": "t" }
     })
 
     const [type] = notificationTypesFromModel(model)
-    expect(type.DeliveryChannels).toBeUndefined()
-  })
-
-  test("Do not add delivery channels when defaultEmailDelivery is not configured", () => {
-    const model = makeModel({
-      "E": { kind: "event", name: "E", "@notification.title": "t" }
-    })
-
-    const [type] = notificationTypesFromModel(model)
-    expect(type.DeliveryChannels).toBeUndefined()
+    expect(type.DeliveryChannels).toEqual([{ Type: 'WEB', Enabled: true, DefaultPreference: true, EditablePreference: true }])
   })
 })
 

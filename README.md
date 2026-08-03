@@ -19,7 +19,7 @@ The `@cap-js/notifications` package is a [CDS plugin](https://cap.cloud.sap/docs
   - [Custom Notification Type Prefix](#custom-notification-type-prefix)
   - [Custom Destination Name](#custom-destination-name)
   - [Authentication Identifier](#authentication-identifier)
-  - [Default Email Delivery](#default-email-delivery)
+  - [Default Channels](#default-channels)
   - [Outbox Behavior](#outbox-behavior)
   - [Disabling the Plugin](#disabling-the-plugin)
   - [Low-level Notifications API](#low-level-notifications-api)
@@ -212,10 +212,10 @@ Use `@notification.channels` to specify which channels a notification type is de
 event BookOrdered { ... }
 ```
 
-The supported values are `email` (SAP Mail) and `workzone` (SAP Build Work Zone). If no channel is specified, the channel defauls to workzone. `Enabled`, `DefaultPreference`, and `EditablePreference` all default to `true`. To override any of them for a specific channel, use the object form:
+The supported values are `email` (SAP Mail) and `workzone` (SAP Build Work Zone). If no channel is specified, the channel defauls to workzone. `Enabled`, `DefaultPreference`, and `EditablePreference` all default to `true`. To override `DefaultPreference`or `EditablePreference` for a specific channel, use the object form:
 
 ```cds
-channels: ['email', { channel: 'workzone', enabled: false }]
+channels: ['email', { channel: 'workzone', editablePreference: false }]
 ```
 
 Only the fields you specify are overridden, the rest remain `true`. You can mix plain enum values and objects in the same array.
@@ -565,21 +565,29 @@ To override the default `SAP_Notifications` destination name:
 
 For Work Zone authentication identifier configuration, see [Work Zone Subaccount Settings](https://help.sap.com/docs/build-work-zone-standard-edition/sap-build-work-zone-standard-edition/subaccount-settings).
 
-### Default Email Delivery
+### Default Channels
 
-To enable email delivery for all notification types without annotating each one individually, set `defaultEmailDelivery` to `true`:
+By default, all notification types use the workzone channel. To change the default for all types that don't have a `channels` annotation, set `channels` in your configuration:
 
 ```json
 "cds": {
   "requires": {
     "notifications": {
-      "defaultEmailDelivery": true
+      "channels": ["email"]
     }
   }
 }
 ```
 
-This adds an email channel (enabled, default preference on, user-editable) to every notification type that does not already have a `channels` annotation.
+Multiple channels are also supported:
+
+```json
+"notifications": {
+  "channels": ["email", "workzone"]
+}
+```
+
+Per-event `channels` annotations always take precedence over this global default.
 
 ### Outbox Behavior
 
