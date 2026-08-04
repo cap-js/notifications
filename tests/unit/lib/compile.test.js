@@ -181,7 +181,7 @@ describe("Notification Types from Model", () => {
     })
   })
 
-  test("Allow per-channel overrides via object form", () => {
+  test("Support object form with just channel name", () => {
     const model = makeModel({
       "E": {
         kind: "event",
@@ -189,14 +189,14 @@ describe("Notification Types from Model", () => {
         "@notification.title": "t",
         "@notification.channels": [
           "email",
-          { channel: "workzone", defaultPreference: false }
+          { channel: "workzone" }
         ]
       }
     })
 
     const [type] = notificationTypesFromModel(model)
     expect(type.DeliveryChannels[0]).toEqual({ Type: "MAIL", Enabled: true, DefaultPreference: true, EditablePreference: true })
-    expect(type.DeliveryChannels[1]).toEqual({ Type: "WEB", Enabled: true, DefaultPreference: false, EditablePreference: true })
+    expect(type.DeliveryChannels[1]).toEqual({ Type: "WEB", Enabled: true, DefaultPreference: true, EditablePreference: true })
   })
 
   test("Skip channel entry when value is not a string", () => {
