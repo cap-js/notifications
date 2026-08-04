@@ -3,17 +3,15 @@ using { CatalogService } from './cat-service';
 extend service CatalogService with {
   @description: '{i18n>BOOK_ORDERED_DESCRIPTION}'
   @notification: {
-    template: {
-      title        : '{i18n>BOOK_ORDERED_TITLE}',
-      publicTitle  : '{i18n>BOOK_ORDERED_PUBLIC_TITLE}',
-      subtitle     : '{i18n>BOOK_ORDERED_SUBTITLE}',
-      groupedTitle : '{i18n>BOOK_ORDERED_GROUPED_TITLE}',
-      email        : {
-        subject: '{i18n>BOOK_ORDERED_EMAIL_SUBJECT}',
-        html   : './book-ordered-email.html',
-      }
+    title        : '{i18n>BOOK_ORDERED_TITLE}',
+    publicTitle  : '{i18n>BOOK_ORDERED_PUBLIC_TITLE}',
+    subtitle     : '{i18n>BOOK_ORDERED_SUBTITLE}',
+    groupedTitle : '{i18n>BOOK_ORDERED_GROUPED_TITLE}',
+    email        : {
+      subject: '{i18n>BOOK_ORDERED_EMAIL_SUBJECT}',
+      html   : './book-ordered-email.html',
     },
-    deliveryChannels: [{ channel: 'MAIL', enabled: true, defaultPreference: true, editablePreference: true}]
+    channels: ['email']
   }
   @notification.priority : (quantity > 5 ? #High : #Low)
   event BookOrderedNotify {
@@ -24,11 +22,9 @@ extend service CatalogService with {
   }
 
   @notification: {
-    template: {
-      title        : 'Late Delivery',
-      publicTitle  : 'Late Delivery',
-      groupedTitle : 'Delivery Updates',
-    }
+    title        : 'Late Delivery',
+    publicTitle  : 'Late Delivery',
+    groupedTitle : 'Delivery Updates',
   }
   @notification.priority : (days_between(orderDate, deliveryDate) > 7 ? #High : #Low)
   event LateDeliveryNotify {

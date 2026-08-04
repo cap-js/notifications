@@ -19,14 +19,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - Return the full HTTP response from the REST notification handler.
   Note: With outbox enabled (default), the application's `await notify()` resolves when
   the message is queued; the return value is only available when `outbox: false`.
-- Support for email delivery channels via `@notification.deliveryChannels` in CDS annotations and `DeliveryChannels` in the JSON format.
-- Support for email templates via `@notification.template.email.subject` and `@notification.template.email.html` in CDS annotations, and `EmailSubject` / `EmailHtml` in JSON templates. The `email.html` annotation accepts an inline HTML string or a path to an `.html` file relative to the `.cds` source file.
+- Support for email delivery channels via `@notification.channels` in CDS annotations and `DeliveryChannels` in the JSON format.
+- Support for email templates via `@notification.email.subject` and `@notification.email.html` in CDS annotations, and `EmailSubject` / `EmailHtml` in JSON templates. The `email.html` annotation accepts an inline HTML string or a path to an `.html` file relative to the `.cds` source file.
 - i18n support for CDS annotation string values using `{i18n>key}` syntax. 
 - Notification types are automatically registered and kept in sync with the notification service on application startup when running in hybrid or production mode.
 - Allows to send notifications of `@notification`-annotated events  via `this.emit()` 
 - Batch notifications: `notify()` now accepts an array of notification objects. Each item is sent individually; partial failures are logged as warnings and the call only throws if all items fail.
 - Static and dynamic notification priority via `@notification.priority`. Accepts a fixed enum value (`#HIGH`, `#LOW`, etc.) or a CDS ternary expression evaluated against event data at runtime (e.g. `(quantity > 5 ? #HIGH : #LOW)`).
-- `cds.env.requires.notifications.defaultEmailDelivery` option to enable email delivery for all notification types globally without per-event annotation.
+- `cds.env.requires.notifications.channels` option to adjust the default delivery for all notification types globally
 - `cds build` integration: annotated events are compiled and written to `notification-types.json` in the build output, merged with any types from the JSON file.
 - Log full response body and headers when the `notifications` logger is enabled at debug level.
 - Return the full HTTP response from the REST notification handler when `outbox:false` 

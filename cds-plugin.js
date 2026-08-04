@@ -53,6 +53,13 @@ cds.once("served", async () => {
 
   if (validateNotificationTypes(notificationTypes)) {
     if (kind === 'notify-to-rest') {
+      const destination = cds.env.requires.notifications?.destination
+      if (destination && destination !== 'SAP_Notifications') {
+        const hasWorkzone = notificationTypes.some(t => t.DeliveryChannels?.some(ch => ch.Type === 'WEB'))
+        if (hasWorkzone) throw new Error(
+          `Workzone channel requires the 'SAP_Notifications' destination but '${destination}' is configured.`
+        )
+      }
       const { processNotificationTypes } = require('./lib/notificationTypes')
       // deploy automatically on startup
       await processNotificationTypes(notificationTypes)
