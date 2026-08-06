@@ -80,10 +80,6 @@ runs:
       shell: bash
       run: cd tests/bookshop && cds deploy --to hana:cap-js-notifications-hana-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA
 
-    - name: Create HDI Container service key
-      shell: bash
-      run: cf create-service-key cap-js-notifications-hana-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA cap-js-notifications-hana-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA-key
-
     - name: Create Destination Service
       shell: bash
       run: cf create-service destination lite cap-js-notifications-destination-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA
@@ -91,13 +87,12 @@ runs:
     - name: Bind against BTP services
       shell: bash
       run: |
-        cds bind db -2 cap-js-notifications-hana-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA \
-                    -2 cap-js-notifications-destination-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA \
-                    -o tests/bookshop/package.json
+        cds bind db -2 cap-js-notifications-hana-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA -o package.json
+        cds bind -2 cap-js-notifications-destination-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA -o package.json
 
     - name: Run integration tests
       shell: bash
-      run: CDS_ENV=hybrid npx jest --silent
+      run: cds bind --exec -- npx jest --silent
 
     - name: Delete HDI Container Key
       if: ${{ always() }}
@@ -114,6 +109,25 @@ runs:
           sleep 10
           if [ "$i" -eq 5 ]; then
             echo "❌ HDI container delete failed after 5 attempts."
+            exit 1
+          fi
+        done
+
+    - name: Delete Destination Service Key
+      if: ${{ always() }}
+      shell: bash
+      run: cf delete-service-key cap-js-notifications-destination-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA cap-js-notifications-destination-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA-key -f
+
+    - name: Delete Destination Service
+      if: ${{ always() }}
+      shell: bash
+      run: |
+        for i in {1..5}; do
+          cf delete-service cap-js-notifications-destination-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA -f && break
+          echo "Destination Service delete failed, retrying ($i/5)..."
+          sleep 10
+          if [ "$i" -eq 5 ]; then
+            echo "❌ Destination Service delete failed after 5 attempts."
             exit 1
           fi
         done
