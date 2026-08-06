@@ -80,15 +80,15 @@ runs:
       shell: bash
       run: cd tests/bookshop && cds deploy --to hana:cap-js-notifications-hana-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA
 
-    - name: Create HDI Container service key
+    - name: Create Destination Service
       shell: bash
-      run: cf create-service-key cap-js-notifications-hana-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA cap-js-notifications-hana-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA-key
+      run: cf create-service destination lite cap-js-notifications-destination-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA
 
-    - name: Bind services
+    - name: Bind against BTP services
       shell: bash
       run: |
         cds bind db -2 cap-js-notifications-hana-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA -o tests/bookshop/package.json
-        cds bind -2 incidents-testing-destination -o tests/bookshop/package.json
+        cds bind -2 cap-js-notifications-destination-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA -o tests/bookshop/package.json
 
     - name: Run integration tests
       shell: bash
