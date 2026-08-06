@@ -602,7 +602,7 @@ describe("Test utils", () => {
     })
 
     test("Replaces {ref} with {val} when key exists in data", () => {
-      expect(replaceRefsInExpr({ ref: ['quantity'] }, { quantity: 10 })).toEqual({ val: 10 })
+      expect(replaceRefsInExpr({ ref: ['quantity'] }, { quantity: 10 })).toEqual({ val: 10, param: false })
     })
 
     test("Leaves {ref} unchanged when key is not in data", () => {
@@ -617,23 +617,23 @@ describe("Test utils", () => {
     test("Recursively replaces refs in flat xpr array", () => {
       const xpr = [{ ref: ['quantity'] }, '>', { val: 5 }]
       expect(replaceRefsInExpr(xpr, { quantity: 10 }))
-        .toEqual([{ val: 10 }, '>', { val: 5 }])
+        .toEqual([{ val: 10, param: false }, '>', { val: 5 }])
     })
 
     test("Recursively replaces refs in nested xpr object", () => {
       const expr = { xpr: [{ ref: ['quantity'] }, '>', { val: 5 }] }
       expect(replaceRefsInExpr(expr, { quantity: 10 }))
-        .toEqual({ xpr: [{ val: 10 }, '>', { val: 5 }] })
+        .toEqual({ xpr: [{ val: 10, param: false }, '>', { val: 5 }] })
     })
 
     test("Converts enum symbol {'#': value} to {val: value}", () => {
-      expect(replaceRefsInExpr({ '#': 'High' }, {})).toEqual({ val: 'High' })
+      expect(replaceRefsInExpr({ '#': 'High' }, {})).toEqual({ val: 'High', param: false })
     })
 
     test("Replaces refs in function call args", () => {
       const func = { func: 'days_between', args: [{ ref: ['startDate'] }, { ref: ['endDate'] }] }
       expect(replaceRefsInExpr(func, { startDate: '2024-01-01', endDate: '2024-06-01' }))
-        .toEqual({ func: 'days_between', args: [{ val: '2024-01-01' }, { val: '2024-06-01' }] })
+        .toEqual({ func: 'days_between', args: [{ val: '2024-01-01', param: false }, { val: '2024-06-01', param: false }] })
     })
 
     test("Handles deep nesting: xpr containing xpr containing refs", () => {
@@ -642,20 +642,20 @@ describe("Test utils", () => {
       }
       expect(replaceRefsInExpr(expr, { a: 0, b: 'High' }))
         .toEqual({
-          xpr: ['case', 'when', { xpr: [{ val: 0 }, '<', { val: 1 }] }, 'then', { val: 'High' }, 'end']
+          xpr: ['case', 'when', { xpr: [{ val: 0, param: false }, '<', { val: 1 }] }, 'then', { val: 'High', param: false }, 'end']
         })
     })
 
     test("Replaces refs inside list nodes", () => {
       const expr = { list: [{ ref: ['a'] }, { ref: ['b'] }] }
       expect(replaceRefsInExpr(expr, { a: 1, b: 2 }))
-        .toEqual({ list: [{ val: 1 }, { val: 2 }] })
+        .toEqual({ list: [{ val: 1, param: false }, { val: 2, param: false }] })
     })
 
     test("Replaces refs in named function args", () => {
       const func = { func: 'foo', args: { p: { ref: ['x'] } } }
       expect(replaceRefsInExpr(func, { x: 42 }))
-        .toEqual({ func: 'foo', args: { p: { val: 42 } } })
+        .toEqual({ func: 'foo', args: { p: { val: 42, param: false } } })
     })
 
     test("Leaves multi-segment refs unchanged — path traversal is not supported", () => {
