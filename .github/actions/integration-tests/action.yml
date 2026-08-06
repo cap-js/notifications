@@ -103,11 +103,6 @@ runs:
       shell: bash
       run: cf delete-service-key cap-js-notifications-hana-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA cap-js-notifications-hana-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA-key -f
 
-    - name: Delete Destination Service Key
-      if: ${{ always() }}
-      shell: bash
-      run: cf delete-service-key cap-js-notifications-destination-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA cap-js-notifications-destination-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA-key -f
-
     - name: Delete HDI Container
       if: ${{ always() }}
       shell: bash
@@ -118,6 +113,25 @@ runs:
           sleep 10
           if [ "$i" -eq 5 ]; then
             echo "❌ HDI container delete failed after 5 attempts."
+            exit 1
+          fi
+        done
+
+    - name: Delete Destination Service Key
+      if: ${{ always() }}
+      shell: bash
+      run: cf delete-service-key cap-js-notifications-destination-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA cap-js-notifications-destination-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA-key -f
+
+    - name: Delete Destination Service
+      if: ${{ always() }}
+      shell: bash
+      run: |
+        for i in {1..5}; do
+          cf delete-service cap-js-notifications-destination-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA -f && break
+          echo "Destination Service delete failed, retrying ($i/5)..."
+          sleep 10
+          if [ "$i" -eq 5 ]; then
+            echo "❌ Destination Service delete failed after 5 attempts."
             exit 1
           fi
         done
