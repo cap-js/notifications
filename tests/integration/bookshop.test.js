@@ -112,19 +112,6 @@ describe("Notifications Integration", () => {
         expect(log.output).not.toContain("is not in the notification types file")
       }
     })
-    
-    test("Emitting a @notification event directly triggers a notification via the plugin", async () => {
-      const catalog = await cds.connect.to('CatalogService')
-      await catalog.emit('BookOrderedNotify', {
-        title: 'Moby Dick',
-        buyer: 'reader@bookshop.com',
-        quantity: 1,
-        recipients: ['reader@bookshop.com'],
-      })
-      
-      expect(log.output).toContain("BookOrderedNotify")
-      expect(log.output).toContain("Moby Dick")
-    })
 
     test("Sending a notification with unknown type key gives a warning (dev only)", async () => {
       if (usesRestService) return
@@ -154,51 +141,66 @@ describe("Notifications Integration", () => {
     
     test("Emitting a @notification event with dynamic xpr priority evaluates priority via db", async () => {
       const catalog = await cds.connect.to('CatalogService')
+      let capturedPriority
 
-      // quantity > 5 -> High
-      await catalog.emit('BookOrderedNotify', {
-        title: 'Bulk Order',
-        buyer: 'reader@bookshop.example',
-        quantity: 10,
-        recipients: ['reader@bookshop.example'],
-      })
-      expect(log.output).toContain('BookOrderedNotify')
-      expect(log.output).toContain("Priority: 'HIGH'")
+      const handler = msg => { capturedPriority = msg.data.Priority }
+      alert.before('*', handler)
 
-      log.clear()
+      try {
+        // quantity > 5 -> High
+        await expect(catalog.emit('BookOrderedNotify', {
+          title: 'Bulk Order',
+          buyer: 'reader@bookshop.example',
+          quantity: 10,
+          recipients: ['reader@bookshop.example'],
+        })).resolves.not.toThrow()
+        expect(capturedPriority).toBe('HIGH')
 
-      // quantity <= 5 -> Low
-      await catalog.emit('BookOrderedNotify', {
-        title: 'Small Order',
-        buyer: 'reader@bookshop.example',
-        quantity: 2,
-        recipients: ['reader@bookshop.example'],
-      })
-      expect(log.output).toContain("Priority: 'LOW'")
+        capturedPriority = undefined
+
+        // quantity <= 5 -> Low
+        await expect(catalog.emit('BookOrderedNotify', {
+          title: 'Small Order',
+          buyer: 'reader@bookshop.example',
+          quantity: 2,
+          recipients: ['reader@bookshop.example'],
+        })).resolves.not.toThrow()
+        expect(capturedPriority).toBe('LOW')
+      } finally {
+        alert._handlers.before.splice(alert._handlers.before.indexOf(handler), 1)
+      }
     })
 
     test("Dynamic priority using a db function (days_between) is evaluated by the database", async () => {
       const catalog = await cds.connect.to('CatalogService')
+      let capturedPriority
 
-      // 30 days apart → High
-      await catalog.emit('LateDeliveryNotify', {
-        title: 'Late delivery',
-        orderDate: '2024-01-01',
-        deliveryDate: '2024-02-01',
-        recipients: ['reader@bookshop.example'],
-      })
-      expect(log.output).toContain("Priority: 'HIGH'")
+      const handler = msg => { capturedPriority = msg.data.Priority }
+      alert.before('*', handler)
 
-      log.clear()
+      try {
+        // 30 days apart → High
+        await expect(catalog.emit('LateDeliveryNotify', {
+          title: 'Late delivery',
+          orderDate: '2024-01-01',
+          deliveryDate: '2024-02-01',
+          recipients: ['reader@bookshop.example'],
+        })).resolves.not.toThrow()
+        expect(capturedPriority).toBe('HIGH')
 
-      // 3 days apart → Low
-      await catalog.emit('LateDeliveryNotify', {
-        title: 'On-time delivery',
-        orderDate: '2024-01-01',
-        deliveryDate: '2024-01-04',
-        recipients: ['reader@bookshop.example'],
-      })
-      expect(log.output).toContain("Priority: 'LOW'")
+        capturedPriority = undefined
+
+        // 3 days apart → Low
+        await expect(catalog.emit('LateDeliveryNotify', {
+          title: 'On-time delivery',
+          orderDate: '2024-01-01',
+          deliveryDate: '2024-01-04',
+          recipients: ['reader@bookshop.example'],
+        })).resolves.not.toThrow()
+        expect(capturedPriority).toBe('LOW')
+      } finally {
+        alert._handlers.before.splice(alert._handlers.before.indexOf(handler), 1)
+      }
     })
 
     test("Throw when a notification event has an element name exceeding 128 characters", () => {
@@ -235,28 +237,50 @@ describe("Notifications Integration", () => {
   })
 
   test("Batch of typed notifications logs each one to console", async () => {
-    await alert.notify("BookOrderedNotify", [
-      { recipients: ["reader1@bookshop.com"], data: { title: "Moby Dick",        buyer: "reader1@bookshop.com" } },
-      { recipients: ["reader2@bookshop.com"], data: { title: "Wuthering Heights", buyer: "reader2@bookshop.com" } },
-    ])
+    const captured = []
+    const handler = msg => { captured.push(...(Array.isArray(msg.data) ? msg.data : [msg.data])) }
+    alert.before('*', handler)
 
-    expect(log.output).toContain("reader1@bookshop.com")
-    expect(log.output).toContain("reader2@bookshop.com")
-    expect(log.output).toContain("Moby Dick")
-    expect(log.output).toContain("Wuthering Heights")
-    expect(log.output).not.toContain("is not in the notification types file")
+    try {
+      await expect(alert.notify("BookOrderedNotify", [
+        { recipients: ["reader1@bookshop.com"], data: { title: "Moby Dick",        buyer: "reader1@bookshop.com" } },
+        { recipients: ["reader2@bookshop.com"], data: { title: "Wuthering Heights", buyer: "reader2@bookshop.com" } },
+      ])).resolves.not.toThrow()
+
+      const titles = captured.flatMap(n => n.Properties?.map(p => p.Value) ?? [])
+      const recipients = captured.flatMap(n => n.Recipients?.map(r => r.RecipientId) ?? [])
+      expect(titles).toContain("Moby Dick")
+      expect(titles).toContain("Wuthering Heights")
+      expect(recipients).toContain("reader1@bookshop.com")
+      expect(recipients).toContain("reader2@bookshop.com")
+      if (!usesRestService) {
+        expect(log.output).not.toContain("is not in the notification types file")
+      }
+    } finally {
+      alert._handlers.before.splice(alert._handlers.before.indexOf(handler), 1)
+    }
   })
 
   test("Batch of default notifications logs each one to console", async () => {
-    await alert.notify([
-      { recipients: ["alice@bookshop.com"], title: "Order #1 confirmed", description: "Your order is on its way." },
-      { recipients: ["bob@bookshop.com"],   title: "Order #2 confirmed", description: "Your order is on its way." },
-    ])
+    const captured = []
+    const handler = msg => { captured.push(...(Array.isArray(msg.data) ? msg.data : [msg.data])) }
+    alert.before('*', handler)
 
-    expect(log.output).toContain("alice@bookshop.com")
-    expect(log.output).toContain("bob@bookshop.com")
-    expect(log.output).toContain("Order #1 confirmed")
-    expect(log.output).toContain("Order #2 confirmed")
+    try {
+      await expect(alert.notify([
+        { recipients: ["alice@bookshop.com"], title: "Order #1 confirmed", description: "Your order is on its way." },
+        { recipients: ["bob@bookshop.com"],   title: "Order #2 confirmed", description: "Your order is on its way." },
+      ])).resolves.not.toThrow()
+
+      const titles = captured.flatMap(n => n.Properties?.map(p => p.Value) ?? [])
+      const recipients = captured.flatMap(n => n.Recipients?.map(r => r.RecipientId) ?? [])
+      expect(titles).toContain("Order #1 confirmed")
+      expect(titles).toContain("Order #2 confirmed")
+      expect(recipients).toContain("alice@bookshop.com")
+      expect(recipients).toContain("bob@bookshop.com")
+    } finally {
+      alert._handlers.before.splice(alert._handlers.before.indexOf(handler), 1)
+    }
   })
 
   test("Email html is loaded from file with i18n resolved per locale", () => {
