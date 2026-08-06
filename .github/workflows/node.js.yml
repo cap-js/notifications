@@ -51,7 +51,7 @@ jobs:
         node-version: [20.x, 22.x]
     steps:
       - name: Integration tests (HANA + ANS)
-        uses: cap-js/notifications/.github/actions/integration-tests@main
+        uses: ./.github/actions/integration-tests
         with:
           CF_API: ${{ secrets.CF_API }}
           CF_USERNAME: ${{ secrets.CF_USERNAME }}
