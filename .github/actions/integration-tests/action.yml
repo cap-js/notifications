@@ -91,12 +91,9 @@ runs:
     - name: Bind against BTP services
       shell: bash
       run: |
-        cds bind db -2 cap-js-notifications-hana-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA -o tests/bookshop/package.json
-        cds bind -2 cap-js-notifications-destination-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA -o tests/bookshop/package.json
-
-    - name: Verify bindings
-      shell: bash
-      run: node -e "const f=require('./tests/bookshop/.cdsrc-private.json'); const h=f.requires['[hybrid]']; console.log('db:', !!h.db, 'destinations:', !!h.destinations)"
+        cds bind db -2 cap-js-notifications-hana-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA \
+                    -2 cap-js-notifications-destination-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA \
+                    -o tests/bookshop/package.json
 
     - name: Run integration tests
       shell: bash
