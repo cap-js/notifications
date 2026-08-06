@@ -605,8 +605,8 @@ describe("Test utils", () => {
       expect(replaceRefsInExpr({ ref: ['quantity'] }, { quantity: 10 })).toEqual({ val: 10, param: false })
     })
 
-    test("Leaves {ref} unchanged when key is not in data", () => {
-      expect(replaceRefsInExpr({ ref: ['unknown'] }, { quantity: 10 })).toEqual({ ref: ['unknown'] })
+    test("Substitutes null when key is not in data", () => {
+      expect(replaceRefsInExpr({ ref: ['unknown'] }, { quantity: 10 })).toEqual({ val: null, param: false })
     })
 
     test("Does not replace binding parameters ({ref, param: true})", () => {
