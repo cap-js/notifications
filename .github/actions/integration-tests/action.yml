@@ -87,12 +87,12 @@ runs:
     - name: Bind against BTP services
       shell: bash
       run: |
-        cds bind db -2 cap-js-notifications-hana-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA -o tests/bookshop/package.json
-        cds bind -2 cap-js-notifications-destination-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA -o tests/bookshop/package.json
+        cds bind db -2 cap-js-notifications-hana-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA -o package.json
+        cds bind -2 cap-js-notifications-destination-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}-$NODE_VERSION_HANA -o package.json
 
     - name: Run integration tests
       shell: bash
-      run: cd tests/bookshop && cds bind --exec -- npx jest --silent
+      run: cds bind --exec -- npx jest --silent
 
     - name: Delete HDI Container Key
       if: ${{ always() }}
