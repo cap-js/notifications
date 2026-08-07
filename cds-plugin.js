@@ -1,43 +1,43 @@
-const cds = require('@sap/cds')
+const cds = require("@sap/cds")
 if (!cds.env.requires?.notifications?.enabled) return
 
-const { buildNotificationFromEvent } = require('./lib/utils')
-cds.build?.register?.('notifications', require('./lib/build'))
+const { buildNotificationFromEvent } = require("./lib/utils")
+cds.build?.register?.("notifications", require("./lib/build"))
 
-cds.on('loaded', m => {
+cds.on("loaded", m => {
   for (const def of Object.values(m.definitions)) {
-    if (def.kind !== 'event') continue
-    if (!Object.keys(def).some(k => k === '@notification' || k.startsWith('@notification.'))) continue
+    if (def.kind !== "event") continue
+    if (!Object.keys(def).some(k => k === "@notification" || k.startsWith("@notification."))) continue
     if (!def.elements) def.elements = {}
     if (!def.elements.recipients) {
-      def.elements.recipients = { items: { type: 'cds.String' } }
+      def.elements.recipients = { items: { type: "cds.String" } }
     }
   }
 })
 
-cds.on('serving', service => {
-  if (service.name === 'notifications' || service instanceof cds.DatabaseService) return
-  service.on('*', async (req, next) => {
+cds.on("serving", service => {
+  if (service.name === "notifications" || service instanceof cds.DatabaseService) return
+  service.on("*", async (req, next) => {
     let def = req.target ?? service.events?.[req.event]
-    if (!def || def.kind !== 'event') return next()
-    if (!Object.keys(def).some(k => k === '@notification' || k.startsWith('@notification.'))) return next()
+    if (!def || def.kind !== "event") return next()
+    if (!Object.keys(def).some(k => k === "@notification" || k.startsWith("@notification."))) return next()
     if (!def.name) def = { ...def, name: req.event }
-    const notifications = await cds.connect.to('notifications')
+    const notifications = await cds.connect.to("notifications")
     const notification = await buildNotificationFromEvent(def, req.data)
     try {
       await notifications.notify(notification)
     } catch (err) {
-      const LOG = cds.log('notifications')
-      LOG._error && LOG.error('Failed to send notification for event', def.name, err)
+      const LOG = cds.log("notifications")
+      LOG._error && LOG.error("Failed to send notification for event", def.name, err)
     }
     return next()
   })
 })
 
-cds.once('served', async () => {
-  const { validateNotificationTypes, readFile } = require('./lib/utils')
-  const { createNotificationTypesMap } = require('./lib/notificationTypes')
-  const { notificationTypesFromModel } = require('./lib/compile')
+cds.once("served", async () => {
+  const { validateNotificationTypes, readFile } = require("./lib/utils")
+  const { createNotificationTypesMap } = require("./lib/notificationTypes")
+  const { notificationTypesFromModel } = require("./lib/compile")
   const typesPath = cds.env.requires?.notifications?.types
   const kind = cds.env.requires?.notifications?.kind
 
@@ -48,19 +48,19 @@ cds.once('served', async () => {
     const notificationTypesMap = createNotificationTypesMap(JSON.parse(JSON.stringify(notificationTypes)), true)
     cds.notifications = { local: { types: notificationTypesMap } }
 
-    if (kind === 'notify-to-rest') {
+    if (kind === "notify-to-rest") {
       const destination = cds.env.requires.notifications?.destination
-      if (destination && destination !== 'SAP_Notifications') {
-        const hasWorkzone = notificationTypes.some(t => t.DeliveryChannels?.some(ch => ch.Type === 'WEB'))
+      if (destination && destination !== "SAP_Notifications") {
+        const hasWorkzone = notificationTypes.some(t => t.DeliveryChannels?.some(ch => ch.Type === "WEB"))
         if (hasWorkzone)
           throw new Error(
             `Workzone channel requires the 'SAP_Notifications' destination but '${destination}' is configured.`
           )
       }
-      const { processNotificationTypes } = require('./lib/notificationTypes')
+      const { processNotificationTypes } = require("./lib/notificationTypes")
       await processNotificationTypes(notificationTypes)
     }
   }
 
-  require('@sap-cloud-sdk/util').setGlobalLogLevel('error')
+  require("@sap-cloud-sdk/util").setGlobalLogLevel("error")
 })

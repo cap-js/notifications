@@ -1,6 +1,6 @@
-const { buildNotification, applyValueLengthConstraints, messages } = require('./../lib/utils')
-const cds = require('@sap/cds')
-const LOG = cds.log('notifications')
+const { buildNotification, applyValueLengthConstraints, messages } = require("./../lib/utils")
+const cds = require("@sap/cds")
+const LOG = cds.log("notifications")
 
 class NotificationService extends cds.Service {
   /**
@@ -19,7 +19,7 @@ class NotificationService extends cds.Service {
     if (!message) [message, event] = [event]
     // Batch: array of messages emitted as a single event
     if (Array.isArray(message)) {
-      const type = event || 'Default'
+      const type = event || "Default"
       const notifications = message
         .map(m => {
           const n = event ? { ...m, type: event } : m
@@ -30,7 +30,7 @@ class NotificationService extends cds.Service {
     }
     // CAP events translate to notification types and vice versa
     if (event) message.type = event
-    else event = message.type || message.NotificationTypeKey || 'Default'
+    else event = message.type || message.NotificationTypeKey || "Default"
     // Prepare and emit the notification
     message = buildNotification(message)
     message = applyValueLengthConstraints(message)

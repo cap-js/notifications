@@ -1,7 +1,7 @@
 _schema-version: 3.3.0
 ID: bookshop-notify
 version: 1.0.0
-description: 'A simple CAP project.'
+description: "A simple CAP project."
 parameters:
   enable-parallel-deployments: true
 build-parameters:
@@ -49,7 +49,7 @@ modules:
       disk-quota: 1GB
       tasks:
         - name: notification-content-deployment
-          command: 'node node_modules/@cap-js/notifications/lib/content-deployment.js'
+          command: "node node_modules/@cap-js/notifications/lib/content-deployment.js"
           memory: 256MB
           disk-quota: 1GB
     requires:
@@ -70,13 +70,13 @@ resources:
         tenant-mode: dedicated
         oauth2-configuration:
           credential-types:
-            - 'binding-secret'
-            - 'x509'
+            - "binding-secret"
+            - "x509"
         role-collections:
-          - name: 'admin (bookshop-notify ${org}-${space})'
-            description: 'generated'
+          - name: "admin (bookshop-notify ${org}-${space})"
+            description: "generated"
             role-template-references:
-              - '$XSAPPNAME.admin'
+              - "$XSAPPNAME.admin"
   - name: bookshop-notify-db
     type: com.sap.xs.hdi-container
     parameters:
