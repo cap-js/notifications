@@ -1,26 +1,26 @@
-name: "Integration tests"
-description: "Run tests with BTP services being bound"
+name: 'Integration tests'
+description: 'Run tests with BTP services being bound'
 inputs:
   CF_API:
-    description: "Cloud Foundry API endpoint"
+    description: 'Cloud Foundry API endpoint'
     required: true
   CF_USERNAME:
-    description: "Cloud Foundry username"
+    description: 'Cloud Foundry username'
     required: true
   CF_PASSWORD:
-    description: "Cloud Foundry password"
+    description: 'Cloud Foundry password'
     required: true
   CF_ORG:
-    description: "Cloud Foundry organization"
+    description: 'Cloud Foundry organization'
     required: true
   CF_SPACE:
-    description: "Cloud Foundry space"
+    description: 'Cloud Foundry space'
     required: true
   NODE_VERSION:
-    description: "Node.js version to use for tests"
+    description: 'Node.js version to use for tests'
     required: true
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Install dependencies and Cloud Foundry CLI (v8.9.0)
       shell: bash

@@ -1,58 +1,58 @@
-const utils = require("../../../lib/utils")
-const httpClient = require("@sap-cloud-sdk/http-client")
-const connectivity = require("@sap-cloud-sdk/connectivity")
-const notificationTypes = require("../../../lib/notificationTypes")
+const utils = require('../../../lib/utils')
+const httpClient = require('@sap-cloud-sdk/http-client')
+const connectivity = require('@sap-cloud-sdk/connectivity')
+const notificationTypes = require('../../../lib/notificationTypes')
 
-jest.mock("../../../lib/utils")
-jest.mock("@sap-cloud-sdk/http-client")
-jest.mock("@sap-cloud-sdk/connectivity")
+jest.mock('../../../lib/utils')
+jest.mock('@sap-cloud-sdk/http-client')
+jest.mock('@sap-cloud-sdk/connectivity')
 
 const defaultNotificationType = {
-  NotificationTypeKey: "Default",
-  NotificationTypeVersion: "1",
+  NotificationTypeKey: 'Default',
+  NotificationTypeVersion: '1',
   Templates: [
     {
-      Language: "en",
-      Description: "Other Notifications",
-      TemplatePublic: "{{title}}",
-      TemplateSensitive: "{{title}}",
-      TemplateGrouped: "Other Notifications",
-      TemplateLanguage: "mustache",
-      Subtitle: "{{description}}"
+      Language: 'en',
+      Description: 'Other Notifications',
+      TemplatePublic: '{{title}}',
+      TemplateSensitive: '{{title}}',
+      TemplateGrouped: 'Other Notifications',
+      TemplateLanguage: 'mustache',
+      Subtitle: '{{description}}'
     }
   ]
 }
 
 const notificationTypeWithAllProperties = {
-  NotificationTypeKey: "notificationTypeWithAllProperties",
-  NotificationTypeVersion: "1",
+  NotificationTypeKey: 'notificationTypeWithAllProperties',
+  NotificationTypeVersion: '1',
   IsGroupable: true,
   Templates: [
     {
-      Language: "EN",
-      TemplatePublic: "TemplatePublic",
-      TemplateSensitive: "TemplateSensitive",
-      TemplateGrouped: "TemplateGrouped",
-      Description: "Description",
-      TemplateLanguage: "MUSTACHE",
-      Subtitle: "Subtitle",
-      EmailSubject: "EmailSubject",
-      EmailText: "EmailText",
-      EmailHtml: "EmailHtml"
+      Language: 'EN',
+      TemplatePublic: 'TemplatePublic',
+      TemplateSensitive: 'TemplateSensitive',
+      TemplateGrouped: 'TemplateGrouped',
+      Description: 'Description',
+      TemplateLanguage: 'MUSTACHE',
+      Subtitle: 'Subtitle',
+      EmailSubject: 'EmailSubject',
+      EmailText: 'EmailText',
+      EmailHtml: 'EmailHtml'
     }
   ],
   Actions: [
     {
-      ActionId: "Accept",
-      Language: "EN",
-      ActionText: "Accept",
-      GroupActionText: "Accept All",
-      Nature: "POSITIVE"
+      ActionId: 'Accept',
+      Language: 'EN',
+      ActionText: 'Accept',
+      GroupActionText: 'Accept All',
+      Nature: 'POSITIVE'
     }
   ],
   DeliveryChannels: [
     {
-      Type: "WEB",
+      Type: 'WEB',
       Enabled: true,
       DefaultPreference: false,
       EditablePreference: true
@@ -61,34 +61,34 @@ const notificationTypeWithAllProperties = {
 }
 
 const notificationTypeWithoutVersion = {
-  NotificationTypeKey: "notificationTypeWithoutVersion",
+  NotificationTypeKey: 'notificationTypeWithoutVersion',
   IsGroupable: true,
   Templates: [
     {
-      Language: "EN",
-      TemplatePublic: "TemplatePublic",
-      TemplateSensitive: "TemplateSensitive",
-      TemplateGrouped: "TemplateGrouped",
-      Description: "Description",
-      TemplateLanguage: "MUSTACHE",
-      Subtitle: "Subtitle",
-      EmailSubject: "EmailSubject",
-      EmailText: "EmailText",
-      EmailHtml: "EmailHtml"
+      Language: 'EN',
+      TemplatePublic: 'TemplatePublic',
+      TemplateSensitive: 'TemplateSensitive',
+      TemplateGrouped: 'TemplateGrouped',
+      Description: 'Description',
+      TemplateLanguage: 'MUSTACHE',
+      Subtitle: 'Subtitle',
+      EmailSubject: 'EmailSubject',
+      EmailText: 'EmailText',
+      EmailHtml: 'EmailHtml'
     }
   ],
   Actions: [
     {
-      ActionId: "Accept",
-      Language: "EN",
-      ActionText: "Accept",
-      GroupActionText: "Accept All",
-      Nature: "POSITIVE"
+      ActionId: 'Accept',
+      Language: 'EN',
+      ActionText: 'Accept',
+      GroupActionText: 'Accept All',
+      Nature: 'POSITIVE'
     }
   ],
   DeliveryChannels: [
     {
-      Type: "WEB",
+      Type: 'WEB',
       Enabled: true,
       DefaultPreference: false,
       EditablePreference: true
@@ -103,7 +103,7 @@ const notificationTypeWithNullTemplatesActionsAndDeliveryChannels = {
   DeliveryChannels: null
 }
 
-const testPrefix = "test-prefix"
+const testPrefix = 'test-prefix'
 
 const emptyResponseBody = { data: { d: { results: [] } } }
 
@@ -112,20 +112,20 @@ const allExistingResponseBody = {
     d: {
       results: [
         {
-          NotificationTypeId: "a6771115-42f4-4ac3-9c85-49a819927b9c",
-          NotificationTypeKey: "Default",
-          NotificationTypeVersion: "1",
+          NotificationTypeId: 'a6771115-42f4-4ac3-9c85-49a819927b9c',
+          NotificationTypeKey: 'Default',
+          NotificationTypeVersion: '1',
           IsGroupable: true,
           Templates: {
             results: [
               {
-                Language: "EN",
-                TemplatePublic: "{{title}}",
-                TemplateSensitive: "{{title}}",
-                TemplateGrouped: "Other Notifications",
-                Description: "Other Notifications",
-                TemplateLanguage: "MUSTACHE",
-                Subtitle: "{{description}}",
+                Language: 'EN',
+                TemplatePublic: '{{title}}',
+                TemplateSensitive: '{{title}}',
+                TemplateGrouped: 'Other Notifications',
+                Description: 'Other Notifications',
+                TemplateLanguage: 'MUSTACHE',
+                Subtitle: '{{description}}',
                 EmailSubject: null,
                 EmailText: null,
                 EmailHtml: null
@@ -140,41 +140,41 @@ const allExistingResponseBody = {
           }
         },
         {
-          NotificationTypeId: "26f1fad0-de4c-4869-9b4e-62f445c8a7a8",
-          NotificationTypeKey: "test-prefix/notificationTypeWithAllProperties",
-          NotificationTypeVersion: "1",
+          NotificationTypeId: '26f1fad0-de4c-4869-9b4e-62f445c8a7a8',
+          NotificationTypeKey: 'test-prefix/notificationTypeWithAllProperties',
+          NotificationTypeVersion: '1',
           IsGroupable: true,
           Templates: {
             results: [
               {
-                Language: "EN",
-                TemplatePublic: "TemplatePublic",
-                TemplateSensitive: "TemplateSensitive",
-                TemplateGrouped: "TemplateGrouped",
-                Description: "Description",
-                TemplateLanguage: "MUSTACHE",
-                Subtitle: "Subtitle",
-                EmailSubject: "EmailSubject",
-                EmailText: "EmailText",
-                EmailHtml: "EmailHtml"
+                Language: 'EN',
+                TemplatePublic: 'TemplatePublic',
+                TemplateSensitive: 'TemplateSensitive',
+                TemplateGrouped: 'TemplateGrouped',
+                Description: 'Description',
+                TemplateLanguage: 'MUSTACHE',
+                Subtitle: 'Subtitle',
+                EmailSubject: 'EmailSubject',
+                EmailText: 'EmailText',
+                EmailHtml: 'EmailHtml'
               }
             ]
           },
           Actions: {
             results: [
               {
-                ActionId: "Accept",
-                ActionText: "Accept",
-                GroupActionText: "Accept All",
-                Language: "EN",
-                Nature: "POSITIVE"
+                ActionId: 'Accept',
+                ActionText: 'Accept',
+                GroupActionText: 'Accept All',
+                Language: 'EN',
+                Nature: 'POSITIVE'
               }
             ]
           },
           DeliveryChannels: {
             results: [
               {
-                Type: "WEB",
+                Type: 'WEB',
                 Enabled: true,
                 DefaultPreference: false,
                 EditablePreference: true
@@ -183,41 +183,41 @@ const allExistingResponseBody = {
           }
         },
         {
-          NotificationTypeId: "5b641f19-7c05-404b-b9a3-f6326f8b23ad",
-          NotificationTypeKey: "test-prefix-2/notificationTypeWithAllProperties",
-          NotificationTypeVersion: "1",
+          NotificationTypeId: '5b641f19-7c05-404b-b9a3-f6326f8b23ad',
+          NotificationTypeKey: 'test-prefix-2/notificationTypeWithAllProperties',
+          NotificationTypeVersion: '1',
           IsGroupable: true,
           Templates: {
             results: [
               {
-                Language: "EN",
-                TemplatePublic: "TemplatePublic",
-                TemplateSensitive: "TemplateSensitive",
-                TemplateGrouped: "TemplateGrouped",
-                Description: "Description",
-                TemplateLanguage: "MUSTACHE",
-                Subtitle: "Subtitle",
-                EmailSubject: "EmailSubject",
-                EmailText: "EmailText",
-                EmailHtml: "EmailHtml"
+                Language: 'EN',
+                TemplatePublic: 'TemplatePublic',
+                TemplateSensitive: 'TemplateSensitive',
+                TemplateGrouped: 'TemplateGrouped',
+                Description: 'Description',
+                TemplateLanguage: 'MUSTACHE',
+                Subtitle: 'Subtitle',
+                EmailSubject: 'EmailSubject',
+                EmailText: 'EmailText',
+                EmailHtml: 'EmailHtml'
               }
             ]
           },
           Actions: {
             results: [
               {
-                ActionId: "Accept",
-                ActionText: "Accept",
-                GroupActionText: "Accept All",
-                Language: "EN",
-                Nature: "POSITIVE"
+                ActionId: 'Accept',
+                ActionText: 'Accept',
+                GroupActionText: 'Accept All',
+                Language: 'EN',
+                Nature: 'POSITIVE'
               }
             ]
           },
           DeliveryChannels: {
             results: [
               {
-                Type: "WEB",
+                Type: 'WEB',
                 Enabled: true,
                 DefaultPreference: false,
                 EditablePreference: true
@@ -226,41 +226,41 @@ const allExistingResponseBody = {
           }
         },
         {
-          NotificationTypeId: "719d8f6a-1e07-4981-b2be-07197cec7492",
-          NotificationTypeKey: "test-prefix/notificationTypeWithoutVersion",
-          NotificationTypeVersion: "1",
+          NotificationTypeId: '719d8f6a-1e07-4981-b2be-07197cec7492',
+          NotificationTypeKey: 'test-prefix/notificationTypeWithoutVersion',
+          NotificationTypeVersion: '1',
           IsGroupable: true,
           Templates: {
             results: [
               {
-                Language: "EN",
-                TemplatePublic: "TemplatePublic",
-                TemplateSensitive: "TemplateSensitive",
-                TemplateGrouped: "TemplateGrouped",
-                Description: "Description",
-                TemplateLanguage: "MUSTACHE",
-                Subtitle: "Subtitle",
-                EmailSubject: "EmailSubject",
-                EmailText: "EmailText",
-                EmailHtml: "EmailHtml"
+                Language: 'EN',
+                TemplatePublic: 'TemplatePublic',
+                TemplateSensitive: 'TemplateSensitive',
+                TemplateGrouped: 'TemplateGrouped',
+                Description: 'Description',
+                TemplateLanguage: 'MUSTACHE',
+                Subtitle: 'Subtitle',
+                EmailSubject: 'EmailSubject',
+                EmailText: 'EmailText',
+                EmailHtml: 'EmailHtml'
               }
             ]
           },
           Actions: {
             results: [
               {
-                ActionId: "Accept",
-                ActionText: "Accept",
-                GroupActionText: "Accept All",
-                Language: "EN",
-                Nature: "POSITIVE"
+                ActionId: 'Accept',
+                ActionText: 'Accept',
+                GroupActionText: 'Accept All',
+                Language: 'EN',
+                Nature: 'POSITIVE'
               }
             ]
           },
           DeliveryChannels: {
             results: [
               {
-                Type: "WEB",
+                Type: 'WEB',
                 Enabled: true,
                 DefaultPreference: false,
                 EditablePreference: true
@@ -278,21 +278,21 @@ const allExistingWithUndefinedTemplatesActionsAndDeliveryChannelsResponseBody = 
     d: {
       results: [
         {
-          NotificationTypeId: "a6771115-42f4-4ac3-9c85-49a819927b9c",
-          NotificationTypeKey: "Default",
-          NotificationTypeVersion: "1",
+          NotificationTypeId: 'a6771115-42f4-4ac3-9c85-49a819927b9c',
+          NotificationTypeKey: 'Default',
+          NotificationTypeVersion: '1',
           IsGroupable: true,
           Templates: {
             results: [
               {
-                NotificationTypeId: "a6771115-42f4-4ac3-9c85-49a819927b9c",
-                Language: "EN",
-                TemplatePublic: "{{title}}",
-                TemplateSensitive: "{{title}}",
-                TemplateGrouped: "Other Notifications",
-                Description: "Other Notifications",
-                TemplateLanguage: "MUSTACHE",
-                Subtitle: "{{description}}",
+                NotificationTypeId: 'a6771115-42f4-4ac3-9c85-49a819927b9c',
+                Language: 'EN',
+                TemplatePublic: '{{title}}',
+                TemplateSensitive: '{{title}}',
+                TemplateGrouped: 'Other Notifications',
+                Description: 'Other Notifications',
+                TemplateLanguage: 'MUSTACHE',
+                Subtitle: '{{description}}',
                 EmailSubject: null,
                 EmailText: null,
                 EmailHtml: null
@@ -305,9 +305,9 @@ const allExistingWithUndefinedTemplatesActionsAndDeliveryChannelsResponseBody = 
           DeliveryChannels: {}
         },
         {
-          NotificationTypeId: "26f1fad0-de4c-4869-9b4e-62f445c8a7a8",
-          NotificationTypeKey: "test-prefix/notificationTypeWithAllProperties",
-          NotificationTypeVersion: "1",
+          NotificationTypeId: '26f1fad0-de4c-4869-9b4e-62f445c8a7a8',
+          NotificationTypeKey: 'test-prefix/notificationTypeWithAllProperties',
+          NotificationTypeVersion: '1',
           IsGroupable: true
         }
       ]
@@ -315,37 +315,37 @@ const allExistingWithUndefinedTemplatesActionsAndDeliveryChannelsResponseBody = 
   }
 }
 
-describe("Managing of Notification Types", () => {
+describe('Managing of Notification Types', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     utils.getNotificationTypesKeyWithPrefix.mockImplementation(str => `${testPrefix}/${str}`)
   })
 
-  describe("Create Notification Types Map", () => {
-    test("Seed the Default type when isLocal is true", () => {
+  describe('Create Notification Types Map', () => {
+    test('Seed the Default type when isLocal is true', () => {
       const result = notificationTypes.createNotificationTypesMap([], true)
-      expect(result).toHaveProperty("Default")
-      expect(result["Default"]["1"]).toMatchObject(defaultNotificationType)
+      expect(result).toHaveProperty('Default')
+      expect(result['Default']['1']).toMatchObject(defaultNotificationType)
     })
 
-    test("Store multiple versions of the same type under the same key", () => {
-      const typeV1 = { NotificationTypeKey: "MyType", NotificationTypeVersion: "1", Templates: [] }
-      const typeV2 = { NotificationTypeKey: "MyType", NotificationTypeVersion: "2", Templates: [] }
+    test('Store multiple versions of the same type under the same key', () => {
+      const typeV1 = { NotificationTypeKey: 'MyType', NotificationTypeVersion: '1', Templates: [] }
+      const typeV2 = { NotificationTypeKey: 'MyType', NotificationTypeVersion: '2', Templates: [] }
       const result = notificationTypes.createNotificationTypesMap([typeV1, typeV2])
 
-      expect(Object.keys(result[`${testPrefix}/MyType`])).toEqual(["1", "2"])
+      expect(Object.keys(result[`${testPrefix}/MyType`])).toEqual(['1', '2'])
     })
   })
 
-  describe("Process Notification Types", () => {
+  describe('Process Notification Types', () => {
     beforeEach(() => {
       utils.getNotificationDestination.mockReturnValue(undefined)
       utils.getPrefix.mockReturnValue(testPrefix)
       connectivity.buildHeadersForDestination.mockReturnValue({})
     })
 
-    describe("Creating Types", () => {
-      test("Create Default and all new types when none exist in Work Zone", () => {
+    describe('Creating Types', () => {
+      test('Create Default and all new types when none exist in Work Zone', () => {
         httpClient.executeHttpRequest.mockReturnValue(emptyResponseBody)
 
         return notificationTypes
@@ -358,22 +358,22 @@ describe("Managing of Notification Types", () => {
               c => c[1]
             )
 
-            expect(createDefault.method).toBe("post")
+            expect(createDefault.method).toBe('post')
             expect(createDefault.data).toEqual(defaultNotificationType)
 
-            expect(createFirst.method).toBe("post")
+            expect(createFirst.method).toBe('post')
             expect(createFirst.data).toEqual(toNTypeWithPrefixedKey(notificationTypeWithAllProperties))
 
-            expect(createSecond.method).toBe("post")
+            expect(createSecond.method).toBe('post')
             expect(createSecond.data).toEqual(
-              toNTypeWithPrefixedKey({ ...notificationTypeWithoutVersion, NotificationTypeVersion: "1" })
+              toNTypeWithPrefixedKey({ ...notificationTypeWithoutVersion, NotificationTypeVersion: '1' })
             )
 
             expect(extra).toBeUndefined()
           })
       })
 
-      test("Do not create Default type when it already exists in Work Zone", () => {
+      test('Do not create Default type when it already exists in Work Zone', () => {
         httpClient.executeHttpRequest.mockReturnValue(allExistingResponseBody)
 
         return notificationTypes
@@ -382,15 +382,15 @@ describe("Managing of Notification Types", () => {
             structuredClone(notificationTypeWithoutVersion)
           ])
           .then(() => {
-            const postCalls = httpClient.executeHttpRequest.mock.calls.filter(c => c[1].method === "post")
+            const postCalls = httpClient.executeHttpRequest.mock.calls.filter(c => c[1].method === 'post')
             expect(postCalls).toHaveLength(0)
           })
       })
 
-      test("Create a missing version when another version of the same type exists", () => {
+      test('Create a missing version when another version of the same type exists', () => {
         httpClient.executeHttpRequest.mockReturnValue(allExistingResponseBody)
         const versionTwo = structuredClone(notificationTypeWithAllProperties)
-        versionTwo.NotificationTypeVersion = "2"
+        versionTwo.NotificationTypeVersion = '2'
 
         return notificationTypes
           .processNotificationTypes([
@@ -400,30 +400,30 @@ describe("Managing of Notification Types", () => {
           ])
           .then(() => {
             const createCall = httpClient.executeHttpRequest.mock.calls[1][1]
-            expect(createCall.method).toBe("post")
-            expect(createCall.data.NotificationTypeVersion).toBe("2")
+            expect(createCall.method).toBe('post')
+            expect(createCall.data.NotificationTypeVersion).toBe('2')
             expect(httpClient.executeHttpRequest.mock.calls[2]).toBeUndefined()
           })
       })
 
-      test("Fall back gracefully when create response has no data.d", () => {
+      test('Fall back gracefully when create response has no data.d', () => {
         httpClient.executeHttpRequest.mockReturnValueOnce(emptyResponseBody).mockReturnValue({ status: 201 })
 
         return notificationTypes
           .processNotificationTypes([structuredClone(notificationTypeWithAllProperties)])
           .then(() => {
-            expect(httpClient.executeHttpRequest.mock.calls[1][1].method).toBe("post")
+            expect(httpClient.executeHttpRequest.mock.calls[1][1].method).toBe('post')
           })
       })
 
-      test("Create new types correctly when existing types use OData results format", () => {
+      test('Create new types correctly when existing types use OData results format', () => {
         httpClient.executeHttpRequest.mockReturnValue({
           data: {
             d: {
               results: [
                 {
-                  NotificationTypeKey: "Default",
-                  NotificationTypeVersion: "1",
+                  NotificationTypeKey: 'Default',
+                  NotificationTypeVersion: '1',
                   IsGroupable: true,
                   Templates: { results: [] },
                   Actions: { results: [] },
@@ -437,20 +437,20 @@ describe("Managing of Notification Types", () => {
         return notificationTypes
           .processNotificationTypes([structuredClone(notificationTypeWithAllProperties)])
           .then(() => {
-            expect(httpClient.executeHttpRequest.mock.calls[1][1].method).toBe("post")
+            expect(httpClient.executeHttpRequest.mock.calls[1][1].method).toBe('post')
             expect(httpClient.executeHttpRequest.mock.calls[2]).toBeUndefined()
           })
       })
     })
 
-    describe("Updating Types", () => {
-      test("Update all changed types", () => {
+    describe('Updating Types', () => {
+      test('Update all changed types', () => {
         httpClient.executeHttpRequest.mockReturnValue(allExistingResponseBody)
 
         const updatedWithAll = structuredClone(notificationTypeWithAllProperties)
-        updatedWithAll.Templates[0].Description = "New Description"
+        updatedWithAll.Templates[0].Description = 'New Description'
         const updatedWithoutVersion = structuredClone(notificationTypeWithoutVersion)
-        updatedWithoutVersion.Templates[0].Description = "New Description"
+        updatedWithoutVersion.Templates[0].Description = 'New Description'
 
         return notificationTypes
           .processNotificationTypes([structuredClone(updatedWithAll), structuredClone(updatedWithoutVersion)])
@@ -460,27 +460,27 @@ describe("Managing of Notification Types", () => {
             expect(updateFirst.url).toBe(
               "v2/NotificationType.svc/NotificationTypes(guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')"
             )
-            expect(updateFirst.method).toBe("patch")
+            expect(updateFirst.method).toBe('patch')
             expect(updateFirst.data).toEqual(toNTypeWithPrefixedKey(updatedWithAll))
 
             expect(updateSecond.url).toBe(
               "v2/NotificationType.svc/NotificationTypes(guid'719d8f6a-1e07-4981-b2be-07197cec7492')"
             )
-            expect(updateSecond.method).toBe("patch")
+            expect(updateSecond.method).toBe('patch')
             expect(updateSecond.data).toEqual(
-              toNTypeWithPrefixedKey({ ...updatedWithoutVersion, NotificationTypeVersion: "1" })
+              toNTypeWithPrefixedKey({ ...updatedWithoutVersion, NotificationTypeVersion: '1' })
             )
 
             expect(extra).toBeUndefined()
           })
       })
 
-      test("Update type when an additional Template is added", () => {
+      test('Update type when an additional Template is added', () => {
         httpClient.executeHttpRequest.mockReturnValue(allExistingResponseBody)
 
         const updated = structuredClone(notificationTypeWithAllProperties)
         updated.Templates[1] = updated.Templates[0]
-        updated.Templates[1].Language = "DE"
+        updated.Templates[1].Language = 'DE'
 
         return notificationTypes
           .processNotificationTypes([structuredClone(updated), structuredClone(notificationTypeWithoutVersion)])
@@ -489,18 +489,18 @@ describe("Managing of Notification Types", () => {
             expect(updateCall.url).toBe(
               "v2/NotificationType.svc/NotificationTypes(guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')"
             )
-            expect(updateCall.method).toBe("patch")
+            expect(updateCall.method).toBe('patch')
             expect(updateCall.data).toEqual(toNTypeWithPrefixedKey(updated))
             expect(extra).toBeUndefined()
           })
       })
 
-      test("Update type when an additional Action is added", () => {
+      test('Update type when an additional Action is added', () => {
         httpClient.executeHttpRequest.mockReturnValue(allExistingResponseBody)
 
         const updated = structuredClone(notificationTypeWithAllProperties)
         updated.Actions[1] = updated.Actions[0]
-        updated.Actions[1].Language = "DE"
+        updated.Actions[1].Language = 'DE'
 
         return notificationTypes
           .processNotificationTypes([structuredClone(updated), structuredClone(notificationTypeWithoutVersion)])
@@ -509,18 +509,18 @@ describe("Managing of Notification Types", () => {
             expect(updateCall.url).toBe(
               "v2/NotificationType.svc/NotificationTypes(guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')"
             )
-            expect(updateCall.method).toBe("patch")
+            expect(updateCall.method).toBe('patch')
             expect(updateCall.data).toEqual(toNTypeWithPrefixedKey(updated))
             expect(extra).toBeUndefined()
           })
       })
 
-      test("Update type when an additional DeliveryChannel is added", () => {
+      test('Update type when an additional DeliveryChannel is added', () => {
         httpClient.executeHttpRequest.mockReturnValue(allExistingResponseBody)
 
         const updated = structuredClone(notificationTypeWithAllProperties)
         updated.DeliveryChannels[1] = updated.DeliveryChannels[0]
-        updated.DeliveryChannels[1].Type = "MOBILE"
+        updated.DeliveryChannels[1].Type = 'MOBILE'
 
         return notificationTypes
           .processNotificationTypes([structuredClone(updated), structuredClone(notificationTypeWithoutVersion)])
@@ -529,19 +529,19 @@ describe("Managing of Notification Types", () => {
             expect(updateCall.url).toBe(
               "v2/NotificationType.svc/NotificationTypes(guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')"
             )
-            expect(updateCall.method).toBe("patch")
+            expect(updateCall.method).toBe('patch')
             expect(updateCall.data).toEqual(toNTypeWithPrefixedKey(updated))
             expect(extra).toBeUndefined()
           })
       })
 
-      test("Update type when any individual field has changed", async () => {
+      test('Update type when any individual field has changed', async () => {
         httpClient.executeHttpRequest.mockReturnValue(allExistingResponseBody)
 
         const mutate = (target, key, value) => {
-          if (typeof value === "string") target[key] = value + " UPDATED"
-          else if (typeof value === "boolean") target[key] = !value
-          else if (typeof value === "number") target[key] = value + 1
+          if (typeof value === 'string') target[key] = value + ' UPDATED'
+          else if (typeof value === 'boolean') target[key] = !value
+          else if (typeof value === 'number') target[key] = value + 1
           else return false
           return true
         }
@@ -551,13 +551,13 @@ describe("Managing of Notification Types", () => {
           expect(updateCall.url).toBe(
             "v2/NotificationType.svc/NotificationTypes(guid'26f1fad0-de4c-4869-9b4e-62f445c8a7a8')"
           )
-          expect(updateCall.method).toBe("patch")
+          expect(updateCall.method).toBe('patch')
           expect(updateCall.data).toEqual(toNTypeWithPrefixedKey(changed))
           expect(extra).toBeUndefined()
         }
 
         for (const [key, value] of Object.entries(notificationTypeWithAllProperties)) {
-          if (key === "NotificationTypeKey" || key === "NotificationTypeVersion") continue
+          if (key === 'NotificationTypeKey' || key === 'NotificationTypeVersion') continue
           const changed = structuredClone(notificationTypeWithAllProperties)
           if (!mutate(changed, key, value)) continue
           await notificationTypes
@@ -594,15 +594,15 @@ describe("Managing of Notification Types", () => {
         }
       })
 
-      test("Update type when existing type has null inner results", () => {
+      test('Update type when existing type has null inner results', () => {
         httpClient.executeHttpRequest.mockReturnValue({
           data: {
             d: {
               results: [
                 {
-                  NotificationTypeId: "test-guid-123",
-                  NotificationTypeKey: "test-prefix/notificationTypeWithAllProperties",
-                  NotificationTypeVersion: "1",
+                  NotificationTypeId: 'test-guid-123',
+                  NotificationTypeKey: 'test-prefix/notificationTypeWithAllProperties',
+                  NotificationTypeVersion: '1',
                   IsGroupable: true,
                   Templates: { results: null },
                   Actions: { results: null },
@@ -617,13 +617,13 @@ describe("Managing of Notification Types", () => {
           .processNotificationTypes([structuredClone(notificationTypeWithAllProperties)])
           .then(() => {
             const [, updateCall] = httpClient.executeHttpRequest.mock.calls.map(c => c[1])
-            expect(updateCall.method).toBe("patch")
+            expect(updateCall.method).toBe('patch')
           })
       })
     })
 
-    describe("No Changed Needed", () => {
-      test("Do nothing when all types match exactly", () => {
+    describe('No Changed Needed', () => {
+      test('Do nothing when all types match exactly', () => {
         httpClient.executeHttpRequest.mockReturnValue(allExistingResponseBody)
 
         return notificationTypes
@@ -636,7 +636,7 @@ describe("Managing of Notification Types", () => {
           })
       })
 
-      test("Do nothing when input Templates/Actions/DeliveryChannels use OData results wrapper", () => {
+      test('Do nothing when input Templates/Actions/DeliveryChannels use OData results wrapper', () => {
         httpClient.executeHttpRequest.mockReturnValue(allExistingResponseBody)
 
         const local = structuredClone(notificationTypeWithAllProperties)
@@ -651,7 +651,7 @@ describe("Managing of Notification Types", () => {
           })
       })
 
-      test("Do nothing when IsGroupable is undefined (treated as true)", () => {
+      test('Do nothing when IsGroupable is undefined (treated as true)', () => {
         httpClient.executeHttpRequest.mockReturnValue(allExistingResponseBody)
 
         const local = structuredClone(notificationTypeWithAllProperties)
@@ -664,7 +664,7 @@ describe("Managing of Notification Types", () => {
           })
       })
 
-      test("Do nothing when Language fields are lowercase", () => {
+      test('Do nothing when Language fields are lowercase', () => {
         httpClient.executeHttpRequest.mockReturnValue(allExistingResponseBody)
 
         const local = structuredClone(notificationTypeWithAllProperties)
@@ -678,7 +678,7 @@ describe("Managing of Notification Types", () => {
           })
       })
 
-      test("Do nothing when TemplateLanguage is lowercase", () => {
+      test('Do nothing when TemplateLanguage is lowercase', () => {
         httpClient.executeHttpRequest.mockReturnValue(allExistingResponseBody)
 
         const local = structuredClone(notificationTypeWithAllProperties)
@@ -692,7 +692,7 @@ describe("Managing of Notification Types", () => {
           })
       })
 
-      test("Do nothing when Templates, Actions and DeliveryChannels are null in both local and remote", () => {
+      test('Do nothing when Templates, Actions and DeliveryChannels are null in both local and remote', () => {
         httpClient.executeHttpRequest.mockReturnValue(
           allExistingWithUndefinedTemplatesActionsAndDeliveryChannelsResponseBody
         )
@@ -704,23 +704,23 @@ describe("Managing of Notification Types", () => {
           })
       })
 
-      test("Do nothing when existing type matches local type exactly", () => {
+      test('Do nothing when existing type matches local type exactly', () => {
         httpClient.executeHttpRequest.mockReturnValue({
           data: {
             d: {
               results: [
                 {
-                  NotificationTypeId: "26f1fad0-de4c-4869-9b4e-62f445c8a7a8",
-                  NotificationTypeKey: "test-prefix/notificationTypeWithAllProperties",
-                  NotificationTypeVersion: "1",
+                  NotificationTypeId: '26f1fad0-de4c-4869-9b4e-62f445c8a7a8',
+                  NotificationTypeKey: 'test-prefix/notificationTypeWithAllProperties',
+                  NotificationTypeVersion: '1',
                   IsGroupable: true,
                   Templates: structuredClone(notificationTypeWithAllProperties).Templates,
                   Actions: structuredClone(notificationTypeWithAllProperties).Actions,
                   DeliveryChannels: structuredClone(notificationTypeWithAllProperties).DeliveryChannels
                 },
                 {
-                  NotificationTypeKey: "Default",
-                  NotificationTypeVersion: "1",
+                  NotificationTypeKey: 'Default',
+                  NotificationTypeVersion: '1',
                   IsGroupable: true,
                   Templates: [],
                   Actions: [],
@@ -739,7 +739,7 @@ describe("Managing of Notification Types", () => {
       })
     })
 
-    test("Deletes a type that is no longer in the local file", () => {
+    test('Deletes a type that is no longer in the local file', () => {
       httpClient.executeHttpRequest.mockReturnValue(allExistingResponseBody)
 
       return notificationTypes
@@ -749,7 +749,7 @@ describe("Managing of Notification Types", () => {
           expect(deleteCall.url).toBe(
             "v2/NotificationType.svc/NotificationTypes(guid'719d8f6a-1e07-4981-b2be-07197cec7492')"
           )
-          expect(deleteCall.method).toBe("delete")
+          expect(deleteCall.method).toBe('delete')
           expect(extra).toBeUndefined()
         })
     })
@@ -758,6 +758,6 @@ describe("Managing of Notification Types", () => {
 
 function toNTypeWithPrefixedKey(ntype) {
   var prefixedNtype = structuredClone(ntype)
-  prefixedNtype.NotificationTypeKey = testPrefix + "/" + prefixedNtype.NotificationTypeKey
+  prefixedNtype.NotificationTypeKey = testPrefix + '/' + prefixedNtype.NotificationTypeKey
   return prefixedNtype
 }

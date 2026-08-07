@@ -46,11 +46,11 @@ After installing the plugin, you can send notifications in two ways:
 Send a simple notification using `notify()`:
 
 ```js
-const alert = await cds.connect.to("notifications")
+const alert = await cds.connect.to('notifications')
 
 await alert.notify({
-  recipients: ["user@example.com"],
-  title: "Book Order Received",
+  recipients: ['user@example.com'],
+  title: 'Book Order Received',
   description: 'Your order for "Wuthering Heights" is being processed.'
 })
 ```
@@ -77,13 +77,13 @@ extend service CatalogService with {
 Emit the event from your service handler:
 
 ```js
-this.on("submitOrder", async req => {
+this.on('submitOrder', async req => {
   // ... process order ...
 
-  await this.emit("BookOrdered", {
+  await this.emit('BookOrdered', {
     title: book.title,
     buyer: req.user.id,
-    recipients: ["user@example.com"]
+    recipients: ['user@example.com']
   })
 })
 ```
@@ -355,13 +355,13 @@ There are two patterns for sending notifications.
 If you defined your notification type as a CDS event with a `@notification` annotation, the plugin hooks into your service automatically. Simply emit the event from your service handler.
 
 ```js
-this.on("submitOrder", async req => {
-  const book = await SELECT.one.from("Books").where({ ID: req.data.book })
+this.on('submitOrder', async req => {
+  const book = await SELECT.one.from('Books').where({ ID: req.data.book })
 
-  await this.emit("BookOrdered", {
+  await this.emit('BookOrdered', {
     title: book.title,
     buyer: req.user.id,
-    recipients: ["reader@bookshop.example"]
+    recipients: ['reader@bookshop.example']
   })
 })
 ```
@@ -375,12 +375,12 @@ You can also connect to the notification service and call `notify()` directly. T
 **Simple notification** (no pre-defined type needed):
 
 ```js
-const alert = await cds.connect.to("notifications")
+const alert = await cds.connect.to('notifications')
 
 await alert.notify({
   recipients: [...readers()],
-  priority: "HIGH",
-  title: "New book arrived!",
+  priority: 'HIGH',
+  title: 'New book arrived!',
   description: "Book 'Wuthering Heights' has been added to the catalog."
 })
 ```
@@ -391,7 +391,7 @@ await alert.notify({
 **Named notification type:**
 
 ```js
-await alert.notify("BookOrdered", {
+await alert.notify('BookOrdered', {
   recipients: [buyer.id],
   data: {
     title: book.title,
@@ -405,7 +405,7 @@ await alert.notify("BookOrdered", {
 It is possible to pass an array to `notify()` to send multiple notifications in a single call. This triggers only one outbox event, reducing the number of transactions when notifying many recipients. If some items fail, the successful ones are still delivered. Failures are logged as warnings, and the call only throws if **all** items fail.
 
 ```js
-alert.notify("BookOrdered", [
+alert.notify('BookOrdered', [
   { recipients: [buyer1.id], data: { title: book.title, buyer: buyer1.name } },
   { recipients: [buyer2.id], data: { title: book.title, buyer: buyer2.name } }
 ])
@@ -418,8 +418,8 @@ Alternatively, the default notification template can be used:
 
 ```js
 await alert.notify([
-  { type: "BookOrdered", recipients: [buyer1.id], data: { title: book1.title, buyer: buyer1.name } },
-  { type: "BookOrdered", recipients: [buyer2.id], data: { title: book2.title, buyer: buyer2.name } }
+  { type: 'BookOrdered', recipients: [buyer1.id], data: { title: book1.title, buyer: buyer1.name } },
+  { type: 'BookOrdered', recipients: [buyer2.id], data: { title: book2.title, buyer: buyer2.name } }
 ])
 ```
 
@@ -614,20 +614,20 @@ For full control, pass the complete notification object directly as described in
 ```js
 alert.notify({
   recipients: [...readers()],
-  type: "BookOrdered",
-  priority: "NEUTRAL",
+  type: 'BookOrdered',
+  priority: 'NEUTRAL',
   data: {
     title: book.title,
     buyer: buyer.name
   },
-  OriginId: "Example Origin Id",
-  NotificationTypeVersion: "1",
-  ProviderId: "/SAMPLEPROVIDER",
-  ActorId: "BACKENDACTORID",
-  ActorDisplayText: "ActorName",
-  ActorImageURL: "https://some-url",
-  NotificationTypeTimestamp: "2022-03-15T09:58:42.807Z",
-  TargetParameters: [{ Key: "string", Value: "string" }]
+  OriginId: 'Example Origin Id',
+  NotificationTypeVersion: '1',
+  ProviderId: '/SAMPLEPROVIDER',
+  ActorId: 'BACKENDACTORID',
+  ActorDisplayText: 'ActorName',
+  ActorImageURL: 'https://some-url',
+  NotificationTypeTimestamp: '2022-03-15T09:58:42.807Z',
+  TargetParameters: [{ Key: 'string', Value: 'string' }]
 })
 ```
 
@@ -635,14 +635,14 @@ alert.notify({
 
 ```js
 alert.notify({
-  NotificationTypeKey: "BookOrdered",
-  NotificationTypeVersion: "1",
-  Priority: "NEUTRAL",
+  NotificationTypeKey: 'BookOrdered',
+  NotificationTypeVersion: '1',
+  Priority: 'NEUTRAL',
   Properties: [
-    { Key: "title", IsSensitive: false, Language: "en", Value: "Wuthering Heights", Type: "String" },
-    { Key: "buyer", IsSensitive: false, Language: "en", Value: "reader@bookshop.com", Type: "String" }
+    { Key: 'title', IsSensitive: false, Language: 'en', Value: 'Wuthering Heights', Type: 'String' },
+    { Key: 'buyer', IsSensitive: false, Language: 'en', Value: 'reader@bookshop.com', Type: 'String' }
   ],
-  Recipients: [{ RecipientId: "reader1@bookshop.com" }, { RecipientId: "reader2@bookshop.com" }]
+  Recipients: [{ RecipientId: 'reader1@bookshop.com' }, { RecipientId: 'reader2@bookshop.com' }]
 })
 ```
 

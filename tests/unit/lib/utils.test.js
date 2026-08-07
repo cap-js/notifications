@@ -1,4 +1,4 @@
-const cds = require("@sap/cds")
+const cds = require('@sap/cds')
 const {
   buildNotification,
   validateNotificationTypes,
@@ -10,679 +10,679 @@ const {
   applyValueLengthConstraints,
   MAX_PROPERTY_VALUE_LENGTH,
   MAX_TARGET_PARAM_VALUE_LENGTH
-} = require("../../../lib/utils")
-const { existsSync, readFileSync } = require("fs")
-const { getDestination } = require("@sap-cloud-sdk/connectivity")
+} = require('../../../lib/utils')
+const { existsSync, readFileSync } = require('fs')
+const { getDestination } = require('@sap-cloud-sdk/connectivity')
 
-jest.mock("fs")
-jest.mock("@sap-cloud-sdk/connectivity")
+jest.mock('fs')
+jest.mock('@sap-cloud-sdk/connectivity')
 
-describe("Test utils", () => {
-  describe("Build notifications", () => {
-    describe("Default notifications", () => {
+describe('Test utils', () => {
+  describe('Build notifications', () => {
+    describe('Default notifications', () => {
       const expectedWithoutDescription = {
-        NotificationTypeKey: "Default",
-        NotificationTypeVersion: "1",
-        Priority: "NEUTRAL",
+        NotificationTypeKey: 'Default',
+        NotificationTypeVersion: '1',
+        Priority: 'NEUTRAL',
         Properties: [
           {
-            Key: "title",
+            Key: 'title',
             IsSensitive: true,
-            Language: "en",
-            Value: "Some Test Title",
-            Type: "String"
+            Language: 'en',
+            Value: 'Some Test Title',
+            Type: 'String'
           },
           {
-            Key: "description",
+            Key: 'description',
             IsSensitive: true,
-            Language: "en",
-            Value: "",
-            Type: "String"
+            Language: 'en',
+            Value: '',
+            Type: 'String'
           }
         ],
-        Recipients: [{ RecipientId: "test.mail@mail.com" }]
+        Recipients: [{ RecipientId: 'test.mail@mail.com' }]
       }
 
       const expectedWithDescription = {
         ...expectedWithoutDescription,
         Properties: [
           {
-            Key: "title",
+            Key: 'title',
             IsSensitive: true,
-            Language: "en",
-            Value: "Some Test Title",
-            Type: "String"
+            Language: 'en',
+            Value: 'Some Test Title',
+            Type: 'String'
           },
           {
-            Key: "description",
+            Key: 'description',
             IsSensitive: true,
-            Language: "en",
-            Value: "Some Test Description",
-            Type: "String"
+            Language: 'en',
+            Value: 'Some Test Description',
+            Type: 'String'
           }
         ]
       }
 
-      test("Build a default notification with priority", () => {
+      test('Build a default notification with priority', () => {
         expect(
           buildNotification({
-            recipients: ["test.mail@mail.com"],
-            title: "Some Test Title",
-            priority: "NEUTRAL"
+            recipients: ['test.mail@mail.com'],
+            title: 'Some Test Title',
+            priority: 'NEUTRAL'
           })
         ).toMatchObject(expectedWithoutDescription)
       })
 
-      test("Build a default notification without priority", () => {
+      test('Build a default notification without priority', () => {
         expect(
           buildNotification({
-            recipients: ["test.mail@mail.com"],
-            title: "Some Test Title"
+            recipients: ['test.mail@mail.com'],
+            title: 'Some Test Title'
           })
         ).toMatchObject(expectedWithoutDescription)
       })
 
-      test("Build a default notification with description and priority", () => {
+      test('Build a default notification with description and priority', () => {
         expect(
           buildNotification({
-            recipients: ["test.mail@mail.com"],
-            title: "Some Test Title",
-            priority: "NEUTRAL",
-            description: "Some Test Description"
+            recipients: ['test.mail@mail.com'],
+            title: 'Some Test Title',
+            priority: 'NEUTRAL',
+            description: 'Some Test Description'
           })
         ).toMatchObject(expectedWithDescription)
       })
 
-      test("Build a default notification with description", () => {
+      test('Build a default notification with description', () => {
         expect(
           buildNotification({
-            recipients: ["test.mail@mail.com"],
-            title: "Some Test Title",
-            description: "Some Test Description"
+            recipients: ['test.mail@mail.com'],
+            title: 'Some Test Title',
+            description: 'Some Test Description'
           })
         ).toMatchObject(expectedWithDescription)
       })
 
-      test("Default notification uses locale from cds.context when set", () => {
+      test('Default notification uses locale from cds.context when set', () => {
         const prev = cds.context
-        cds.context = { locale: "de" }
+        cds.context = { locale: 'de' }
         const result = buildNotification({
-          recipients: ["test@mail.com"],
-          title: "Hallo"
+          recipients: ['test@mail.com'],
+          title: 'Hallo'
         })
         cds.context = prev
-        expect(result.Properties[0].Language).toBe("de")
-        expect(result.Properties[1].Language).toBe("de")
+        expect(result.Properties[0].Language).toBe('de')
+        expect(result.Properties[1].Language).toBe('de')
       })
     })
 
-    describe("Custom notifications", () => {
+    describe('Custom notifications', () => {
       const properties = [
         {
-          Key: "title",
+          Key: 'title',
           IsSensitive: true,
-          Language: "en",
-          Value: "Some Test Title",
-          Type: "String"
+          Language: 'en',
+          Value: 'Some Test Title',
+          Type: 'String'
         }
       ]
 
       const baseInput = {
-        recipients: ["test.mail@mail.com"],
-        type: "TestNotificationType",
+        recipients: ['test.mail@mail.com'],
+        type: 'TestNotificationType',
         Properties: properties
       }
 
       const baseExpected = {
-        NotificationTypeKey: "notifications/TestNotificationType",
-        NotificationTypeVersion: "1",
-        Priority: "NEUTRAL",
+        NotificationTypeKey: 'notifications/TestNotificationType',
+        NotificationTypeVersion: '1',
+        Priority: 'NEUTRAL',
         Properties: properties,
-        Recipients: [{ RecipientId: "test.mail@mail.com" }]
+        Recipients: [{ RecipientId: 'test.mail@mail.com' }]
       }
 
-      test("Build a custom notification with properties", () => {
+      test('Build a custom notification with properties', () => {
         expect(buildNotification(baseInput)).toMatchObject(baseExpected)
       })
 
-      test("Build a custom notification with navigation targets", () => {
+      test('Build a custom notification with navigation targets', () => {
         expect(
           buildNotification({
             ...baseInput,
-            NavigationTargetAction: "TestTargetAction",
-            NavigationTargetObject: "TestTargetObject"
+            NavigationTargetAction: 'TestTargetAction',
+            NavigationTargetObject: 'TestTargetObject'
           })
         ).toMatchObject({
           ...baseExpected,
-          NavigationTargetAction: "TestTargetAction",
-          NavigationTargetObject: "TestTargetObject"
+          NavigationTargetAction: 'TestTargetAction',
+          NavigationTargetObject: 'TestTargetObject'
         })
       })
 
-      test("Build a custom notification with a non-default priority", () => {
+      test('Build a custom notification with a non-default priority', () => {
         expect(
           buildNotification({
             ...baseInput,
-            priority: "HIGH"
+            priority: 'HIGH'
           })
         ).toMatchObject({
           ...baseExpected,
-          Priority: "HIGH"
+          Priority: 'HIGH'
         })
       })
 
-      test("Build a custom notification with a non-default priority and navigation targets", () => {
+      test('Build a custom notification with a non-default priority and navigation targets', () => {
         expect(
           buildNotification({
             ...baseInput,
-            NavigationTargetAction: "TestTargetAction",
-            NavigationTargetObject: "TestTargetObject",
-            priority: "HIGH"
+            NavigationTargetAction: 'TestTargetAction',
+            NavigationTargetObject: 'TestTargetObject',
+            priority: 'HIGH'
           })
         ).toMatchObject({
           ...baseExpected,
-          NavigationTargetAction: "TestTargetAction",
-          NavigationTargetObject: "TestTargetObject",
-          Priority: "HIGH"
+          NavigationTargetAction: 'TestTargetAction',
+          NavigationTargetObject: 'TestTargetObject',
+          Priority: 'HIGH'
         })
       })
 
-      test("Maps data object to Properties array", () => {
+      test('Maps data object to Properties array', () => {
         expect(
           buildNotification({
-            recipients: ["test.mail@mail.com"],
-            type: "TestNotificationType",
-            data: { title: "Some Test Title" }
+            recipients: ['test.mail@mail.com'],
+            type: 'TestNotificationType',
+            data: { title: 'Some Test Title' }
           })
         ).toMatchObject({
           ...baseExpected,
           Properties: [
             {
-              Key: "title",
-              Value: "Some Test Title",
-              Language: "en",
-              Type: "string"
+              Key: 'title',
+              Value: 'Some Test Title',
+              Language: 'en',
+              Type: 'string'
             }
           ]
         })
       })
 
-      test("Pass all low-level API fields through to the notification", () => {
+      test('Pass all low-level API fields through to the notification', () => {
         const lowLevelFields = {
-          OriginId: "01234567-89ab-cdef-0123-456789abcdef",
-          NotificationTypeId: "01234567-89ab-cdef-0123-456789abcdef",
-          NavigationTargetAction: "TestTargetAction",
-          NavigationTargetObject: "TestTargetObject",
-          ProviderId: "SAMPLEPROVIDER",
-          ActorId: "BACKENDACTORID",
-          ActorDisplayText: "ActorName",
-          ActorImageURL: "https://some-url",
-          NotificationTypeTimestamp: "2022-03-15T09:58:42.807Z",
-          TargetParameters: [{ Key: "string", Value: "string" }]
+          OriginId: '01234567-89ab-cdef-0123-456789abcdef',
+          NotificationTypeId: '01234567-89ab-cdef-0123-456789abcdef',
+          NavigationTargetAction: 'TestTargetAction',
+          NavigationTargetObject: 'TestTargetObject',
+          ProviderId: 'SAMPLEPROVIDER',
+          ActorId: 'BACKENDACTORID',
+          ActorDisplayText: 'ActorName',
+          ActorImageURL: 'https://some-url',
+          NotificationTypeTimestamp: '2022-03-15T09:58:42.807Z',
+          TargetParameters: [{ Key: 'string', Value: 'string' }]
         }
 
         expect(
           buildNotification({
             ...baseInput,
             ...lowLevelFields,
-            priority: "HIGH"
+            priority: 'HIGH'
           })
         ).toMatchObject({
           ...baseExpected,
           ...lowLevelFields,
-          Priority: "HIGH"
+          Priority: 'HIGH'
         })
       })
 
-      test("Pass partial low-level API fields through to the notification", () => {
+      test('Pass partial low-level API fields through to the notification', () => {
         const partialLowLevelFields = {
-          NotificationTypeId: "01234567-89ab-cdef-0123-456789abcdef",
-          NavigationTargetAction: "TestTargetAction",
-          NavigationTargetObject: "TestTargetObject",
-          ProviderId: "SAMPLEPROVIDER",
-          ActorId: "BACKENDACTORID",
-          ActorDisplayText: "ActorName",
-          ActorImageURL: "https://some-url",
-          NotificationTypeTimestamp: "2022-03-15T09:58:42.807Z",
-          TargetParameters: [{ Key: "string", Value: "string" }]
+          NotificationTypeId: '01234567-89ab-cdef-0123-456789abcdef',
+          NavigationTargetAction: 'TestTargetAction',
+          NavigationTargetObject: 'TestTargetObject',
+          ProviderId: 'SAMPLEPROVIDER',
+          ActorId: 'BACKENDACTORID',
+          ActorDisplayText: 'ActorName',
+          ActorImageURL: 'https://some-url',
+          NotificationTypeTimestamp: '2022-03-15T09:58:42.807Z',
+          TargetParameters: [{ Key: 'string', Value: 'string' }]
         }
 
         expect(
           buildNotification({
             ...baseInput,
             ...partialLowLevelFields,
-            priority: "HIGH"
+            priority: 'HIGH'
           })
         ).toMatchObject({
           ...baseExpected,
           ...partialLowLevelFields,
-          Priority: "HIGH"
+          Priority: 'HIGH'
         })
       })
 
-      test("Custom notification data mapping uses locale from cds.context when set", () => {
+      test('Custom notification data mapping uses locale from cds.context when set', () => {
         const prev = cds.context
-        cds.context = { locale: "de" }
+        cds.context = { locale: 'de' }
         const result = buildNotification({
-          recipients: ["test@mail.com"],
-          type: "TestType",
-          data: { title: "Hallo" }
+          recipients: ['test@mail.com'],
+          type: 'TestType',
+          data: { title: 'Hallo' }
         })
         cds.context = prev
-        expect(result.Properties[0].Language).toBe("de")
+        expect(result.Properties[0].Language).toBe('de')
       })
     })
 
-    describe("Invalid inputs", () => {
-      test("Return falsy when an empty object is passed", () => {
+    describe('Invalid inputs', () => {
+      test('Return falsy when an empty object is passed', () => {
         expect(buildNotification({})).toBeFalsy()
       })
 
-      describe("Default notification", () => {
-        test("Return falsy when title is missing", () => {
+      describe('Default notification', () => {
+        test('Return falsy when title is missing', () => {
           expect(
             buildNotification({
-              recipients: ["test.mail@mail.com"],
-              priority: "NEUTRAL"
+              recipients: ['test.mail@mail.com'],
+              priority: 'NEUTRAL'
             })
           ).toBeFalsy()
         })
 
-        test("Return falsy when recipients is empty", () => {
+        test('Return falsy when recipients is empty', () => {
           expect(
             buildNotification({
               recipients: [],
-              title: "Some Test Title",
-              priority: "NEUTRAL"
+              title: 'Some Test Title',
+              priority: 'NEUTRAL'
             })
           ).toBeFalsy()
         })
 
-        test("Return falsy when recipients is not an array", () => {
+        test('Return falsy when recipients is not an array', () => {
           expect(
             buildNotification({
-              recipients: "invalid",
-              title: "Some Test Title",
-              priority: "NEUTRAL"
+              recipients: 'invalid',
+              title: 'Some Test Title',
+              priority: 'NEUTRAL'
             })
           ).toBeFalsy()
         })
 
-        test("Return falsy when priority is not a valid value", () => {
+        test('Return falsy when priority is not a valid value', () => {
           expect(
             buildNotification({
-              recipients: ["test.mail@mail.com"],
-              title: "Some Test Title",
-              priority: "INVALID"
+              recipients: ['test.mail@mail.com'],
+              title: 'Some Test Title',
+              priority: 'INVALID'
             })
           ).toBeFalsy()
         })
 
-        test("Return falsy when description is not a string", () => {
+        test('Return falsy when description is not a string', () => {
           expect(
             buildNotification({
-              recipients: ["test.mail@mail.com"],
-              title: "Some Test Title",
-              priority: "NEUTRAL",
-              description: { invalid: "invalid" }
+              recipients: ['test.mail@mail.com'],
+              title: 'Some Test Title',
+              priority: 'NEUTRAL',
+              description: { invalid: 'invalid' }
             })
           ).toBeFalsy()
         })
 
-        test("Return falsy when title is not a string", () => {
+        test('Return falsy when title is not a string', () => {
           expect(
             buildNotification({
-              recipients: ["test.mail@mail.com"],
-              title: { invalid: "invalid" },
-              priority: "NEUTRAL"
+              recipients: ['test.mail@mail.com'],
+              title: { invalid: 'invalid' },
+              priority: 'NEUTRAL'
             })
           ).toBeFalsy()
         })
       })
 
-      describe("Custom notification", () => {
-        test("Return falsy when recipients is missing", () => {
+      describe('Custom notification', () => {
+        test('Return falsy when recipients is missing', () => {
           expect(
             buildNotification({
-              type: "TestNotificationType"
+              type: 'TestNotificationType'
             })
           ).toBeFalsy()
         })
 
-        test("Return falsy when recipients is empty", () => {
+        test('Return falsy when recipients is empty', () => {
           expect(
             buildNotification({
               recipients: [],
-              type: "TestNotificationType"
+              type: 'TestNotificationType'
             })
           ).toBeFalsy()
         })
 
-        test("Return falsy when recipients is not an array", () => {
+        test('Return falsy when recipients is not an array', () => {
           expect(
             buildNotification({
-              recipients: "invalid",
-              type: "TestNotificationType"
+              recipients: 'invalid',
+              type: 'TestNotificationType'
             })
           ).toBeFalsy()
         })
 
-        test("Return falsy when priority is not a valid value", () => {
+        test('Return falsy when priority is not a valid value', () => {
           expect(
             buildNotification({
-              recipients: ["test.mail@mail.com"],
-              type: "TestNotificationType",
-              priority: "invalid"
+              recipients: ['test.mail@mail.com'],
+              type: 'TestNotificationType',
+              priority: 'invalid'
             })
           ).toBeFalsy()
         })
 
-        test("Return falsy when properties is not an array", () => {
+        test('Return falsy when properties is not an array', () => {
           expect(
             buildNotification({
-              recipients: ["test.mail@mail.com"],
-              type: "TestNotificationType",
-              priority: "NEUTRAL",
-              properties: "invalid"
+              recipients: ['test.mail@mail.com'],
+              type: 'TestNotificationType',
+              priority: 'NEUTRAL',
+              properties: 'invalid'
             })
           ).toBeFalsy()
         })
 
-        test("Return falsy when navigation is not an object", () => {
+        test('Return falsy when navigation is not an object', () => {
           expect(
             buildNotification({
-              recipients: ["test.mail@mail.com"],
-              type: "TestNotificationType",
-              priority: "NEUTRAL",
-              navigation: "invalid"
+              recipients: ['test.mail@mail.com'],
+              type: 'TestNotificationType',
+              priority: 'NEUTRAL',
+              navigation: 'invalid'
             })
           ).toBeFalsy()
         })
 
-        test("Return falsy when payload is not an object", () => {
+        test('Return falsy when payload is not an object', () => {
           expect(
             buildNotification({
-              recipients: ["test.mail@mail.com"],
-              type: "TestNotificationType",
-              priority: "NEUTRAL",
-              payload: "invalid"
+              recipients: ['test.mail@mail.com'],
+              type: 'TestNotificationType',
+              priority: 'NEUTRAL',
+              payload: 'invalid'
             })
           ).toBeFalsy()
         })
       })
     })
 
-    test("Pass a raw notification object through with the prefix applied to the type key", () => {
+    test('Pass a raw notification object through with the prefix applied to the type key', () => {
       const rawNotification = {
-        NotificationTypeKey: "TestNotificationType",
-        NotificationTypeVersion: "1",
-        Priority: "NEUTRAL",
+        NotificationTypeKey: 'TestNotificationType',
+        NotificationTypeVersion: '1',
+        Priority: 'NEUTRAL',
         Properties: [
           {
-            Key: "title",
+            Key: 'title',
             IsSensitive: true,
-            Language: "en",
-            Value: "Some Test Title",
-            Type: "String"
+            Language: 'en',
+            Value: 'Some Test Title',
+            Type: 'String'
           },
           {
-            Key: "description",
+            Key: 'description',
             IsSensitive: true,
-            Language: "en",
-            Value: "Some Test Description",
-            Type: "String"
+            Language: 'en',
+            Value: 'Some Test Description',
+            Type: 'String'
           }
         ],
-        Recipients: [{ RecipientId: "test.mail@mail.com" }]
+        Recipients: [{ RecipientId: 'test.mail@mail.com' }]
       }
 
       expect(buildNotification({ ...rawNotification })).toMatchObject({
         ...rawNotification,
-        NotificationTypeKey: "notifications/TestNotificationType"
+        NotificationTypeKey: 'notifications/TestNotificationType'
       })
     })
   })
 
-  describe("Notification types validation", () => {
-    test("Return false when an entry is missing NotificationTypeKey", () => {
-      expect(validateNotificationTypes([{ NotificationTypeKey: "Test" }, { blabla: "Test2" }])).toEqual(false)
+  describe('Notification types validation', () => {
+    test('Return false when an entry is missing NotificationTypeKey', () => {
+      expect(validateNotificationTypes([{ NotificationTypeKey: 'Test' }, { blabla: 'Test2' }])).toEqual(false)
     })
 
-    test("Return true for an empty array", () => {
+    test('Return true for an empty array', () => {
       expect(validateNotificationTypes([])).toBe(true)
     })
 
-    test("Return true when all entries have NotificationTypeKey", () => {
-      expect(validateNotificationTypes([{ NotificationTypeKey: "Test" }, { NotificationTypeKey: "Test2" }])).toEqual(
+    test('Return true when all entries have NotificationTypeKey', () => {
+      expect(validateNotificationTypes([{ NotificationTypeKey: 'Test' }, { NotificationTypeKey: 'Test2' }])).toEqual(
         true
       )
     })
   })
 
-  describe("Read file", () => {
-    test("Return an empty array when the file does not exist", () => {
+  describe('Read file', () => {
+    test('Return an empty array when the file does not exist', () => {
       existsSync.mockReturnValue(false)
-      expect(readFile("test.json")).toMatchObject([])
+      expect(readFile('test.json')).toMatchObject([])
     })
 
-    test("Return the parsed file contents when the file exists", () => {
+    test('Return the parsed file contents when the file exists', () => {
       existsSync.mockReturnValue(true)
       readFileSync.mockReturnValue('[{ "test": "test" }]')
-      expect(readFile("test.json")).toMatchObject([{ test: "test" }])
+      expect(readFile('test.json')).toMatchObject([{ test: 'test' }])
     })
   })
 
-  describe("Get notification destination", () => {
-    test("Return the destination when it exists", async () => {
-      getDestination.mockReturnValue({ "mock-destination": "mock-destination" })
-      expect(await getNotificationDestination()).toMatchObject({ "mock-destination": "mock-destination" })
+  describe('Get notification destination', () => {
+    test('Return the destination when it exists', async () => {
+      getDestination.mockReturnValue({ 'mock-destination': 'mock-destination' })
+      expect(await getNotificationDestination()).toMatchObject({ 'mock-destination': 'mock-destination' })
     })
 
-    test("Throw an error when the destination is not found", async () => {
+    test('Throw an error when the destination is not found', async () => {
       getDestination.mockReturnValue(undefined)
-      await expect(() => getNotificationDestination()).rejects.toThrow("Failed to get destination: SAP_Notifications")
+      await expect(() => getNotificationDestination()).rejects.toThrow('Failed to get destination: SAP_Notifications')
     })
   })
 
-  describe("Build notification from event", () => {
+  describe('Build notification from event', () => {
     const baseEventDef = {
-      name: "CatalogService.NewOrder",
-      kind: "event",
-      "@notification": true,
+      name: 'CatalogService.NewOrder',
+      kind: 'event',
+      '@notification': true,
       elements: {
-        book: { type: "cds.String" },
-        quantity: { type: "cds.Integer" },
-        orderedAt: { type: "cds.Date" },
-        ID: { type: "cds.UUID", key: true },
-        recipients: { items: { type: "cds.String" } }
+        book: { type: 'cds.String' },
+        quantity: { type: 'cds.Integer' },
+        orderedAt: { type: 'cds.Date' },
+        ID: { type: 'cds.UUID', key: true },
+        recipients: { items: { type: 'cds.String' } }
       }
     }
 
     const baseData = {
-      book: "Moby Dick",
+      book: 'Moby Dick',
       quantity: 2,
-      orderedAt: "2024-01-15",
-      ID: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
-      recipients: ["buyer@example.com"]
+      orderedAt: '2024-01-15',
+      ID: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+      recipients: ['buyer@example.com']
     }
 
-    test("Sets NotificationTypeKey to the unqualified event name", async () => {
+    test('Sets NotificationTypeKey to the unqualified event name', async () => {
       const result = await buildNotificationFromEvent(baseEventDef, baseData)
-      expect(result.NotificationTypeKey).toBe("NewOrder")
+      expect(result.NotificationTypeKey).toBe('NewOrder')
     })
 
     test("Sets NotificationTypeVersion to '1'", async () => {
       const result = await buildNotificationFromEvent(baseEventDef, baseData)
-      expect(result.NotificationTypeVersion).toBe("1")
+      expect(result.NotificationTypeVersion).toBe('1')
     })
 
-    test("Maps event data fields to Properties with IsSensitive true", async () => {
+    test('Maps event data fields to Properties with IsSensitive true', async () => {
       const result = await buildNotificationFromEvent(baseEventDef, baseData)
       expect(result.Properties).toContainEqual({
-        Key: "book",
-        Language: "en",
-        Value: "Moby Dick",
-        Type: "String",
+        Key: 'book',
+        Language: 'en',
+        Value: 'Moby Dick',
+        Type: 'String',
         IsSensitive: true
       })
     })
 
-    test("Does not include recipients in Properties", async () => {
+    test('Does not include recipients in Properties', async () => {
       const result = await buildNotificationFromEvent(baseEventDef, baseData)
-      expect(result.Properties.map(p => p.Key)).not.toContain("recipients")
+      expect(result.Properties.map(p => p.Key)).not.toContain('recipients')
     })
 
-    test("Maps key elements to TargetParameters", async () => {
+    test('Maps key elements to TargetParameters', async () => {
       const result = await buildNotificationFromEvent(baseEventDef, baseData)
-      expect(result.TargetParameters).toEqual([{ Key: "ID", Value: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee" }])
+      expect(result.TargetParameters).toEqual([{ Key: 'ID', Value: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee' }])
     })
 
-    test("Omits TargetParameters when no key elements exist", async () => {
-      const defNoKeys = { ...baseEventDef, elements: { book: { type: "cds.String" } } }
-      const result = await buildNotificationFromEvent(defNoKeys, { book: "Test", recipients: [] })
+    test('Omits TargetParameters when no key elements exist', async () => {
+      const defNoKeys = { ...baseEventDef, elements: { book: { type: 'cds.String' } } }
+      const result = await buildNotificationFromEvent(defNoKeys, { book: 'Test', recipients: [] })
       expect(result.TargetParameters).toBeUndefined()
     })
 
-    test("Uses RecipientId for email-style recipients", async () => {
+    test('Uses RecipientId for email-style recipients', async () => {
       const result = await buildNotificationFromEvent(baseEventDef, baseData)
-      expect(result.Recipients).toEqual([{ RecipientId: "buyer@example.com" }])
+      expect(result.Recipients).toEqual([{ RecipientId: 'buyer@example.com' }])
     })
 
-    test("Uses GlobalUserId for GUID recipients", async () => {
-      const data = { ...baseData, recipients: ["123e4567-e89b-12d3-a456-426614174000"] }
+    test('Uses GlobalUserId for GUID recipients', async () => {
+      const data = { ...baseData, recipients: ['123e4567-e89b-12d3-a456-426614174000'] }
       const result = await buildNotificationFromEvent(baseEventDef, data)
-      expect(result.Recipients).toEqual([{ GlobalUserId: "123e4567-e89b-12d3-a456-426614174000" }])
+      expect(result.Recipients).toEqual([{ GlobalUserId: '123e4567-e89b-12d3-a456-426614174000' }])
     })
 
-    test("Handles mixed GUID and email recipients", async () => {
-      const data = { ...baseData, recipients: ["123e4567-e89b-12d3-a456-426614174000", "email@example.com"] }
+    test('Handles mixed GUID and email recipients', async () => {
+      const data = { ...baseData, recipients: ['123e4567-e89b-12d3-a456-426614174000', 'email@example.com'] }
       const result = await buildNotificationFromEvent(baseEventDef, data)
       expect(result.Recipients).toEqual([
-        { GlobalUserId: "123e4567-e89b-12d3-a456-426614174000" },
-        { RecipientId: "email@example.com" }
+        { GlobalUserId: '123e4567-e89b-12d3-a456-426614174000' },
+        { RecipientId: 'email@example.com' }
       ])
     })
 
-    test("Defaults Priority to NEUTRAL when annotation is absent", async () => {
+    test('Defaults Priority to NEUTRAL when annotation is absent', async () => {
       const result = await buildNotificationFromEvent(baseEventDef, baseData)
-      expect(result.Priority).toBe("NEUTRAL")
+      expect(result.Priority).toBe('NEUTRAL')
     })
 
-    test("Resolves enum priority annotation (#High -> HIGH)", async () => {
-      const def = { ...baseEventDef, "@notification.priority": { "#": "High" } }
+    test('Resolves enum priority annotation (#High -> HIGH)', async () => {
+      const def = { ...baseEventDef, '@notification.priority': { '#': 'High' } }
       const result = await buildNotificationFromEvent(def, baseData)
-      expect(result.Priority).toBe("HIGH")
+      expect(result.Priority).toBe('HIGH')
     })
 
-    test("Accepts plain string priority annotation", async () => {
-      const def = { ...baseEventDef, "@notification.priority": "LOW" }
+    test('Accepts plain string priority annotation', async () => {
+      const def = { ...baseEventDef, '@notification.priority': 'LOW' }
       const result = await buildNotificationFromEvent(def, baseData)
-      expect(result.Priority).toBe("LOW")
+      expect(result.Priority).toBe('LOW')
     })
 
-    describe("Invalid static priority annotation", () => {
+    describe('Invalid static priority annotation', () => {
       const log = cds.test.log()
       beforeEach(() => log.clear())
 
-      test("Falls back to NEUTRAL and warns when plain string priority is invalid", async () => {
-        const def = { ...baseEventDef, "@notification.priority": "CRITICAL" }
+      test('Falls back to NEUTRAL and warns when plain string priority is invalid', async () => {
+        const def = { ...baseEventDef, '@notification.priority': 'CRITICAL' }
         const result = await buildNotificationFromEvent(def, baseData)
-        expect(result.Priority).toBe("NEUTRAL")
+        expect(result.Priority).toBe('NEUTRAL')
         expect(log.output).toMatch(/invalid|CRITICAL/i)
       })
 
-      test("Falls back to NEUTRAL and warns when enum priority annotation resolves to invalid value", async () => {
-        const def = { ...baseEventDef, "@notification.priority": { "#": "CRITICAL" } }
+      test('Falls back to NEUTRAL and warns when enum priority annotation resolves to invalid value', async () => {
+        const def = { ...baseEventDef, '@notification.priority': { '#': 'CRITICAL' } }
         const result = await buildNotificationFromEvent(def, baseData)
-        expect(result.Priority).toBe("NEUTRAL")
+        expect(result.Priority).toBe('NEUTRAL')
         expect(log.output).toMatch(/invalid|CRITICAL/i)
       })
     })
 
-    test("Maps @Common.SemanticObject to NavigationTargetObject", async () => {
-      const def = { ...baseEventDef, "@Common.SemanticObject": "Orders" }
+    test('Maps @Common.SemanticObject to NavigationTargetObject', async () => {
+      const def = { ...baseEventDef, '@Common.SemanticObject': 'Orders' }
       const result = await buildNotificationFromEvent(def, baseData)
-      expect(result.NavigationTargetObject).toBe("Orders")
+      expect(result.NavigationTargetObject).toBe('Orders')
     })
 
-    test("Maps @Common.SemanticObjectAction to NavigationTargetAction", async () => {
-      const def = { ...baseEventDef, "@Common.SemanticObjectAction": "manage" }
+    test('Maps @Common.SemanticObjectAction to NavigationTargetAction', async () => {
+      const def = { ...baseEventDef, '@Common.SemanticObjectAction': 'manage' }
       const result = await buildNotificationFromEvent(def, baseData)
-      expect(result.NavigationTargetAction).toBe("manage")
+      expect(result.NavigationTargetAction).toBe('manage')
     })
 
-    test("Works with empty data and no recipients", async () => {
+    test('Works with empty data and no recipients', async () => {
       const result = await buildNotificationFromEvent(baseEventDef, {})
       expect(result.Recipients).toEqual([])
       expect(result.Properties).toEqual([])
     })
   })
 
-  describe("replaceRefsInExpr", () => {
-    test("Passes through val nodes unchanged", () => {
+  describe('replaceRefsInExpr', () => {
+    test('Passes through val nodes unchanged', () => {
       expect(replaceRefsInExpr({ val: 42 }, {})).toEqual({ val: 42 })
     })
 
-    test("Passes through string operators unchanged", () => {
-      expect(replaceRefsInExpr(">", {})).toBe(">")
+    test('Passes through string operators unchanged', () => {
+      expect(replaceRefsInExpr('>', {})).toBe('>')
     })
 
-    test("Replaces {ref} with {val} when key exists in data", () => {
-      expect(replaceRefsInExpr({ ref: ["quantity"] }, { quantity: 10 })).toEqual({ val: 10, param: false })
+    test('Replaces {ref} with {val} when key exists in data', () => {
+      expect(replaceRefsInExpr({ ref: ['quantity'] }, { quantity: 10 })).toEqual({ val: 10, param: false })
     })
 
-    test("Substitutes null when key is not in data", () => {
-      expect(replaceRefsInExpr({ ref: ["unknown"] }, { quantity: 10 })).toEqual({ val: null, param: false })
+    test('Substitutes null when key is not in data', () => {
+      expect(replaceRefsInExpr({ ref: ['unknown'] }, { quantity: 10 })).toEqual({ val: null, param: false })
     })
 
-    test("Does not replace binding parameters ({ref, param: true})", () => {
-      const param = { ref: ["?"], param: true }
-      expect(replaceRefsInExpr(param, { "?": "something" })).toEqual(param)
+    test('Does not replace binding parameters ({ref, param: true})', () => {
+      const param = { ref: ['?'], param: true }
+      expect(replaceRefsInExpr(param, { '?': 'something' })).toEqual(param)
     })
 
-    test("Recursively replaces refs in flat xpr array", () => {
-      const xpr = [{ ref: ["quantity"] }, ">", { val: 5 }]
-      expect(replaceRefsInExpr(xpr, { quantity: 10 })).toEqual([{ val: 10, param: false }, ">", { val: 5 }])
+    test('Recursively replaces refs in flat xpr array', () => {
+      const xpr = [{ ref: ['quantity'] }, '>', { val: 5 }]
+      expect(replaceRefsInExpr(xpr, { quantity: 10 })).toEqual([{ val: 10, param: false }, '>', { val: 5 }])
     })
 
-    test("Recursively replaces refs in nested xpr object", () => {
-      const expr = { xpr: [{ ref: ["quantity"] }, ">", { val: 5 }] }
-      expect(replaceRefsInExpr(expr, { quantity: 10 })).toEqual({ xpr: [{ val: 10, param: false }, ">", { val: 5 }] })
+    test('Recursively replaces refs in nested xpr object', () => {
+      const expr = { xpr: [{ ref: ['quantity'] }, '>', { val: 5 }] }
+      expect(replaceRefsInExpr(expr, { quantity: 10 })).toEqual({ xpr: [{ val: 10, param: false }, '>', { val: 5 }] })
     })
 
     test("Converts enum symbol {'#': value} to {val: value}", () => {
-      expect(replaceRefsInExpr({ "#": "High" }, {})).toEqual({ val: "High", param: false })
+      expect(replaceRefsInExpr({ '#': 'High' }, {})).toEqual({ val: 'High', param: false })
     })
 
-    test("Replaces refs in function call args", () => {
-      const func = { func: "days_between", args: [{ ref: ["startDate"] }, { ref: ["endDate"] }] }
-      expect(replaceRefsInExpr(func, { startDate: "2024-01-01", endDate: "2024-06-01" })).toEqual({
-        func: "days_between",
+    test('Replaces refs in function call args', () => {
+      const func = { func: 'days_between', args: [{ ref: ['startDate'] }, { ref: ['endDate'] }] }
+      expect(replaceRefsInExpr(func, { startDate: '2024-01-01', endDate: '2024-06-01' })).toEqual({
+        func: 'days_between',
         args: [
-          { val: "2024-01-01", param: false },
-          { val: "2024-06-01", param: false }
+          { val: '2024-01-01', param: false },
+          { val: '2024-06-01', param: false }
         ]
       })
     })
 
-    test("Handles deep nesting: xpr containing xpr containing refs", () => {
+    test('Handles deep nesting: xpr containing xpr containing refs', () => {
       const expr = {
-        xpr: ["case", "when", { xpr: [{ ref: ["a"] }, "<", { val: 1 }] }, "then", { ref: ["b"] }, "end"]
+        xpr: ['case', 'when', { xpr: [{ ref: ['a'] }, '<', { val: 1 }] }, 'then', { ref: ['b'] }, 'end']
       }
-      expect(replaceRefsInExpr(expr, { a: 0, b: "High" })).toEqual({
+      expect(replaceRefsInExpr(expr, { a: 0, b: 'High' })).toEqual({
         xpr: [
-          "case",
-          "when",
-          { xpr: [{ val: 0, param: false }, "<", { val: 1 }] },
-          "then",
-          { val: "High", param: false },
-          "end"
+          'case',
+          'when',
+          { xpr: [{ val: 0, param: false }, '<', { val: 1 }] },
+          'then',
+          { val: 'High', param: false },
+          'end'
         ]
       })
     })
 
-    test("Replaces refs inside list nodes", () => {
-      const expr = { list: [{ ref: ["a"] }, { ref: ["b"] }] }
+    test('Replaces refs inside list nodes', () => {
+      const expr = { list: [{ ref: ['a'] }, { ref: ['b'] }] }
       expect(replaceRefsInExpr(expr, { a: 1, b: 2 })).toEqual({
         list: [
           { val: 1, param: false },
@@ -691,198 +691,198 @@ describe("Test utils", () => {
       })
     })
 
-    test("Replaces refs in named function args", () => {
-      const func = { func: "foo", args: { p: { ref: ["x"] } } }
-      expect(replaceRefsInExpr(func, { x: 42 })).toEqual({ func: "foo", args: { p: { val: 42, param: false } } })
+    test('Replaces refs in named function args', () => {
+      const func = { func: 'foo', args: { p: { ref: ['x'] } } }
+      expect(replaceRefsInExpr(func, { x: 42 })).toEqual({ func: 'foo', args: { p: { val: 42, param: false } } })
     })
 
-    test("Leaves multi-segment refs unchanged — path traversal is not supported", () => {
-      const expr = { ref: ["assoc", "field"] }
-      expect(replaceRefsInExpr(expr, { assoc: "something" })).toEqual({ ref: ["assoc", "field"] })
-    })
-  })
-
-  describe("mapCdsTypeToANSType", () => {
-    test.each([
-      ["cds.String", "String"],
-      ["cds.UUID", "String"],
-      ["cds.Boolean", "String"],
-      ["String", "String"]
-    ])("%s -> %s", (cdsType, expected) => {
-      expect(mapCdsTypeToANSType(cdsType)).toBe(expected)
-    })
-
-    test.each([
-      ["cds.Integer", "Integer"],
-      ["cds.Integer64", "Integer"],
-      ["cds.Int16", "Integer"],
-      ["cds.Int32", "Integer"],
-      ["cds.Int64", "Integer"],
-      ["cds.UInt8", "Integer"],
-      ["cds.Decimal", "String"],
-      ["cds.Double", "String"],
-      ["cds.Float", "String"]
-    ])("%s -> %s", (cdsType, expected) => {
-      expect(mapCdsTypeToANSType(cdsType)).toBe(expected)
-    })
-
-    test.each([
-      ["cds.Date", "Date"],
-      ["cds.DateTime", "Date"],
-      ["cds.Timestamp", "Date"],
-      ["cds.Time", "Date"]
-    ])("%s -> %s", (cdsType, expected) => {
-      expect(mapCdsTypeToANSType(cdsType)).toBe(expected)
-    })
-
-    test("Returns String for undefined type", () => {
-      expect(mapCdsTypeToANSType(undefined)).toBe("String")
+    test('Leaves multi-segment refs unchanged — path traversal is not supported', () => {
+      const expr = { ref: ['assoc', 'field'] }
+      expect(replaceRefsInExpr(expr, { assoc: 'something' })).toEqual({ ref: ['assoc', 'field'] })
     })
   })
 
-  describe("Configuration", () => {
+  describe('mapCdsTypeToANSType', () => {
+    test.each([
+      ['cds.String', 'String'],
+      ['cds.UUID', 'String'],
+      ['cds.Boolean', 'String'],
+      ['String', 'String']
+    ])('%s -> %s', (cdsType, expected) => {
+      expect(mapCdsTypeToANSType(cdsType)).toBe(expected)
+    })
+
+    test.each([
+      ['cds.Integer', 'Integer'],
+      ['cds.Integer64', 'Integer'],
+      ['cds.Int16', 'Integer'],
+      ['cds.Int32', 'Integer'],
+      ['cds.Int64', 'Integer'],
+      ['cds.UInt8', 'Integer'],
+      ['cds.Decimal', 'String'],
+      ['cds.Double', 'String'],
+      ['cds.Float', 'String']
+    ])('%s -> %s', (cdsType, expected) => {
+      expect(mapCdsTypeToANSType(cdsType)).toBe(expected)
+    })
+
+    test.each([
+      ['cds.Date', 'Date'],
+      ['cds.DateTime', 'Date'],
+      ['cds.Timestamp', 'Date'],
+      ['cds.Time', 'Date']
+    ])('%s -> %s', (cdsType, expected) => {
+      expect(mapCdsTypeToANSType(cdsType)).toBe(expected)
+    })
+
+    test('Returns String for undefined type', () => {
+      expect(mapCdsTypeToANSType(undefined)).toBe('String')
+    })
+  })
+
+  describe('Configuration', () => {
     const log = cds.test.log()
     afterEach(() => {
       delete cds.env.requires.notifications?.authenticationIdentifier
     })
 
-    it("Use GlobalUserId as the recipient key when authenticationIdentifier is set to UserUUID", () => {
+    it('Use GlobalUserId as the recipient key when authenticationIdentifier is set to UserUUID', () => {
       cds.env.requires.notifications ??= {}
-      cds.env.requires.notifications.authenticationIdentifier = "UserUUID"
+      cds.env.requires.notifications.authenticationIdentifier = 'UserUUID'
 
       const result = buildNotification({
-        recipients: ["user-uuid-123"],
-        title: "Test Title"
+        recipients: ['user-uuid-123'],
+        title: 'Test Title'
       })
 
-      expect(result.Recipients[0]).toMatchObject({ GlobalUserId: "user-uuid-123" })
+      expect(result.Recipients[0]).toMatchObject({ GlobalUserId: 'user-uuid-123' })
     })
 
-    it("Auto mode picks GlobalUserId for UUID recipients", () => {
+    it('Auto mode picks GlobalUserId for UUID recipients', () => {
       cds.env.requires.notifications ??= {}
-      cds.env.requires.notifications.authenticationIdentifier = "auto"
+      cds.env.requires.notifications.authenticationIdentifier = 'auto'
 
       const result = buildNotification({
-        recipients: ["550e8400-e29b-41d4-a716-446655440000"],
-        title: "Test Title"
+        recipients: ['550e8400-e29b-41d4-a716-446655440000'],
+        title: 'Test Title'
       })
 
-      expect(result.Recipients[0]).toMatchObject({ GlobalUserId: "550e8400-e29b-41d4-a716-446655440000" })
+      expect(result.Recipients[0]).toMatchObject({ GlobalUserId: '550e8400-e29b-41d4-a716-446655440000' })
     })
 
-    it("Auto mode picks RecipientId for email recipients", () => {
+    it('Auto mode picks RecipientId for email recipients', () => {
       cds.env.requires.notifications ??= {}
-      cds.env.requires.notifications.authenticationIdentifier = "auto"
+      cds.env.requires.notifications.authenticationIdentifier = 'auto'
 
       const result = buildNotification({
-        recipients: ["test.mail@mail.com"],
-        title: "Test Title"
+        recipients: ['test.mail@mail.com'],
+        title: 'Test Title'
       })
 
-      expect(result.Recipients[0]).toMatchObject({ RecipientId: "test.mail@mail.com" })
+      expect(result.Recipients[0]).toMatchObject({ RecipientId: 'test.mail@mail.com' })
     })
 
-    it("Auto mode supports mixed UUID and email recipients in one notification", () => {
+    it('Auto mode supports mixed UUID and email recipients in one notification', () => {
       cds.env.requires.notifications ??= {}
-      cds.env.requires.notifications.authenticationIdentifier = "auto"
+      cds.env.requires.notifications.authenticationIdentifier = 'auto'
 
       const result = buildNotification({
-        recipients: ["550e8400-e29b-41d4-a716-446655440000", "test.mail@mail.com"],
-        title: "Test Title"
+        recipients: ['550e8400-e29b-41d4-a716-446655440000', 'test.mail@mail.com'],
+        title: 'Test Title'
       })
 
       expect(result.Recipients).toEqual([
-        { GlobalUserId: "550e8400-e29b-41d4-a716-446655440000" },
-        { RecipientId: "test.mail@mail.com" }
+        { GlobalUserId: '550e8400-e29b-41d4-a716-446655440000' },
+        { RecipientId: 'test.mail@mail.com' }
       ])
     })
 
-    it("Auto mode warns and falls back to RecipientId when value is neither UUID nor email", () => {
+    it('Auto mode warns and falls back to RecipientId when value is neither UUID nor email', () => {
       cds.env.requires.notifications ??= {}
-      cds.env.requires.notifications.authenticationIdentifier = "auto"
+      cds.env.requires.notifications.authenticationIdentifier = 'auto'
       log.clear()
 
       const result = buildNotification({
-        recipients: ["not-a-uuid-or-email"],
-        title: "Test Title"
+        recipients: ['not-a-uuid-or-email'],
+        title: 'Test Title'
       })
 
-      expect(result.Recipients[0]).toMatchObject({ RecipientId: "not-a-uuid-or-email" })
-      expect(log.output).toContain("neither a UUID nor an email")
+      expect(result.Recipients[0]).toMatchObject({ RecipientId: 'not-a-uuid-or-email' })
+      expect(log.output).toContain('neither a UUID nor an email')
     })
 
-    it("Auto is the default when authenticationIdentifier is not configured", () => {
+    it('Auto is the default when authenticationIdentifier is not configured', () => {
       cds.env.requires.notifications ??= {}
       delete cds.env.requires.notifications.authenticationIdentifier
 
       const result = buildNotification({
-        recipients: ["550e8400-e29b-41d4-a716-446655440000"],
-        title: "Test Title"
+        recipients: ['550e8400-e29b-41d4-a716-446655440000'],
+        title: 'Test Title'
       })
 
-      expect(result.Recipients[0]).toMatchObject({ GlobalUserId: "550e8400-e29b-41d4-a716-446655440000" })
+      expect(result.Recipients[0]).toMatchObject({ GlobalUserId: '550e8400-e29b-41d4-a716-446655440000' })
     })
 
-    it("Explicit RecipientId mode never resolves to GlobalUserId even for UUID values", () => {
+    it('Explicit RecipientId mode never resolves to GlobalUserId even for UUID values', () => {
       cds.env.requires.notifications ??= {}
-      cds.env.requires.notifications.authenticationIdentifier = "RecipientId"
+      cds.env.requires.notifications.authenticationIdentifier = 'RecipientId'
 
       const result = buildNotification({
-        recipients: ["550e8400-e29b-41d4-a716-446655440000"],
-        title: "Test Title"
+        recipients: ['550e8400-e29b-41d4-a716-446655440000'],
+        title: 'Test Title'
       })
 
-      expect(result.Recipients[0]).toMatchObject({ RecipientId: "550e8400-e29b-41d4-a716-446655440000" })
+      expect(result.Recipients[0]).toMatchObject({ RecipientId: '550e8400-e29b-41d4-a716-446655440000' })
     })
 
-    it("Fall back to basename of cds.root as prefix when package.json cannot be read", () => {
+    it('Fall back to basename of cds.root as prefix when package.json cannot be read', () => {
       let result
       jest.isolateModules(() => {
-        const cds = require("@sap/cds")
+        const cds = require('@sap/cds')
         const originalRoot = cds.root
         cds.env.requires.notifications ??= {}
-        cds.env.requires.notifications.prefix = "$app-name"
-        cds.root = "/nonexistent-path-for-testing"
+        cds.env.requires.notifications.prefix = '$app-name'
+        cds.root = '/nonexistent-path-for-testing'
         try {
-          const { getNotificationTypesKeyWithPrefix } = require("../../../lib/utils")
-          result = getNotificationTypesKeyWithPrefix("TestType")
+          const { getNotificationTypesKeyWithPrefix } = require('../../../lib/utils')
+          result = getNotificationTypesKeyWithPrefix('TestType')
         } finally {
           cds.root = originalRoot
           delete cds.env.requires.notifications.prefix
         }
       })
-      expect(result).toBe("nonexistent-path-for-testing/TestType")
+      expect(result).toBe('nonexistent-path-for-testing/TestType')
     })
   })
 
-  describe("applyValueLengthConstraints", () => {
-    const longValue251 = "a".repeat(MAX_TARGET_PARAM_VALUE_LENGTH + 1)
-    const longValue256 = "a".repeat(MAX_PROPERTY_VALUE_LENGTH + 1)
-    const value255 = "a".repeat(MAX_PROPERTY_VALUE_LENGTH)
-    const value250 = "a".repeat(MAX_TARGET_PARAM_VALUE_LENGTH)
+  describe('applyValueLengthConstraints', () => {
+    const longValue251 = 'a'.repeat(MAX_TARGET_PARAM_VALUE_LENGTH + 1)
+    const longValue256 = 'a'.repeat(MAX_PROPERTY_VALUE_LENGTH + 1)
+    const value255 = 'a'.repeat(MAX_PROPERTY_VALUE_LENGTH)
+    const value250 = 'a'.repeat(MAX_TARGET_PARAM_VALUE_LENGTH)
 
-    test("Returns notification unchanged when all values are within limits", () => {
+    test('Returns notification unchanged when all values are within limits', () => {
       const notification = {
-        Properties: [{ Key: "k", Value: value255 }],
-        TargetParameters: [{ Key: "k", Value: value250 }]
+        Properties: [{ Key: 'k', Value: value255 }],
+        TargetParameters: [{ Key: 'k', Value: value250 }]
       }
       expect(applyValueLengthConstraints(notification)).toStrictEqual(notification)
     })
 
-    test("Throws when a Property value exceeds 255 characters", () => {
+    test('Throws when a Property value exceeds 255 characters', () => {
       const notification = {
-        Properties: [{ Key: "k", Value: longValue256 }]
+        Properties: [{ Key: 'k', Value: longValue256 }]
       }
       expect(() => applyValueLengthConstraints(notification)).toThrow(
         `Property value exceeds the maximum length of ${MAX_PROPERTY_VALUE_LENGTH} characters.`
       )
     })
 
-    test("Throws on the first Property value over 255 even when others are valid", () => {
+    test('Throws on the first Property value over 255 even when others are valid', () => {
       const notification = {
         Properties: [
-          { Key: "ok", Value: "short" },
-          { Key: "bad", Value: longValue256 }
+          { Key: 'ok', Value: 'short' },
+          { Key: 'bad', Value: longValue256 }
         ]
       }
       expect(() => applyValueLengthConstraints(notification)).toThrow(
@@ -890,32 +890,32 @@ describe("Test utils", () => {
       )
     })
 
-    test("Removes TargetParameter entries whose value exceeds 250 characters", () => {
+    test('Removes TargetParameter entries whose value exceeds 250 characters', () => {
       const notification = {
         TargetParameters: [
-          { Key: "short", Value: value250 },
-          { Key: "long", Value: longValue251 }
+          { Key: 'short', Value: value250 },
+          { Key: 'long', Value: longValue251 }
         ]
       }
       const result = applyValueLengthConstraints(notification)
-      expect(result.TargetParameters).toEqual([{ Key: "short", Value: value250 }])
+      expect(result.TargetParameters).toEqual([{ Key: 'short', Value: value250 }])
     })
 
-    test("Removes all TargetParameters when all values exceed 250 characters", () => {
+    test('Removes all TargetParameters when all values exceed 250 characters', () => {
       const notification = {
-        TargetParameters: [{ Key: "k", Value: longValue251 }]
+        TargetParameters: [{ Key: 'k', Value: longValue251 }]
       }
       const result = applyValueLengthConstraints(notification)
       expect(result.TargetParameters).toEqual([])
     })
 
-    test("Returns null/undefined unchanged", () => {
+    test('Returns null/undefined unchanged', () => {
       expect(applyValueLengthConstraints(null)).toBeNull()
       expect(applyValueLengthConstraints(undefined)).toBeUndefined()
     })
 
-    test("Handles notification with no Properties or TargetParameters", () => {
-      const notification = { NotificationTypeKey: "Test" }
+    test('Handles notification with no Properties or TargetParameters', () => {
+      const notification = { NotificationTypeKey: 'Test' }
       expect(applyValueLengthConstraints(notification)).toBe(notification)
     })
   })

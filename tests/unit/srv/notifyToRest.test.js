@@ -1,15 +1,15 @@
-const cds = require("@sap/cds")
-const { messages, buildNotification } = require("../../../lib/utils")
-const NotifyToRest = require("../../../srv/notifyToRest")
+const cds = require('@sap/cds')
+const { messages, buildNotification } = require('../../../lib/utils')
+const NotifyToRest = require('../../../srv/notifyToRest')
 
-jest.mock("@sap-cloud-sdk/connectivity", () => ({ buildHeadersForDestination: jest.fn().mockResolvedValue({}) }))
-jest.mock("@sap-cloud-sdk/http-client", () => ({ executeHttpRequest: jest.fn() }))
-jest.mock("../../../lib/utils", () => ({
-  ...jest.requireActual("../../../lib/utils"),
+jest.mock('@sap-cloud-sdk/connectivity', () => ({ buildHeadersForDestination: jest.fn().mockResolvedValue({}) }))
+jest.mock('@sap-cloud-sdk/http-client', () => ({ executeHttpRequest: jest.fn() }))
+jest.mock('../../../lib/utils', () => ({
+  ...jest.requireActual('../../../lib/utils'),
   getNotificationDestination: jest.fn().mockResolvedValue({})
 }))
 
-describe("Notify to rest", () => {
+describe('Notify to rest', () => {
   let log = cds.test.log()
   let notifyToRest
 
@@ -17,13 +17,13 @@ describe("Notify to rest", () => {
     notifyToRest = new NotifyToRest()
   })
 
-  describe("Warnings", () => {
-    test("No object is passed", async () => {
+  describe('Warnings', () => {
+    test('No object is passed', async () => {
       notifyToRest.notify()
       expect(log.output).toContain(messages.NO_OBJECT_FOR_NOTIFY)
     })
 
-    test("Empty object is passed", async () => {
+    test('Empty object is passed', async () => {
       notifyToRest.notify({})
       expect(log.output).toContain(messages.EMPTY_OBJECT_FOR_NOTIFY)
     })
@@ -34,64 +34,64 @@ describe("Notify to rest", () => {
     })
 
     test("Title isn't a string in default notification", async () => {
-      notifyToRest.notify({ title: 1, recipients: ["abc@abc.com"] })
+      notifyToRest.notify({ title: 1, recipients: ['abc@abc.com'] })
       expect(log.output).toContain(messages.TITLE_IS_NOT_STRING)
     })
 
     test("Priority isn't valid in default notification", async () => {
-      notifyToRest.notify({ title: "abc", recipients: ["abc@abc.com"], priority: "abc" })
-      expect(log.output).toContain("Invalid priority abc. Allowed priorities are LOW, NEUTRAL, MEDIUM, HIGH")
+      notifyToRest.notify({ title: 'abc', recipients: ['abc@abc.com'], priority: 'abc' })
+      expect(log.output).toContain('Invalid priority abc. Allowed priorities are LOW, NEUTRAL, MEDIUM, HIGH')
     })
 
     test("Description isn't valid in default notification", async () => {
-      notifyToRest.notify({ title: "abc", recipients: ["abc@abc.com"], priority: "low", description: true })
+      notifyToRest.notify({ title: 'abc', recipients: ['abc@abc.com'], priority: 'low', description: true })
       expect(log.output).toContain(messages.DESCRIPTION_IS_NOT_STRING)
     })
   })
 
-  describe("Error handling", () => {
+  describe('Error handling', () => {
     let httpClient
 
     beforeEach(() => {
-      httpClient = require("@sap-cloud-sdk/http-client")
+      httpClient = require('@sap-cloud-sdk/http-client')
       notifyToRest.init()
     })
 
-    test("Throws a cds.error with the ANS error message on failure", async () => {
+    test('Throws a cds.error with the ANS error message on failure', async () => {
       httpClient.executeHttpRequest.mockRejectedValueOnce({
-        response: { status: 500, data: { error: { message: { value: "Internal Server Error" } } } }
+        response: { status: 500, data: { error: { message: { value: 'Internal Server Error' } } } }
       })
-      await expect(notifyToRest.notify({ title: "abc", recipients: ["abc@abc.com"] })).rejects.toThrow(
-        "Internal Server Error"
+      await expect(notifyToRest.notify({ title: 'abc', recipients: ['abc@abc.com'] })).rejects.toThrow(
+        'Internal Server Error'
       )
     })
 
-    test("Marks 4xx errors as unrecoverable", async () => {
+    test('Marks 4xx errors as unrecoverable', async () => {
       httpClient.executeHttpRequest.mockRejectedValueOnce({
-        response: { status: 400, data: { error: { message: { value: "Bad Request" } } } }
+        response: { status: 400, data: { error: { message: { value: 'Bad Request' } } } }
       })
-      const err = await notifyToRest.notify({ title: "abc", recipients: ["abc@abc.com"] }).catch(e => e)
+      const err = await notifyToRest.notify({ title: 'abc', recipients: ['abc@abc.com'] }).catch(e => e)
       expect(err.unrecoverable).toBe(true)
     })
 
-    test("Does not mark 429 as unrecoverable", async () => {
+    test('Does not mark 429 as unrecoverable', async () => {
       httpClient.executeHttpRequest.mockRejectedValueOnce({
-        response: { status: 429, data: { error: { message: { value: "Too Many Requests" } } } }
+        response: { status: 429, data: { error: { message: { value: 'Too Many Requests' } } } }
       })
-      const err = await notifyToRest.notify({ title: "abc", recipients: ["abc@abc.com"] }).catch(e => e)
+      const err = await notifyToRest.notify({ title: 'abc', recipients: ['abc@abc.com'] }).catch(e => e)
       expect(err.unrecoverable).toBeUndefined()
     })
 
-    test("Does not mark 5xx errors as unrecoverable", async () => {
+    test('Does not mark 5xx errors as unrecoverable', async () => {
       httpClient.executeHttpRequest.mockRejectedValueOnce({
-        response: { status: 500, data: { error: { message: { value: "Server Error" } } } }
+        response: { status: 500, data: { error: { message: { value: 'Server Error' } } } }
       })
-      const err = await notifyToRest.notify({ title: "abc", recipients: ["abc@abc.com"] }).catch(e => e)
+      const err = await notifyToRest.notify({ title: 'abc', recipients: ['abc@abc.com'] }).catch(e => e)
       expect(err.unrecoverable).toBeUndefined()
     })
   })
 
-  describe("Posting notifications", () => {
+  describe('Posting notifications', () => {
     let postedNotification
 
     beforeEach(() => {
@@ -99,19 +99,19 @@ describe("Notify to rest", () => {
       notifyToRest.init()
     })
 
-    test("Correct body is sent the notification should be posted", async () => {
-      const body = { title: "abc", recipients: ["abc@abc.com"], priority: "low" }
+    test('Correct body is sent the notification should be posted', async () => {
+      const body = { title: 'abc', recipients: ['abc@abc.com'], priority: 'low' }
       await notifyToRest.notify(body)
       expect(postedNotification).toMatchObject(buildNotification(body))
     })
 
-    test("Emit is called with an outbox request object", async () => {
+    test('Emit is called with an outbox request object', async () => {
       const req = {
-        event: "IncidentResolved",
+        event: 'IncidentResolved',
         data: {
-          NotificationTypeKey: "IncidentResolved",
-          NotificationTypeVersion: "1",
-          Priority: "NEUTRAL",
+          NotificationTypeKey: 'IncidentResolved',
+          NotificationTypeVersion: '1',
+          Priority: 'NEUTRAL',
           Properties: [],
           Recipients: []
         },
@@ -121,24 +121,24 @@ describe("Notify to rest", () => {
       expect(postedNotification).toMatchObject(req.data)
     })
 
-    test("Notify is called with a single object-containing type", async () => {
-      const body = { type: "IncidentResolved", recipients: ["abc@abc.com"], data: { title: "test" } }
+    test('Notify is called with a single object-containing type', async () => {
+      const body = { type: 'IncidentResolved', recipients: ['abc@abc.com'], data: { title: 'test' } }
       await notifyToRest.notify(body)
       expect(postedNotification).toMatchObject(buildNotification(body))
     })
 
-    test("Notify is called with type as first arg and message as second", async () => {
-      await notifyToRest.notify("IncidentResolved", { recipients: ["abc@abc.com"], data: { title: "test" } })
+    test('Notify is called with type as first arg and message as second', async () => {
+      await notifyToRest.notify('IncidentResolved', { recipients: ['abc@abc.com'], data: { title: 'test' } })
       expect(postedNotification).toMatchObject(
-        buildNotification({ type: "IncidentResolved", recipients: ["abc@abc.com"], data: { title: "test" } })
+        buildNotification({ type: 'IncidentResolved', recipients: ['abc@abc.com'], data: { title: 'test' } })
       )
     })
 
-    test("Notify is called with a single object containing NotificationTypeKey and no type", async () => {
+    test('Notify is called with a single object containing NotificationTypeKey and no type', async () => {
       const body = {
-        NotificationTypeKey: "IncidentResolved",
-        NotificationTypeVersion: "1",
-        Priority: "NEUTRAL",
+        NotificationTypeKey: 'IncidentResolved',
+        NotificationTypeVersion: '1',
+        Priority: 'NEUTRAL',
         Properties: [],
         Recipients: []
       }
@@ -147,30 +147,30 @@ describe("Notify to rest", () => {
       expect(postedNotification).toMatchObject(expected)
     })
 
-    test("Notify is called with type and array of messages for batch", async () => {
+    test('Notify is called with type and array of messages for batch', async () => {
       const messages = [
-        { recipients: ["alice@example.com"], data: { title: "Batch 1" } },
-        { recipients: ["bob@example.com"], data: { title: "Batch 2" } }
+        { recipients: ['alice@example.com'], data: { title: 'Batch 1' } },
+        { recipients: ['bob@example.com'], data: { title: 'Batch 2' } }
       ]
       let postedNotifications = []
       notifyToRest.postNotification = n => {
         postedNotifications = n
       }
-      await notifyToRest.notify("IncidentResolved", messages)
+      await notifyToRest.notify('IncidentResolved', messages)
       expect(Array.isArray(postedNotifications)).toBe(true)
       expect(postedNotifications).toHaveLength(2)
       expect(postedNotifications[0]).toMatchObject(
-        buildNotification({ type: "IncidentResolved", recipients: ["alice@example.com"], data: { title: "Batch 1" } })
+        buildNotification({ type: 'IncidentResolved', recipients: ['alice@example.com'], data: { title: 'Batch 1' } })
       )
       expect(postedNotifications[1]).toMatchObject(
-        buildNotification({ type: "IncidentResolved", recipients: ["bob@example.com"], data: { title: "Batch 2" } })
+        buildNotification({ type: 'IncidentResolved', recipients: ['bob@example.com'], data: { title: 'Batch 2' } })
       )
     })
 
-    test("Notify is called with array of default notifications for batch", async () => {
+    test('Notify is called with array of default notifications for batch', async () => {
       const messages = [
-        { recipients: ["alice@example.com"], title: "Hello Alice" },
-        { recipients: ["bob@example.com"], title: "Hello Bob" }
+        { recipients: ['alice@example.com'], title: 'Hello Alice' },
+        { recipients: ['bob@example.com'], title: 'Hello Bob' }
       ]
       let postedNotifications = []
       notifyToRest.postNotification = n => {
@@ -180,15 +180,15 @@ describe("Notify to rest", () => {
       expect(Array.isArray(postedNotifications)).toBe(true)
       expect(postedNotifications).toHaveLength(2)
       expect(postedNotifications[0]).toMatchObject(
-        buildNotification({ recipients: ["alice@example.com"], title: "Hello Alice" })
+        buildNotification({ recipients: ['alice@example.com'], title: 'Hello Alice' })
       )
       expect(postedNotifications[1]).toMatchObject(
-        buildNotification({ recipients: ["bob@example.com"], title: "Hello Bob" })
+        buildNotification({ recipients: ['bob@example.com'], title: 'Hello Bob' })
       )
     })
   })
 
-  describe("Before hook", () => {
+  describe('Before hook', () => {
     let postedNotification
 
     beforeEach(() => {
@@ -198,16 +198,16 @@ describe("Notify to rest", () => {
 
     test("before('*') hook receives msg.event and msg.data before notification is sent", async () => {
       let capturedEvent, capturedData
-      notifyToRest.before("*", msg => {
+      notifyToRest.before('*', msg => {
         capturedEvent = msg.event
         capturedData = msg.data
       })
 
-      const body = { recipients: ["user@example.com"], data: { title: "Test" } }
-      await notifyToRest.notify("IncidentResolved", body)
+      const body = { recipients: ['user@example.com'], data: { title: 'Test' } }
+      await notifyToRest.notify('IncidentResolved', body)
 
-      expect(capturedEvent).toBe("IncidentResolved")
-      expect(capturedData).toMatchObject(buildNotification({ type: "IncidentResolved", ...body }))
+      expect(capturedEvent).toBe('IncidentResolved')
+      expect(capturedData).toMatchObject(buildNotification({ type: 'IncidentResolved', ...body }))
       expect(postedNotification).toBeDefined()
     })
   })
