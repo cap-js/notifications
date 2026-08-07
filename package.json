@@ -35,6 +35,7 @@
   "scripts": {
     "lint": "npx eslint .",
     "test": "npx jest --silent",
+    "test:hybrid": "cds bind --exec -- npx jest --silent",
     "test-with-coverage": "npx jest --silent --coverage"
   },
   "cds": {
