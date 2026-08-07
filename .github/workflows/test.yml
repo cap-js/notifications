@@ -3,9 +3,9 @@ name: Node.js CI
 on:
   workflow_dispatch:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request_target:
-    branches: [ "main" ]
+    branches: ["main"]
     types: [reopened, synchronize, opened]
 
 permissions:

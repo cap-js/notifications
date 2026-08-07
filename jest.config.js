@@ -2,7 +2,7 @@
 
 const config = {
   testTimeout: 42222,
-  testMatch: ['**/*.test.js']
+  testMatch: ["**/*.test.js"]
 }
 
 module.exports = config

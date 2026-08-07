@@ -10,9 +10,7 @@
     {
       "name": "admin",
       "description": "generated",
-      "scope-references": [
-        "$XSAPPNAME.admin"
-      ],
+      "scope-references": ["$XSAPPNAME.admin"],
       "attribute-references": []
     }
   ]
