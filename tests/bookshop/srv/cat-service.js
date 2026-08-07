@@ -22,7 +22,7 @@ module.exports = cds.service.impl(async function () {
       title: book.title,
       buyer: req.user.id,
       quantity: quantity,
-      recipients: ["0c62ccd5-96a8-43dd-8a12-7202ea2d1fb9"]
+      recipients: ["reader@bookshop.example"]
     })
 
     return { stock: book.stock - quantity }
