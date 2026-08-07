@@ -34,6 +34,8 @@
   },
   "scripts": {
     "lint": "npx eslint .",
+    "prettier": "npx -y prettier@3 --write .",
+    "prettier:check": "npx -y prettier@3 --check .",
     "test": "npx jest --silent",
     "test:hybrid": "cds bind --exec -- npx jest --silent",
     "test-with-coverage": "npx jest --silent --coverage"

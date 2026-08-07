@@ -73,10 +73,10 @@ resources:
             - "binding-secret"
             - "x509"
         role-collections:
-          - name: 'admin (bookshop-notify ${org}-${space})'
-            description: 'generated'
+          - name: "admin (bookshop-notify ${org}-${space})"
+            description: "generated"
             role-template-references:
-              - '$XSAPPNAME.admin'
+              - "$XSAPPNAME.admin"
   - name: bookshop-notify-db
     type: com.sap.xs.hdi-container
     parameters:
