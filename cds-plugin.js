@@ -1,5 +1,5 @@
 const cds = require("@sap/cds")
-if (!cds.env.requires?.notifications?.enabled) return // eslint-disable-line no-undef
+if (!cds.env.requires?.notifications?.enabled) return
 
 const { buildNotificationFromEvent } = require("./lib/utils")
 cds.build?.register?.("notifications", require("./lib/build"))
