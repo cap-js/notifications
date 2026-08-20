@@ -1,12 +1,11 @@
 const NotificationService = require("./service")
 
 const { buildHeadersForDestination } = require("@sap-cloud-sdk/connectivity")
-const { executeHttpRequest } = require("@sap-cloud-sdk/http-client")
+const httpClient = require("@sap-cloud-sdk/http-client")
 const { getNotificationDestination } = require("../lib/utils")
 const cds = require("@sap/cds")
-const LOG = cds.log('notifications')
+const LOG = cds.log("notifications")
 const NOTIFICATIONS_API_ENDPOINT = "v2/Notification.svc"
-
 
 module.exports = exports = class NotifyToRest extends NotificationService {
   async init() {
@@ -19,8 +18,8 @@ module.exports = exports = class NotifyToRest extends NotificationService {
 
     if (Array.isArray(notificationData)) {
       const results = await Promise.allSettled(notificationData.map(n => this._postOne(n, notificationDestination)))
-      const failures = results.filter(r => r.status === 'rejected')
-      for (const f of failures) LOG._warn && LOG.warn('Batch notification failed:', f.reason?.message ?? f.reason)
+      const failures = results.filter(r => r.status === "rejected")
+      for (const f of failures) LOG._warn && LOG.warn("Batch notification failed:", f.reason?.message ?? f.reason)
       if (results.length === 0) return results
       if (failures.length === results.length) throw failures[0].reason
       return results
@@ -30,22 +29,23 @@ module.exports = exports = class NotifyToRest extends NotificationService {
 
   async _postOne(notificationData, notificationDestination) {
     const csrfHeaders = await buildHeadersForDestination(notificationDestination, {
-      url: NOTIFICATIONS_API_ENDPOINT,
+      url: NOTIFICATIONS_API_ENDPOINT
     })
     try {
-      LOG._info && LOG.info(
-        `Sending notification of key: ${notificationData.NotificationTypeKey} and version: ${notificationData.NotificationTypeVersion}`
-      )
-      const response = await executeHttpRequest(notificationDestination, {
+      LOG._info &&
+        LOG.info(
+          `Sending notification of key: ${notificationData.NotificationTypeKey} and version: ${notificationData.NotificationTypeVersion}`
+        )
+      const response = await httpClient.executeHttpRequest(notificationDestination, {
         url: `${NOTIFICATIONS_API_ENDPOINT}/Notifications`,
         method: "post",
         data: notificationData,
-        headers: { ...csrfHeaders, Accept: "application/json" },
+        headers: { ...csrfHeaders, Accept: "application/json" }
       })
       if (LOG._debug) {
         LOG.debug("Notification sent", {
           body: response?.data,
-          headers: response?.headers,
+          headers: response?.headers
         })
       }
       return response

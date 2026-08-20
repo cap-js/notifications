@@ -1,5 +1,16 @@
 const cds = require("@sap/cds")
-const { buildNotification, validateNotificationTypes, readFile, getNotificationDestination, buildNotificationFromEvent, mapCdsTypeToANSType, replaceRefsInExpr, applyValueLengthConstraints, MAX_PROPERTY_VALUE_LENGTH, MAX_TARGET_PARAM_VALUE_LENGTH } = require("../../../lib/utils")
+const {
+  buildNotification,
+  validateNotificationTypes,
+  readFile,
+  getNotificationDestination,
+  buildNotificationFromEvent,
+  mapCdsTypeToANSType,
+  replaceRefsInExpr,
+  applyValueLengthConstraints,
+  MAX_PROPERTY_VALUE_LENGTH,
+  MAX_TARGET_PARAM_VALUE_LENGTH
+} = require("../../../lib/utils")
 const { existsSync, readFileSync } = require("fs")
 const { getDestination } = require("@sap-cloud-sdk/connectivity")
 
@@ -7,7 +18,6 @@ jest.mock("fs")
 jest.mock("@sap-cloud-sdk/connectivity")
 
 describe("Test utils", () => {
-
   describe("Build notifications", () => {
     describe("Default notifications", () => {
       const expectedWithoutDescription = {
@@ -107,13 +117,15 @@ describe("Test utils", () => {
     })
 
     describe("Custom notifications", () => {
-      const properties = [{
-        Key: "title",
-        IsSensitive: true,
-        Language: "en",
-        Value: "Some Test Title",
-        Type: "String"
-      }]
+      const properties = [
+        {
+          Key: "title",
+          IsSensitive: true,
+          Language: "en",
+          Value: "Some Test Title",
+          Type: "String"
+        }
+      ]
 
       const baseInput = {
         recipients: ["test.mail@mail.com"],
@@ -134,24 +146,28 @@ describe("Test utils", () => {
       })
 
       test("Build a custom notification with navigation targets", () => {
-        expect(buildNotification({ 
-          ...baseInput, 
-          NavigationTargetAction: "TestTargetAction", 
-          NavigationTargetObject: "TestTargetObject" 
-        })).toMatchObject({ 
-          ...baseExpected, 
-          NavigationTargetAction: "TestTargetAction", 
-          NavigationTargetObject: "TestTargetObject" 
+        expect(
+          buildNotification({
+            ...baseInput,
+            NavigationTargetAction: "TestTargetAction",
+            NavigationTargetObject: "TestTargetObject"
+          })
+        ).toMatchObject({
+          ...baseExpected,
+          NavigationTargetAction: "TestTargetAction",
+          NavigationTargetObject: "TestTargetObject"
         })
       })
 
       test("Build a custom notification with a non-default priority", () => {
-        expect(buildNotification({ 
-          ...baseInput, 
-          priority: "HIGH" 
-        })).toMatchObject({ 
-          ...baseExpected, 
-          Priority: "HIGH" 
+        expect(
+          buildNotification({
+            ...baseInput,
+            priority: "HIGH"
+          })
+        ).toMatchObject({
+          ...baseExpected,
+          Priority: "HIGH"
         })
       })
 
@@ -164,7 +180,7 @@ describe("Test utils", () => {
             priority: "HIGH"
           })
         ).toMatchObject({
-          ...baseExpected, 
+          ...baseExpected,
           NavigationTargetAction: "TestTargetAction",
           NavigationTargetObject: "TestTargetObject",
           Priority: "HIGH"
@@ -180,12 +196,14 @@ describe("Test utils", () => {
           })
         ).toMatchObject({
           ...baseExpected,
-          Properties: [{ 
-            Key: "title", 
-            Value: "Some Test Title", 
-            Language: "en", 
-            Type: "string" 
-          }]
+          Properties: [
+            {
+              Key: "title",
+              Value: "Some Test Title",
+              Language: "en",
+              Type: "string"
+            }
+          ]
         })
       })
 
@@ -203,11 +221,13 @@ describe("Test utils", () => {
           TargetParameters: [{ Key: "string", Value: "string" }]
         }
 
-        expect(buildNotification({
+        expect(
+          buildNotification({
             ...baseInput,
-            ...lowLevelFields, 
+            ...lowLevelFields,
             priority: "HIGH"
-        })).toMatchObject({
+          })
+        ).toMatchObject({
           ...baseExpected,
           ...lowLevelFields,
           Priority: "HIGH"
@@ -398,27 +418,25 @@ describe("Test utils", () => {
         NotificationTypeVersion: "1",
         Priority: "NEUTRAL",
         Properties: [
-          { 
+          {
             Key: "title",
             IsSensitive: true,
             Language: "en",
             Value: "Some Test Title",
-            Type: "String" 
+            Type: "String"
           },
-          { 
+          {
             Key: "description",
             IsSensitive: true,
             Language: "en",
             Value: "Some Test Description",
-            Type: "String" 
+            Type: "String"
           }
         ],
         Recipients: [{ RecipientId: "test.mail@mail.com" }]
       }
 
-      expect(
-        buildNotification({ ...rawNotification }))
-        .toMatchObject({
+      expect(buildNotification({ ...rawNotification })).toMatchObject({
         ...rawNotification,
         NotificationTypeKey: "notifications/TestNotificationType"
       })
@@ -435,7 +453,9 @@ describe("Test utils", () => {
     })
 
     test("Return true when all entries have NotificationTypeKey", () => {
-      expect(validateNotificationTypes([{ NotificationTypeKey: "Test" }, { NotificationTypeKey: "Test2" }])).toEqual(true)
+      expect(validateNotificationTypes([{ NotificationTypeKey: "Test" }, { NotificationTypeKey: "Test2" }])).toEqual(
+        true
+      )
     })
   })
 
@@ -466,92 +486,98 @@ describe("Test utils", () => {
 
   describe("Build notification from event", () => {
     const baseEventDef = {
-      name: 'CatalogService.NewOrder',
-      kind: 'event',
-      '@notification': true,
+      name: "CatalogService.NewOrder",
+      kind: "event",
+      "@notification": true,
       elements: {
-        book:      { type: 'cds.String' },
-        quantity:  { type: 'cds.Integer' },
-        orderedAt: { type: 'cds.Date' },
-        ID:        { type: 'cds.UUID', key: true },
-        recipients: { items: { type: 'cds.String' } },
+        book: { type: "cds.String" },
+        quantity: { type: "cds.Integer" },
+        orderedAt: { type: "cds.Date" },
+        ID: { type: "cds.UUID", key: true },
+        recipients: { items: { type: "cds.String" } }
       }
     }
 
     const baseData = {
-      book: 'Moby Dick',
+      book: "Moby Dick",
       quantity: 2,
-      orderedAt: '2024-01-15',
-      ID: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
-      recipients: ['buyer@example.com'],
+      orderedAt: "2024-01-15",
+      ID: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+      recipients: ["buyer@example.com"]
     }
 
     test("Sets NotificationTypeKey to the unqualified event name", async () => {
       const result = await buildNotificationFromEvent(baseEventDef, baseData)
-      expect(result.NotificationTypeKey).toBe('NewOrder')
+      expect(result.NotificationTypeKey).toBe("NewOrder")
     })
 
     test("Sets NotificationTypeVersion to '1'", async () => {
       const result = await buildNotificationFromEvent(baseEventDef, baseData)
-      expect(result.NotificationTypeVersion).toBe('1')
+      expect(result.NotificationTypeVersion).toBe("1")
     })
 
     test("Maps event data fields to Properties with IsSensitive true", async () => {
       const result = await buildNotificationFromEvent(baseEventDef, baseData)
-      expect(result.Properties).toContainEqual({ Key: 'book', Language: 'en', Value: 'Moby Dick', Type: 'String', IsSensitive: true })
+      expect(result.Properties).toContainEqual({
+        Key: "book",
+        Language: "en",
+        Value: "Moby Dick",
+        Type: "String",
+        IsSensitive: true
+      })
     })
 
     test("Does not include recipients in Properties", async () => {
       const result = await buildNotificationFromEvent(baseEventDef, baseData)
-      expect(result.Properties.map(p => p.Key)).not.toContain('recipients')
+      expect(result.Properties.map(p => p.Key)).not.toContain("recipients")
     })
 
     test("Maps key elements to TargetParameters", async () => {
       const result = await buildNotificationFromEvent(baseEventDef, baseData)
-      expect(result.TargetParameters).toEqual([{ Key: 'ID', Value: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee' }])
+      expect(result.TargetParameters).toEqual([{ Key: "ID", Value: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee" }])
     })
 
     test("Omits TargetParameters when no key elements exist", async () => {
-      const defNoKeys = { ...baseEventDef, elements: { book: { type: 'cds.String' } } }
-      const result = await buildNotificationFromEvent(defNoKeys, { book: 'Test', recipients: [] })
+      const defNoKeys = { ...baseEventDef, elements: { book: { type: "cds.String" } } }
+      const result = await buildNotificationFromEvent(defNoKeys, { book: "Test", recipients: [] })
       expect(result.TargetParameters).toBeUndefined()
     })
 
     test("Uses RecipientId for email-style recipients", async () => {
       const result = await buildNotificationFromEvent(baseEventDef, baseData)
-      expect(result.Recipients).toEqual([{ RecipientId: 'buyer@example.com' }])
+      expect(result.Recipients).toEqual([{ RecipientId: "buyer@example.com" }])
     })
 
     test("Uses GlobalUserId for GUID recipients", async () => {
-      const data = { ...baseData, recipients: ['123e4567-e89b-12d3-a456-426614174000'] }
+      const data = { ...baseData, recipients: ["123e4567-e89b-12d3-a456-426614174000"] }
       const result = await buildNotificationFromEvent(baseEventDef, data)
-      expect(result.Recipients).toEqual([{ GlobalUserId: '123e4567-e89b-12d3-a456-426614174000' }])
+      expect(result.Recipients).toEqual([{ GlobalUserId: "123e4567-e89b-12d3-a456-426614174000" }])
     })
 
     test("Handles mixed GUID and email recipients", async () => {
-      const data = { ...baseData, recipients: ['123e4567-e89b-12d3-a456-426614174000', 'email@example.com'] }
+      const data = { ...baseData, recipients: ["123e4567-e89b-12d3-a456-426614174000", "email@example.com"] }
       const result = await buildNotificationFromEvent(baseEventDef, data)
       expect(result.Recipients).toEqual([
-        { GlobalUserId: '123e4567-e89b-12d3-a456-426614174000' },
-        { RecipientId: 'email@example.com' },
+        { GlobalUserId: "123e4567-e89b-12d3-a456-426614174000" },
+        { RecipientId: "email@example.com" }
       ])
     })
 
     test("Defaults Priority to NEUTRAL when annotation is absent", async () => {
       const result = await buildNotificationFromEvent(baseEventDef, baseData)
-      expect(result.Priority).toBe('NEUTRAL')
+      expect(result.Priority).toBe("NEUTRAL")
     })
 
     test("Resolves enum priority annotation (#High -> HIGH)", async () => {
-      const def = { ...baseEventDef, '@notification.priority': { '#': 'High' } }
+      const def = { ...baseEventDef, "@notification.priority": { "#": "High" } }
       const result = await buildNotificationFromEvent(def, baseData)
-      expect(result.Priority).toBe('HIGH')
+      expect(result.Priority).toBe("HIGH")
     })
 
     test("Accepts plain string priority annotation", async () => {
-      const def = { ...baseEventDef, '@notification.priority': 'LOW' }
+      const def = { ...baseEventDef, "@notification.priority": "LOW" }
       const result = await buildNotificationFromEvent(def, baseData)
-      expect(result.Priority).toBe('LOW')
+      expect(result.Priority).toBe("LOW")
     })
 
     describe("Invalid static priority annotation", () => {
@@ -559,30 +585,30 @@ describe("Test utils", () => {
       beforeEach(() => log.clear())
 
       test("Falls back to NEUTRAL and warns when plain string priority is invalid", async () => {
-        const def = { ...baseEventDef, '@notification.priority': 'CRITICAL' }
+        const def = { ...baseEventDef, "@notification.priority": "CRITICAL" }
         const result = await buildNotificationFromEvent(def, baseData)
-        expect(result.Priority).toBe('NEUTRAL')
+        expect(result.Priority).toBe("NEUTRAL")
         expect(log.output).toMatch(/invalid|CRITICAL/i)
       })
 
       test("Falls back to NEUTRAL and warns when enum priority annotation resolves to invalid value", async () => {
-        const def = { ...baseEventDef, '@notification.priority': { '#': 'CRITICAL' } }
+        const def = { ...baseEventDef, "@notification.priority": { "#": "CRITICAL" } }
         const result = await buildNotificationFromEvent(def, baseData)
-        expect(result.Priority).toBe('NEUTRAL')
+        expect(result.Priority).toBe("NEUTRAL")
         expect(log.output).toMatch(/invalid|CRITICAL/i)
       })
     })
 
     test("Maps @Common.SemanticObject to NavigationTargetObject", async () => {
-      const def = { ...baseEventDef, '@Common.SemanticObject': 'Orders' }
+      const def = { ...baseEventDef, "@Common.SemanticObject": "Orders" }
       const result = await buildNotificationFromEvent(def, baseData)
-      expect(result.NavigationTargetObject).toBe('Orders')
+      expect(result.NavigationTargetObject).toBe("Orders")
     })
 
     test("Maps @Common.SemanticObjectAction to NavigationTargetAction", async () => {
-      const def = { ...baseEventDef, '@Common.SemanticObjectAction': 'manage' }
+      const def = { ...baseEventDef, "@Common.SemanticObjectAction": "manage" }
       const result = await buildNotificationFromEvent(def, baseData)
-      expect(result.NavigationTargetAction).toBe('manage')
+      expect(result.NavigationTargetAction).toBe("manage")
     })
 
     test("Works with empty data and no recipients", async () => {
@@ -598,114 +624,127 @@ describe("Test utils", () => {
     })
 
     test("Passes through string operators unchanged", () => {
-      expect(replaceRefsInExpr('>', {})).toBe('>')
+      expect(replaceRefsInExpr(">", {})).toBe(">")
     })
 
     test("Replaces {ref} with {val} when key exists in data", () => {
-      expect(replaceRefsInExpr({ ref: ['quantity'] }, { quantity: 10 })).toEqual({ val: 10 })
+      expect(replaceRefsInExpr({ ref: ["quantity"] }, { quantity: 10 })).toEqual({ val: 10, param: false })
     })
 
-    test("Leaves {ref} unchanged when key is not in data", () => {
-      expect(replaceRefsInExpr({ ref: ['unknown'] }, { quantity: 10 })).toEqual({ ref: ['unknown'] })
+    test("Substitutes null when key is not in data", () => {
+      expect(replaceRefsInExpr({ ref: ["unknown"] }, { quantity: 10 })).toEqual({ val: null, param: false })
     })
 
     test("Does not replace binding parameters ({ref, param: true})", () => {
-      const param = { ref: ['?'], param: true }
-      expect(replaceRefsInExpr(param, { '?': 'something' })).toEqual(param)
+      const param = { ref: ["?"], param: true }
+      expect(replaceRefsInExpr(param, { "?": "something" })).toEqual(param)
     })
 
     test("Recursively replaces refs in flat xpr array", () => {
-      const xpr = [{ ref: ['quantity'] }, '>', { val: 5 }]
-      expect(replaceRefsInExpr(xpr, { quantity: 10 }))
-        .toEqual([{ val: 10 }, '>', { val: 5 }])
+      const xpr = [{ ref: ["quantity"] }, ">", { val: 5 }]
+      expect(replaceRefsInExpr(xpr, { quantity: 10 })).toEqual([{ val: 10, param: false }, ">", { val: 5 }])
     })
 
     test("Recursively replaces refs in nested xpr object", () => {
-      const expr = { xpr: [{ ref: ['quantity'] }, '>', { val: 5 }] }
-      expect(replaceRefsInExpr(expr, { quantity: 10 }))
-        .toEqual({ xpr: [{ val: 10 }, '>', { val: 5 }] })
+      const expr = { xpr: [{ ref: ["quantity"] }, ">", { val: 5 }] }
+      expect(replaceRefsInExpr(expr, { quantity: 10 })).toEqual({ xpr: [{ val: 10, param: false }, ">", { val: 5 }] })
     })
 
     test("Converts enum symbol {'#': value} to {val: value}", () => {
-      expect(replaceRefsInExpr({ '#': 'High' }, {})).toEqual({ val: 'High' })
+      expect(replaceRefsInExpr({ "#": "High" }, {})).toEqual({ val: "High", param: false })
     })
 
     test("Replaces refs in function call args", () => {
-      const func = { func: 'days_between', args: [{ ref: ['startDate'] }, { ref: ['endDate'] }] }
-      expect(replaceRefsInExpr(func, { startDate: '2024-01-01', endDate: '2024-06-01' }))
-        .toEqual({ func: 'days_between', args: [{ val: '2024-01-01' }, { val: '2024-06-01' }] })
+      const func = { func: "days_between", args: [{ ref: ["startDate"] }, { ref: ["endDate"] }] }
+      expect(replaceRefsInExpr(func, { startDate: "2024-01-01", endDate: "2024-06-01" })).toEqual({
+        func: "days_between",
+        args: [
+          { val: "2024-01-01", param: false },
+          { val: "2024-06-01", param: false }
+        ]
+      })
     })
 
     test("Handles deep nesting: xpr containing xpr containing refs", () => {
       const expr = {
-        xpr: ['case', 'when', { xpr: [{ ref: ['a'] }, '<', { val: 1 }] }, 'then', { ref: ['b'] }, 'end']
+        xpr: ["case", "when", { xpr: [{ ref: ["a"] }, "<", { val: 1 }] }, "then", { ref: ["b"] }, "end"]
       }
-      expect(replaceRefsInExpr(expr, { a: 0, b: 'High' }))
-        .toEqual({
-          xpr: ['case', 'when', { xpr: [{ val: 0 }, '<', { val: 1 }] }, 'then', { val: 'High' }, 'end']
-        })
+      expect(replaceRefsInExpr(expr, { a: 0, b: "High" })).toEqual({
+        xpr: [
+          "case",
+          "when",
+          { xpr: [{ val: 0, param: false }, "<", { val: 1 }] },
+          "then",
+          { val: "High", param: false },
+          "end"
+        ]
+      })
     })
 
     test("Replaces refs inside list nodes", () => {
-      const expr = { list: [{ ref: ['a'] }, { ref: ['b'] }] }
-      expect(replaceRefsInExpr(expr, { a: 1, b: 2 }))
-        .toEqual({ list: [{ val: 1 }, { val: 2 }] })
+      const expr = { list: [{ ref: ["a"] }, { ref: ["b"] }] }
+      expect(replaceRefsInExpr(expr, { a: 1, b: 2 })).toEqual({
+        list: [
+          { val: 1, param: false },
+          { val: 2, param: false }
+        ]
+      })
     })
 
     test("Replaces refs in named function args", () => {
-      const func = { func: 'foo', args: { p: { ref: ['x'] } } }
-      expect(replaceRefsInExpr(func, { x: 42 }))
-        .toEqual({ func: 'foo', args: { p: { val: 42 } } })
+      const func = { func: "foo", args: { p: { ref: ["x"] } } }
+      expect(replaceRefsInExpr(func, { x: 42 })).toEqual({ func: "foo", args: { p: { val: 42, param: false } } })
     })
 
     test("Leaves multi-segment refs unchanged — path traversal is not supported", () => {
-      const expr = { ref: ['assoc', 'field'] }
-      expect(replaceRefsInExpr(expr, { assoc: 'something' }))
-        .toEqual({ ref: ['assoc', 'field'] })
+      const expr = { ref: ["assoc", "field"] }
+      expect(replaceRefsInExpr(expr, { assoc: "something" })).toEqual({ ref: ["assoc", "field"] })
     })
   })
 
   describe("mapCdsTypeToANSType", () => {
     test.each([
-      ['cds.String',    'String'],
-      ['cds.UUID',      'String'],
-      ['cds.Boolean',   'String'],
-      ['String',        'String'],
+      ["cds.String", "String"],
+      ["cds.UUID", "String"],
+      ["cds.Boolean", "String"],
+      ["String", "String"]
     ])("%s -> %s", (cdsType, expected) => {
       expect(mapCdsTypeToANSType(cdsType)).toBe(expected)
     })
 
     test.each([
-      ['cds.Integer',   'Integer'],
-      ['cds.Integer64', 'Integer'],
-      ['cds.Int16',     'Integer'],
-      ['cds.Int32',     'Integer'],
-      ['cds.Int64',     'Integer'],
-      ['cds.UInt8',     'Integer'],
-      ['cds.Decimal',   'String'],
-      ['cds.Double',    'String'],
-      ['cds.Float',     'String'],
+      ["cds.Integer", "Integer"],
+      ["cds.Integer64", "Integer"],
+      ["cds.Int16", "Integer"],
+      ["cds.Int32", "Integer"],
+      ["cds.Int64", "Integer"],
+      ["cds.UInt8", "Integer"],
+      ["cds.Decimal", "String"],
+      ["cds.Double", "String"],
+      ["cds.Float", "String"]
     ])("%s -> %s", (cdsType, expected) => {
       expect(mapCdsTypeToANSType(cdsType)).toBe(expected)
     })
 
     test.each([
-      ['cds.Date',      'Date'],
-      ['cds.DateTime',  'Date'],
-      ['cds.Timestamp', 'Date'],
-      ['cds.Time',      'Date'],
+      ["cds.Date", "Date"],
+      ["cds.DateTime", "Date"],
+      ["cds.Timestamp", "Date"],
+      ["cds.Time", "Date"]
     ])("%s -> %s", (cdsType, expected) => {
       expect(mapCdsTypeToANSType(cdsType)).toBe(expected)
     })
 
     test("Returns String for undefined type", () => {
-      expect(mapCdsTypeToANSType(undefined)).toBe('String')
+      expect(mapCdsTypeToANSType(undefined)).toBe("String")
     })
   })
 
   describe("Configuration", () => {
     const log = cds.test.log()
-    afterEach(() => { delete cds.env.requires.notifications?.authenticationIdentifier })
+    afterEach(() => {
+      delete cds.env.requires.notifications?.authenticationIdentifier
+    })
 
     it("Use GlobalUserId as the recipient key when authenticationIdentifier is set to UserUUID", () => {
       cds.env.requires.notifications ??= {}
@@ -726,7 +765,7 @@ describe("Test utils", () => {
       const result = buildNotification({
         recipients: ["550e8400-e29b-41d4-a716-446655440000"],
         title: "Test Title"
-      });
+      })
 
       expect(result.Recipients[0]).toMatchObject({ GlobalUserId: "550e8400-e29b-41d4-a716-446655440000" })
     })
@@ -825,34 +864,38 @@ describe("Test utils", () => {
     test("Returns notification unchanged when all values are within limits", () => {
       const notification = {
         Properties: [{ Key: "k", Value: value255 }],
-        TargetParameters: [{ Key: "k", Value: value250 }],
+        TargetParameters: [{ Key: "k", Value: value250 }]
       }
       expect(applyValueLengthConstraints(notification)).toStrictEqual(notification)
     })
 
     test("Throws when a Property value exceeds 255 characters", () => {
       const notification = {
-        Properties: [{ Key: "k", Value: longValue256 }],
+        Properties: [{ Key: "k", Value: longValue256 }]
       }
-      expect(() => applyValueLengthConstraints(notification)).toThrow(`Property value exceeds the maximum length of ${MAX_PROPERTY_VALUE_LENGTH} characters.`)
+      expect(() => applyValueLengthConstraints(notification)).toThrow(
+        `Property value exceeds the maximum length of ${MAX_PROPERTY_VALUE_LENGTH} characters.`
+      )
     })
 
     test("Throws on the first Property value over 255 even when others are valid", () => {
       const notification = {
         Properties: [
           { Key: "ok", Value: "short" },
-          { Key: "bad", Value: longValue256 },
-        ],
+          { Key: "bad", Value: longValue256 }
+        ]
       }
-      expect(() => applyValueLengthConstraints(notification)).toThrow(`Property value exceeds the maximum length of ${MAX_PROPERTY_VALUE_LENGTH} characters.`)
+      expect(() => applyValueLengthConstraints(notification)).toThrow(
+        `Property value exceeds the maximum length of ${MAX_PROPERTY_VALUE_LENGTH} characters.`
+      )
     })
 
     test("Removes TargetParameter entries whose value exceeds 250 characters", () => {
       const notification = {
         TargetParameters: [
           { Key: "short", Value: value250 },
-          { Key: "long", Value: longValue251 },
-        ],
+          { Key: "long", Value: longValue251 }
+        ]
       }
       const result = applyValueLengthConstraints(notification)
       expect(result.TargetParameters).toEqual([{ Key: "short", Value: value250 }])
@@ -860,7 +903,7 @@ describe("Test utils", () => {
 
     test("Removes all TargetParameters when all values exceed 250 characters", () => {
       const notification = {
-        TargetParameters: [{ Key: "k", Value: longValue251 }],
+        TargetParameters: [{ Key: "k", Value: longValue251 }]
       }
       const result = applyValueLengthConstraints(notification)
       expect(result.TargetParameters).toEqual([])

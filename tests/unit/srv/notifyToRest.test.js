@@ -1,6 +1,13 @@
-const cds = require('@sap/cds')
+const cds = require("@sap/cds")
 const { messages, buildNotification } = require("../../../lib/utils")
 const NotifyToRest = require("../../../srv/notifyToRest")
+
+jest.mock("@sap-cloud-sdk/connectivity", () => ({ buildHeadersForDestination: jest.fn().mockResolvedValue({}) }))
+jest.mock("@sap-cloud-sdk/http-client", () => ({ executeHttpRequest: jest.fn() }))
+jest.mock("../../../lib/utils", () => ({
+  ...jest.requireActual("../../../lib/utils"),
+  getNotificationDestination: jest.fn().mockResolvedValue({})
+}))
 
 describe("Notify to rest", () => {
   let log = cds.test.log()
@@ -42,22 +49,74 @@ describe("Notify to rest", () => {
     })
   })
 
+  describe("Error handling", () => {
+    let httpClient
+
+    beforeEach(() => {
+      httpClient = require("@sap-cloud-sdk/http-client")
+      notifyToRest.init()
+    })
+
+    test("Throws a cds.error with the ANS error message on failure", async () => {
+      httpClient.executeHttpRequest.mockRejectedValueOnce({
+        response: { status: 500, data: { error: { message: { value: "Internal Server Error" } } } }
+      })
+      await expect(notifyToRest.notify({ title: "abc", recipients: ["abc@abc.com"] })).rejects.toThrow(
+        "Internal Server Error"
+      )
+    })
+
+    test("Marks 4xx errors as unrecoverable", async () => {
+      httpClient.executeHttpRequest.mockRejectedValueOnce({
+        response: { status: 400, data: { error: { message: { value: "Bad Request" } } } }
+      })
+      const err = await notifyToRest.notify({ title: "abc", recipients: ["abc@abc.com"] }).catch(e => e)
+      expect(err.unrecoverable).toBe(true)
+    })
+
+    test("Does not mark 429 as unrecoverable", async () => {
+      httpClient.executeHttpRequest.mockRejectedValueOnce({
+        response: { status: 429, data: { error: { message: { value: "Too Many Requests" } } } }
+      })
+      const err = await notifyToRest.notify({ title: "abc", recipients: ["abc@abc.com"] }).catch(e => e)
+      expect(err.unrecoverable).toBeUndefined()
+    })
+
+    test("Does not mark 5xx errors as unrecoverable", async () => {
+      httpClient.executeHttpRequest.mockRejectedValueOnce({
+        response: { status: 500, data: { error: { message: { value: "Server Error" } } } }
+      })
+      const err = await notifyToRest.notify({ title: "abc", recipients: ["abc@abc.com"] }).catch(e => e)
+      expect(err.unrecoverable).toBeUndefined()
+    })
+  })
+
   describe("Posting notifications", () => {
     let postedNotification
 
     beforeEach(() => {
-      notifyToRest.postNotification = n => postedNotification = n
+      notifyToRest.postNotification = n => (postedNotification = n)
       notifyToRest.init()
     })
 
     test("Correct body is sent the notification should be posted", async () => {
-      const body = { title: "abc", recipients: ["abc@abc.com"], priority: "low" } 
+      const body = { title: "abc", recipients: ["abc@abc.com"], priority: "low" }
       await notifyToRest.notify(body)
       expect(postedNotification).toMatchObject(buildNotification(body))
     })
 
     test("Emit is called with an outbox request object", async () => {
-      const req = { event: "IncidentResolved", data: { NotificationTypeKey: "IncidentResolved", NotificationTypeVersion: "1", Priority: "NEUTRAL", Properties: [], Recipients: [] }, headers: {} }
+      const req = {
+        event: "IncidentResolved",
+        data: {
+          NotificationTypeKey: "IncidentResolved",
+          NotificationTypeVersion: "1",
+          Priority: "NEUTRAL",
+          Properties: [],
+          Recipients: []
+        },
+        headers: {}
+      }
       await notifyToRest.emit(req)
       expect(postedNotification).toMatchObject(req.data)
     })
@@ -70,11 +129,19 @@ describe("Notify to rest", () => {
 
     test("Notify is called with type as first arg and message as second", async () => {
       await notifyToRest.notify("IncidentResolved", { recipients: ["abc@abc.com"], data: { title: "test" } })
-      expect(postedNotification).toMatchObject(buildNotification({ type: "IncidentResolved", recipients: ["abc@abc.com"], data: { title: "test" } }))
+      expect(postedNotification).toMatchObject(
+        buildNotification({ type: "IncidentResolved", recipients: ["abc@abc.com"], data: { title: "test" } })
+      )
     })
 
     test("Notify is called with a single object containing NotificationTypeKey and no type", async () => {
-      const body = { NotificationTypeKey: "IncidentResolved", NotificationTypeVersion: "1", Priority: "NEUTRAL", Properties: [], Recipients: [] }
+      const body = {
+        NotificationTypeKey: "IncidentResolved",
+        NotificationTypeVersion: "1",
+        Priority: "NEUTRAL",
+        Properties: [],
+        Recipients: []
+      }
       const expected = buildNotification({ ...body })
       await notifyToRest.notify(body)
       expect(postedNotification).toMatchObject(expected)
@@ -83,29 +150,41 @@ describe("Notify to rest", () => {
     test("Notify is called with type and array of messages for batch", async () => {
       const messages = [
         { recipients: ["alice@example.com"], data: { title: "Batch 1" } },
-        { recipients: ["bob@example.com"], data: { title: "Batch 2" } },
+        { recipients: ["bob@example.com"], data: { title: "Batch 2" } }
       ]
       let postedNotifications = []
-      notifyToRest.postNotification = n => { postedNotifications = n }
+      notifyToRest.postNotification = n => {
+        postedNotifications = n
+      }
       await notifyToRest.notify("IncidentResolved", messages)
       expect(Array.isArray(postedNotifications)).toBe(true)
       expect(postedNotifications).toHaveLength(2)
-      expect(postedNotifications[0]).toMatchObject(buildNotification({ type: "IncidentResolved", recipients: ["alice@example.com"], data: { title: "Batch 1" } }))
-      expect(postedNotifications[1]).toMatchObject(buildNotification({ type: "IncidentResolved", recipients: ["bob@example.com"], data: { title: "Batch 2" } }))
+      expect(postedNotifications[0]).toMatchObject(
+        buildNotification({ type: "IncidentResolved", recipients: ["alice@example.com"], data: { title: "Batch 1" } })
+      )
+      expect(postedNotifications[1]).toMatchObject(
+        buildNotification({ type: "IncidentResolved", recipients: ["bob@example.com"], data: { title: "Batch 2" } })
+      )
     })
 
     test("Notify is called with array of default notifications for batch", async () => {
       const messages = [
         { recipients: ["alice@example.com"], title: "Hello Alice" },
-        { recipients: ["bob@example.com"], title: "Hello Bob" },
+        { recipients: ["bob@example.com"], title: "Hello Bob" }
       ]
       let postedNotifications = []
-      notifyToRest.postNotification = n => { postedNotifications = n }
+      notifyToRest.postNotification = n => {
+        postedNotifications = n
+      }
       await notifyToRest.notify(messages)
       expect(Array.isArray(postedNotifications)).toBe(true)
       expect(postedNotifications).toHaveLength(2)
-      expect(postedNotifications[0]).toMatchObject(buildNotification({ recipients: ["alice@example.com"], title: "Hello Alice" }))
-      expect(postedNotifications[1]).toMatchObject(buildNotification({ recipients: ["bob@example.com"], title: "Hello Bob" }))
+      expect(postedNotifications[0]).toMatchObject(
+        buildNotification({ recipients: ["alice@example.com"], title: "Hello Alice" })
+      )
+      expect(postedNotifications[1]).toMatchObject(
+        buildNotification({ recipients: ["bob@example.com"], title: "Hello Bob" })
+      )
     })
   })
 
@@ -113,13 +192,13 @@ describe("Notify to rest", () => {
     let postedNotification
 
     beforeEach(() => {
-      notifyToRest.postNotification = n => postedNotification = n
+      notifyToRest.postNotification = n => (postedNotification = n)
       notifyToRest.init()
     })
 
     test("before('*') hook receives msg.event and msg.data before notification is sent", async () => {
       let capturedEvent, capturedData
-      notifyToRest.before('*', msg => {
+      notifyToRest.before("*", msg => {
         capturedEvent = msg.event
         capturedData = msg.data
       })

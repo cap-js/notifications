@@ -2,6 +2,9 @@
 @username=alice
 @password=
 
+### Reset all book stock to seed values
+POST {{server}}/odata/v4/admin/resetStock
+Authorization: Basic {{username}}:{{password}}
 
 ### Books
 # @name Books_GET

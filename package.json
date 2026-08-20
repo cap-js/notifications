@@ -1,6 +1,6 @@
 {
   "name": "@cap-js/notifications",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "CDS plugin providing support for business notifications in SAP Build WorkZone.",
   "repository": "cap-js/notifications",
   "author": "SAP SE (https://www.sap.com)",
@@ -34,7 +34,10 @@
   },
   "scripts": {
     "lint": "npx eslint .",
+    "prettier": "npx -y prettier@3 --write .",
+    "prettier:check": "npx -y prettier@3 --check .",
     "test": "npx jest --silent",
+    "test:hybrid": "cds bind --exec -- npx jest --silent",
     "test-with-coverage": "npx jest --silent --coverage"
   },
   "cds": {
