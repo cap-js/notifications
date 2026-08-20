@@ -1,4 +1,5 @@
 using { CatalogService } from './cat-service';
+using {sap.capire.bookshop as my} from '../db/schema';
 
 extend service CatalogService with {
   @description: '{i18n>BOOK_ORDERED_DESCRIPTION}'
@@ -37,4 +38,16 @@ extend service CatalogService with {
     deliveryDate : Date;
     recipients   : array of String;
   }
+}
+
+service CatalogTest {
+    @notifications : [{
+      type: 'MY_NOTIFICATION_TYPE',
+      on: ['READ', 'CREATE'],
+      recipients: ($self.createdBy),
+      where: ($self.title = 'Wuthering Heights'),
+      priority: #Low,
+    }]
+    entity Books as projection on my.Books;
+
 }

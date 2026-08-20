@@ -1,7 +1,7 @@
 const cds = require('@sap/cds')
 if (!cds.env.requires?.notifications?.enabled) return 
 
-const { buildNotificationFromEvent } = require('./lib/utils')
+const { buildNotificationFromEvent, replaceRefsInExpr, buildNotificationFromEntity } = require('./lib/utils')
 cds.build?.register?.('notifications', require("./lib/build"))
 
 cds.on("loaded", m => {
@@ -31,6 +31,29 @@ cds.on('serving', service => {
       LOG._error && LOG.error('Failed to send notification for event', def.name, err)
     }
     return next()
+  })
+  service.after("*", async (results, req) => {
+    const notificationsList = req.target?.['@notifications']  
+    if (!notificationsList?.length) return
+    const matching = notificationsList.filter(n => n.on?.includes(req.event))
+    if (!matching.length) return
+    const notifications = await cds.connect.to('notifications')
+    for (const n of matching) {
+      if (n.where) {
+        const where = n.where.xpr.map(token => 
+          token?.ref?.[0] === '$self' ? { ref: token.ref.slice(1) } : token
+        )
+        const exists = await SELECT.one.from(req.target).where(where)
+        if (!exists) continue
+      }
+      const notification = await buildNotificationFromEntity(n, results)
+      try {
+        await notifications.notify(notification)
+      } catch (err) {
+        const LOG = cds.log('notifications')
+        LOG._error && LOG.error('Failed to send notification for entity', n.type, err)
+      }
+    }
   })
 })
 
