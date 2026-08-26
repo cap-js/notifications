@@ -1,8 +1,8 @@
 const cds = require("@sap/cds")
 if (!cds.env.requires?.notifications?.enabled) return
 
-const { buildNotificationFromEvent, replaceRefsInExpr, buildNotificationFromEntity } = require('./lib/utils')
-cds.build?.register?.('notifications', require("./lib/build"))
+const { buildNotificationFromEvent, replaceRefsInExpr, buildNotificationFromEntity } = require("./lib/utils")
+cds.build?.register?.("notifications", require("./lib/build"))
 
 cds.on("loaded", m => {
   for (const def of Object.values(m.definitions)) {
@@ -33,16 +33,14 @@ cds.on("serving", service => {
     return next()
   })
   service.after("*", async (results, req) => {
-    const notificationsList = req.target?.['@notifications']  
+    const notificationsList = req.target?.["@notifications"]
     if (!notificationsList?.length) return
     const matching = notificationsList.filter(n => n.on?.includes(req.event))
     if (!matching.length) return
-    const notifications = await cds.connect.to('notifications')
+    const notifications = await cds.connect.to("notifications")
     for (const n of matching) {
       if (n.where) {
-        const where = n.where.xpr.map(token => 
-          token?.ref?.[0] === '$self' ? { ref: token.ref.slice(1) } : token
-        )
+        const where = n.where.xpr.map(token => (token?.ref?.[0] === "$self" ? { ref: token.ref.slice(1) } : token))
         const exists = await SELECT.one.from(req.target).where(where)
         if (!exists) continue
       }
@@ -50,8 +48,8 @@ cds.on("serving", service => {
       try {
         await notifications.notify(notification)
       } catch (err) {
-        const LOG = cds.log('notifications')
-        LOG._error && LOG.error('Failed to send notification for entity', n.type, err)
+        const LOG = cds.log("notifications")
+        LOG._error && LOG.error("Failed to send notification for entity", n.type, err)
       }
     }
   })
