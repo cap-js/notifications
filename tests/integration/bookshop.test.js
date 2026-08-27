@@ -257,7 +257,6 @@ describe("Notifications Integration", () => {
     })
 
     test("Throws clear error when deploying a notification type with empty templates", async () => {
-      if (!usesRestService) return
       const emptyType = { NotificationTypeKey: "EmptyType", NotificationTypeVersion: "1", Templates: [{ Language: "en", TemplateLanguage: "mustache" }] }
       await expect(createNotificationType(emptyType)).rejects.toThrow(
         "At least one of TemplateSensitive, TemplatePublic, or TemplateGrouped must be provided in the @notification annotation."
