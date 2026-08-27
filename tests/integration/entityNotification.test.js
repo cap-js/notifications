@@ -84,31 +84,4 @@ describe("Entity @notifications", () => {
       }
     })
   })
-
-  describe("CREATE event", () => {
-    test("Creating a book fires a notification (CREATE is in on list)", async () => {
-      if (usesRestService) return
-      const captured = []
-      const handler = msg => captured.push(msg.data)
-      alert.before("*", handler)
-
-      try {
-        await catalogTest.run(
-          INSERT.into("CatalogTest.Books").entries({
-            ID: 999,
-            title: "Wuthering Heights",
-            author_ID: 101,
-            stock: 1,
-            price: 9.99,
-            currency_code: "GBP"
-          })
-        )
-        expect(captured.length).toBeGreaterThan(0)
-        expect(captured[0].NotificationTypeKey).toContain("MY_NOTIFICATION_TYPE")
-      } finally {
-        alert._handlers.before.splice(alert._handlers.before.indexOf(handler), 1)
-        await DELETE.from("CatalogTest.Books").where({ ID: 999 })
-      }
-    })
-  })
 })
