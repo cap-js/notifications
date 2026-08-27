@@ -2,7 +2,7 @@ const cds = require("@sap/cds")
 const { join } = require("path")
 const { messages } = require("../../lib/utils")
 const { notificationTypesFromModel } = require("../../lib/compile")
-const { processNotificationTypes } = require("../../lib/notificationTypes")
+const { createNotificationType } = require("../../lib/notificationTypes")
 
 const usesRestService = ["hybrid", "production"].includes(process.env.CDS_ENV)
 
@@ -259,7 +259,7 @@ describe("Notifications Integration", () => {
     test("Throws clear error when deploying a notification type with empty templates", async () => {
       if (!usesRestService) return
       const emptyType = { NotificationTypeKey: "EmptyType", NotificationTypeVersion: "1", Templates: [{ Language: "en", TemplateLanguage: "mustache" }] }
-      await expect(processNotificationTypes([emptyType])).rejects.toThrow(
+      await expect(createNotificationType(emptyType)).rejects.toThrow(
         "At least one of TemplateSensitive, TemplatePublic, or TemplateGrouped must be provided in the @notification annotation."
       )
     })
@@ -343,7 +343,7 @@ describe("Notifications Integration", () => {
       alert._handlers.before.splice(beforeHandlers)
     })
 
-    test("is called before a notification is sent and receives msg.event and msg.data", async () => {
+    test("Is called before a notification is sent and receives msg.event and msg.data", async () => {
       let capturedEvent, capturedData
       alert.before("*", msg => {
         capturedEvent = msg.event
@@ -362,7 +362,7 @@ describe("Notifications Integration", () => {
       })
     })
 
-    test("can suppress a notification by throwing", async () => {
+    test("Can suppress a notification by throwing", async () => {
       alert.before("*", () => {
         throw new cds.error("Recipient not eligible")
       })
