@@ -2,6 +2,7 @@ const cds = require("@sap/cds")
 const { join } = require("path")
 const { messages } = require("../../lib/utils")
 const { notificationTypesFromModel } = require("../../lib/compile")
+const { processNotificationTypes } = require("../../lib/notificationTypes")
 
 const usesRestService = ["hybrid", "production"].includes(process.env.CDS_ENV)
 
@@ -252,6 +253,14 @@ describe("Notifications Integration", () => {
       const model = cds.linked(cds.parse.cdl(`@notification event OversizedEvent { ${longName}: String; }`))
       expect(() => notificationTypesFromModel(model)).toThrow(
         "Event 'OversizedEvent' has elements exceeding the maximum key length of 128 characters"
+      )
+    })
+
+    test("Throws clear error when deploying a notification type with empty templates", async () => {
+      if (!usesRestService) return
+      const emptyType = { NotificationTypeKey: "EmptyType", NotificationTypeVersion: "1", Templates: [{ Language: "en", TemplateLanguage: "mustache" }] }
+      await expect(processNotificationTypes([emptyType])).rejects.toThrow(
+        "At least one of TemplateSensitive, TemplatePublic, or TemplateGrouped must be provided in the @notification annotation."
       )
     })
   })

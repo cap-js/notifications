@@ -36,7 +36,7 @@ extend service CatalogService with {
   }
 }
 
-service CatalogTest {
+// service CatalogTest {
 //     @notifications : [{
 //       type: 'MY_NOTIFICATION_TYPE',
 //       on: ['READ', 'CREATE'],
@@ -45,10 +45,4 @@ service CatalogTest {
 //       priority: #Low,
 //     }]
 //     entity Books as projection on my.Books;
-
-@notification.title: ''
-event EmptyNotify {
-  recipients: array of String;
-}
-
-}
+// }
