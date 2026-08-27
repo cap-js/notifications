@@ -39,7 +39,7 @@ extend service CatalogService with {
 service CatalogTest {
     @notifications : [{
       type: 'MY_NOTIFICATION_TYPE',
-      on: ['READ', 'CREATE'],
+      on: ['READ'],
       recipients: ($self.createdBy),
       where: ($self.title = 'Wuthering Heights'),
       priority: #Low,
