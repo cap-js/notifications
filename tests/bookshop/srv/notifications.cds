@@ -36,13 +36,14 @@ extend service CatalogService with {
   }
 }
 
-// service CatalogTest {
-//     @notifications : [{
-//       type: 'MY_NOTIFICATION_TYPE',
-//       on: ['READ', 'CREATE'],
-//       recipients: ($self.createdBy),
-//       where: ($self.title = 'Wuthering Heights'),
-//       priority: #Low,
-//     }]
-//     entity Books as projection on my.Books;
-// }
+service CatalogTest {
+    @notifications : [{
+      type: 'MY_NOTIFICATION_TYPE',
+      on: ['READ', 'CREATE'],
+      recipients: ($self.createdBy),
+      where: ($self.title = 'Wuthering Heights'),
+      priority: #Low,
+    }]
+    entity Books as projection on my.Books;
+
+}
