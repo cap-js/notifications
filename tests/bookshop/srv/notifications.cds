@@ -37,13 +37,18 @@ extend service CatalogService with {
 }
 
 service CatalogTest {
-    @notifications : [{
-      type: 'MY_NOTIFICATION_TYPE',
-      on: ['READ', 'CREATE'],
-      recipients: ($self.createdBy),
-      where: ($self.title = 'Wuthering Heights'),
-      priority: #Low,
-    }]
-    entity Books as projection on my.Books;
+//     @notifications : [{
+//       type: 'MY_NOTIFICATION_TYPE',
+//       on: ['READ', 'CREATE'],
+//       recipients: ($self.createdBy),
+//       where: ($self.title = 'Wuthering Heights'),
+//       priority: #Low,
+//     }]
+//     entity Books as projection on my.Books;
+
+@notification.title: ''
+event EmptyNotify {
+  recipients: array of String;
+}
 
 }
