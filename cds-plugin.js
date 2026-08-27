@@ -41,15 +41,26 @@ cds.on("serving", service => {
     for (const n of matching) {
       if (n.where) {
         const where = n.where.xpr.map(token => (token?.ref?.[0] === "$self" ? { ref: token.ref.slice(1) } : token))
-        const exists = await SELECT.one.from(req.target).where(where)
+        const keyParams = req.params?.[0]
+        let checkWhere = where
+        if (keyParams) {
+          const keyFilter = Object.entries(keyParams).flatMap(([k, v], i) =>
+            (i > 0 ? ["and"] : []).concat([{ ref: [k] }, "=", { val: v }])
+          )
+          checkWhere = [...keyFilter, "and", ...where]
+        }
+        const exists = await SELECT.one.from(req.target).where(checkWhere)
         if (!exists) continue
       }
-      const notification = await buildNotificationFromEntity(n, results)
-      try {
-        await notifications.notify(notification)
-      } catch (err) {
-        const LOG = cds.log("notifications")
-        LOG._error && LOG.error("Failed to send notification for entity", n.type, err)
+      const entities = Array.isArray(results) ? results : [results]
+      for (const entity of entities) {
+        const notification = await buildNotificationFromEntity(n, entity)
+        try {
+          await notifications.notify(notification)
+        } catch (err) {
+          const LOG = cds.log("notifications")
+          LOG._error && LOG.error("Failed to send notification for entity", n.type, err)
+        }
       }
     }
   })
