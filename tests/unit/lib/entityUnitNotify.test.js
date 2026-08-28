@@ -4,7 +4,9 @@ const { notificationTypesFromModel } = require("../../../lib/compile")
 
 function makeModel(defs) {
   const definitions = { ...defs }
-  definitions[Symbol.iterator] = function* () { yield* Object.values(this) }
+  definitions[Symbol.iterator] = function* () {
+    yield* Object.values(this)
+  }
   return { definitions }
 }
 
@@ -28,7 +30,6 @@ describe("resolveWhereXpr", () => {
     expect(resolveWhereXpr(undefined)).toBeNull()
   })
 })
-
 
 describe("resolveRecipients", () => {
   test("Returns empty array for null", () => {
