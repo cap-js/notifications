@@ -1,10 +1,34 @@
 const cds = require("@sap/cds")
-const { buildNotificationFromEntity, resolveRecipients } = require("../../../lib/utils")
+const { buildNotificationFromEntity, resolveRecipients, resolveWhereXpr } = require("../../../lib/utils")
 const { notificationTypesFromModel } = require("../../../lib/compile")
 
 function makeModel(defs) {
-  return { definitions: Object.values(defs) }
+  const definitions = { ...defs }
+  definitions[Symbol.iterator] = function* () { yield* Object.values(this) }
+  return { definitions }
 }
+
+describe("resolveWhereXpr", () => {
+  test("Returns xpr array when where has xpr property", () => {
+    const where = { xpr: [{ ref: ["title"] }, "=", { val: "Wuthering Heights" }] }
+    expect(resolveWhereXpr(where)).toBe(where.xpr)
+  })
+
+  test("Returns where directly when it is a plain array", () => {
+    const where = [{ ref: ["title"] }, "=", { val: "Wuthering Heights" }]
+    expect(resolveWhereXpr(where)).toBe(where)
+  })
+
+  test("Returns null when where has no xpr and is not an array", () => {
+    expect(resolveWhereXpr({ someOtherShape: true })).toBeNull()
+  })
+
+  test("Returns null for null/undefined", () => {
+    expect(resolveWhereXpr(null)).toBeNull()
+    expect(resolveWhereXpr(undefined)).toBeNull()
+  })
+})
+
 
 describe("resolveRecipients", () => {
   test("Returns empty array for null", () => {
@@ -113,6 +137,49 @@ describe("buildNotificationFromEntity", () => {
     const result = await buildNotificationFromEntity(hook, baseData)
     expect(result.Properties).toHaveLength(1)
     expect(result.Properties[0]).toMatchObject({ Key: "bookTitle", Value: "Wuthering Heights" })
+  })
+
+  test("hook.parameters strips $self prefix from refs", async () => {
+    const hook = {
+      ...baseHook,
+      parameters: {
+        bookTitle: { ref: ["$self", "title"] }
+      }
+    }
+    const result = await buildNotificationFromEntity(hook, baseData)
+    expect(result.Properties[0]).toMatchObject({ Key: "bookTitle", Value: "Wuthering Heights" })
+  })
+
+  test("hook.parameters resolves CDS '=' path expression format ({ '=': '$self.title' })", async () => {
+    const hook = {
+      ...baseHook,
+      parameters: {
+        bookTitle: { "=": "$self.title" },
+        bookId: { "=": "$self.ID" }
+      }
+    }
+    const result = await buildNotificationFromEntity(hook, baseData)
+    expect(result.Properties.find(p => p.Key === "bookTitle")?.Value).toBe("Wuthering Heights")
+    expect(result.Properties.find(p => p.Key === "bookId")?.Value).toBe("201")
+  })
+
+  test("hook.parameters with array data uses first element instead of crashing", async () => {
+    const hook = {
+      ...baseHook,
+      parameters: { bookTitle: { ref: ["title"] } }
+    }
+    const data = [{ title: "Wuthering Heights", createdBy: "alice@example.com" }]
+    const result = await buildNotificationFromEntity(hook, data)
+    expect(result.Properties[0]).toMatchObject({ Key: "bookTitle", Value: "Wuthering Heights" })
+  })
+
+  test("hook.parameters with a plain literal value (no ref) uses val instead of crashing", async () => {
+    const hook = {
+      ...baseHook,
+      parameters: { staticKey: { val: "hardcoded" } }
+    }
+    const result = await buildNotificationFromEntity(hook, baseData)
+    expect(result.Properties[0]).toMatchObject({ Key: "staticKey", Value: "hardcoded" })
   })
 
   test("Defaults Priority to NEUTRAL when hook has no priority", async () => {

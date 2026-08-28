@@ -1,7 +1,7 @@
 const cds = require("@sap/cds")
 if (!cds.env.requires?.notifications?.enabled) return
 
-const { buildNotificationFromEvent, replaceRefsInExpr, buildNotificationFromEntity } = require("./lib/utils")
+const { buildNotificationFromEvent, buildNotificationFromEntity, resolveWhereXpr } = require("./lib/utils")
 cds.build?.register?.("notifications", require("./lib/build"))
 
 cds.on("loaded", m => {
@@ -40,7 +40,9 @@ cds.on("serving", service => {
     const notifications = await cds.connect.to("notifications")
     for (const n of matching) {
       if (n.where) {
-        const where = n.where.xpr.map(token => (token?.ref?.[0] === "$self" ? { ref: token.ref.slice(1) } : token))
+        const rawXpr = resolveWhereXpr(n.where)
+        if (!rawXpr) continue
+        const where = rawXpr.map(token => (token?.ref?.[0] === "$self" ? { ref: token.ref.slice(1) } : token))
         const keyParams = req.params?.[0]
         let checkWhere = where
         if (keyParams) {

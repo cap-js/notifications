@@ -49,7 +49,7 @@ describe("Entity @notifications", () => {
       alert.before("*", handler)
 
       try {
-        await GET("/odata/v4/catalog-test/Books(207)")
+        await GET("/odata/v4/catalog-test/Books(251)")
         expect(captured).toHaveLength(0)
       } finally {
         alert._handlers.before.splice(alert._handlers.before.indexOf(handler), 1)
@@ -79,6 +79,50 @@ describe("Entity @notifications", () => {
         const props = captured[0]?.Properties ?? []
         const titleProp = props.find(p => p.Key === "title")
         expect(titleProp?.Value).toBe("Wuthering Heights")
+      } finally {
+        alert._handlers.before.splice(alert._handlers.before.indexOf(handler), 1)
+      }
+    })
+  })
+
+  describe("READ event with explicit parameters", () => {
+    test("Notification recipient falls back to RecipientId for non-UUID createdBy", async () => {
+      const captured = []
+      const handler = msg => captured.push(msg.data)
+      alert.before("*", handler)
+
+      try {
+        await GET("/odata/v4/catalog-test/Books(207)")
+        expect(captured[0]?.Recipients).toContainEqual({ RecipientId: "anonymous" })
+      } finally {
+        alert._handlers.before.splice(alert._handlers.before.indexOf(handler), 1)
+      }
+    })
+
+    test("Notification Properties contains only the explicitly specified parameters", async () => {
+      const captured = []
+      const handler = msg => captured.push(msg.data)
+      alert.before("*", handler)
+
+      try {
+        await GET("/odata/v4/catalog-test/Books(207)")
+        const props = captured[0]?.Properties ?? []
+        expect(props.map(p => p.Key)).toEqual(["bookTitle", "bookId"])
+      } finally {
+        alert._handlers.before.splice(alert._handlers.before.indexOf(handler), 1)
+      }
+    })
+
+    test("Notification Properties values are resolved from entity data", async () => {
+      const captured = []
+      const handler = msg => captured.push(msg.data)
+      alert.before("*", handler)
+
+      try {
+        await GET("/odata/v4/catalog-test/Books(207)")
+        const props = captured[0]?.Properties ?? []
+        expect(props.find(p => p.Key === "bookTitle")?.Value).toBe("Jane Eyre")
+        expect(props.find(p => p.Key === "bookId")?.Value).toBe("207")
       } finally {
         alert._handlers.before.splice(alert._handlers.before.indexOf(handler), 1)
       }

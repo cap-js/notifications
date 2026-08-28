@@ -43,6 +43,13 @@ service CatalogTest {
       recipients: ($self.createdBy),
       where: ($self.title = 'Wuthering Heights'),
       priority: #Low,
+    }, {
+      type: 'MY_NOTIFICATION_TYPE',
+      on: ['READ'],
+      recipients: ($self.createdBy),
+      where: ($self.title = 'Jane Eyre'),
+      priority: #Low,
+      parameters: { bookTitle: $self.title, bookId: $self.ID }
     }]
     entity Books as projection on my.Books;
 
