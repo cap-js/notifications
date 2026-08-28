@@ -128,6 +128,15 @@ describe("buildNotificationFromEntity", () => {
     expect(titleProp.Value).toBe("")
   })
 
+  test("Auto-maps entity fields when data is an array (no hook.parameters)", async () => {
+    const data = [{ ID: "201", title: "Wuthering Heights", createdBy: "alice@example.com" }]
+    const result = await buildNotificationFromEntity(baseHook, data)
+    const keys = result.Properties.map(p => p.Key)
+    expect(keys).not.toContain("0")
+    expect(keys).toContain("title")
+    expect(result.Properties.find(p => p.Key === "title")?.Value).toBe("Wuthering Heights")
+  })
+
   test("Uses explicit hook.parameters when provided, mapped by ref", async () => {
     const hook = {
       ...baseHook,
