@@ -262,6 +262,21 @@ describe("notificationTypesFromModel — entity @notifications", () => {
     expect(type.Templates[0].TemplateGrouped).toBe("MY_TYPE")
   })
 
+  test("Includes default DeliveryChannels on entity-derived types", () => {
+    const model = makeModel({
+      MyEntity: {
+        kind: "entity",
+        name: "MyEntity",
+        "@notifications": [{ type: "MY_TYPE", on: ["READ"] }]
+      }
+    })
+    const types = notificationTypesFromModel(model)
+    const type = types.find(t => t.NotificationTypeKey === "MY_TYPE")
+    expect(type.DeliveryChannels).toBeDefined()
+    expect(type.DeliveryChannels.length).toBeGreaterThan(0)
+    expect(type.DeliveryChannels[0]).toMatchObject({ Type: "WEB", Enabled: true })
+  })
+
   test("Skips @notifications entries that have no type field", () => {
     const model = makeModel({
       MyEntity: {

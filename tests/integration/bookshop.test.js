@@ -257,7 +257,6 @@ describe("Notifications Integration", () => {
     })
 
     test("Throws clear error when deploying a notification type with empty templates", async () => {
-      if (!usesRestService) return
       const emptyType = {
         NotificationTypeKey: "EmptyType",
         NotificationTypeVersion: "1",
