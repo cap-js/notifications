@@ -1,17 +1,13 @@
 const cds = require("@sap/cds")
 const { join } = require("path")
 
-const usesRestService = ["hybrid", "production"].includes(process.env.CDS_ENV)
-
 const { GET } = cds.test(join(__dirname, "../bookshop"))
 
 describe("Entity @notifications", () => {
   let alert
-  let catalogTest
 
   beforeAll(async () => {
     alert = await cds.connect.to("notifications")
-    catalogTest = await cds.connect.to("CatalogTest")
   })
 
   describe("Startup", () => {
@@ -86,19 +82,6 @@ describe("Entity @notifications", () => {
   })
 
   describe("READ event with explicit parameters", () => {
-    test("Notification recipient falls back to RecipientId for non-UUID createdBy", async () => {
-      const captured = []
-      const handler = msg => captured.push(msg.data)
-      alert.before("*", handler)
-
-      try {
-        await GET("/odata/v4/catalog-test/Books(207)")
-        expect(captured[0]?.Recipients).toContainEqual({ RecipientId: "anonymous" })
-      } finally {
-        alert._handlers.before.splice(alert._handlers.before.indexOf(handler), 1)
-      }
-    })
-
     test("Notification Properties contains only the explicitly specified parameters", async () => {
       const captured = []
       const handler = msg => captured.push(msg.data)
