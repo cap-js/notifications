@@ -178,6 +178,9 @@ Any event with at least one `@notification` annotation (the bare `@notification`
 > [!Important]
 > The event must be contained within a service either by defining it directly inside a `service` or by using `extend service` / `using` to include it in an existing one.
 
+> [!Note]
+> Annotations can also be placed in a separate file using the standard CDS `annotate` directive.
+
 **Common annotations:**
 
 ```cds
