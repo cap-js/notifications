@@ -346,6 +346,8 @@ event BookOrdered { ... }
 }
 ```
 
+> **Note:** `Enabled`, `DefaultPreference`, and `EditablePreference` are required ANS fields. Use the values as shown above without changing them.
+
 ## Send Notifications
 
 There are two patterns for sending notifications.
@@ -627,7 +629,7 @@ alert.notify({
   ActorDisplayText: "ActorName",
   ActorImageURL: "https://some-url",
   NotificationTypeTimestamp: "2022-03-15T09:58:42.807Z",
-  TargetParameters: [{ Key: "string", Value: "string" }]
+  TargetParameters: [{ Key: "string", Value: "string" }] //tell Work Zone which record to open when the user clicks on the notification
 })
 ```
 
