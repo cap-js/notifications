@@ -11,6 +11,7 @@ The `@cap-js/notifications` package is a [CDS plugin](https://cap.cloud.sap/docs
 - [Running the Sample](#running-the-sample)
 - [Define Notification Types](#define-notification-types)
 - [Send Notifications](#send-notifications)
+- [Entity Notifications](#entity-notifications)
 - [API Reference](#api-reference)
 - [Test-drive Locally](#test-drive-locally)
 - [Run in Production](#run-in-production)
@@ -427,6 +428,50 @@ await alert.notify([
   { type: "BookOrdered", recipients: [buyer2.id], data: { title: book2.title, buyer: buyer2.name } }
 ])
 ```
+
+## Entity Notifications
+
+Entity notifications let you declaratively fire notifications when entity data is read or changed, without writing any handler code. Add a `@notifications` annotation directly to a CDS entity, each entry in the array defines one notification:
+
+```cds
+service CatalogService {
+  @notifications: [{
+    type      : 'BookOrdered',
+    on        : ['READ'],
+    recipients: ($self.createdBy),
+    where     : ($self.stock < 5),
+    priority  : #High
+  }]
+  entity Books as projection on my.Books;
+}
+```
+
+### Annotation properties
+
+| Property     | Required | Description                                                                                      |
+| ------------ | -------- | ------------------------------------------------------------------------------------------------ |
+| `type`       | yes      | The name for this notification type (e.g. 'BookOrdered'). The plugin registers it automatically. |
+| `on`         | yes      | Array of CDS events to listen on: `'READ'`, `'CREATE'`, `'UPDATE'`                               |
+| `recipients` | yes      | Field reference (e.g. `$self.createdBy`) or literal recipient identifier                         |
+| `where`      | no       | Filter expression: only entities matching this condition fire a notification                     |
+| `priority`   | no       | `#Low`, `#Neutral`, `#Medium`, or `#High`                                                        |
+| `parameters` | no       | Explicit mapping of notification template placeholders to entity fields                          |
+
+### Notification properties
+
+By default, all entity fields are passed to the notification template. Use `parameters` to map only specific fields instead:
+
+```cds
+@notifications: [{
+  type      : 'BookOrdered',
+  on        : ['READ'],
+  recipients: ($self.createdBy),
+  parameters: { bookTitle: $self.title, bookId: $self.ID }
+}]
+entity Books as projection on my.Books;
+```
+
+This produces a notification with only the `bookTitle` and `bookId` properties set, matching the placeholders in the notification type template.
 
 ## API Reference
 
