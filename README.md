@@ -178,6 +178,9 @@ Any event with at least one `@notification` annotation (the bare `@notification`
 > [!Important]
 > The event must be contained within a service either by defining it directly inside a `service` or by using `extend service` / `using` to include it in an existing one.
 
+> [!Note]
+> Annotations can also be placed in a separate file using the standard CDS `annotate` directive.
+
 **Common annotations:**
 
 ```cds
@@ -345,6 +348,8 @@ event BookOrdered { ... }
   "DeliveryChannels": [{ "Type": "MAIL", "Enabled": true, "DefaultPreference": true, "EditablePreference": true }]
 }
 ```
+
+> **Note:** `Enabled`, `DefaultPreference`, and `EditablePreference` are required ANS fields. Use the values as shown above without changing them.
 
 ## Send Notifications
 
@@ -627,7 +632,7 @@ alert.notify({
   ActorDisplayText: "ActorName",
   ActorImageURL: "https://some-url",
   NotificationTypeTimestamp: "2022-03-15T09:58:42.807Z",
-  TargetParameters: [{ Key: "string", Value: "string" }]
+  TargetParameters: [{ Key: "string", Value: "string" }] //tell Work Zone which record to open when the user clicks on the notification
 })
 ```
 

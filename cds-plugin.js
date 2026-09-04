@@ -1,7 +1,7 @@
 const cds = require("@sap/cds")
 if (!cds.env.requires?.notifications?.enabled) return
 
-const { buildNotificationFromEvent } = require("./lib/utils")
+const { buildNotificationFromEvent, buildNotificationFromEntity, resolveWhereXpr } = require("./lib/utils")
 cds.build?.register?.("notifications", require("./lib/build"))
 
 cds.on("loaded", m => {
@@ -31,6 +31,40 @@ cds.on("serving", service => {
       LOG._error && LOG.error("Failed to send notification for event", def.name, err)
     }
     return next()
+  })
+  service.after("*", async (results, req) => {
+    const notificationsList = req.target?.["@notifications"]
+    if (!notificationsList?.length) return
+    const matching = notificationsList.filter(n => n.on?.includes(req.event))
+    if (!matching.length) return
+    const notifications = await cds.connect.to("notifications")
+    for (const n of matching) {
+      if (n.where) {
+        const rawXpr = resolveWhereXpr(n.where)
+        if (!rawXpr) continue
+        const where = rawXpr.map(token => (token?.ref?.[0] === "$self" ? { ref: token.ref.slice(1) } : token))
+        const keyParams = req.params?.[0]
+        let checkWhere = where
+        if (keyParams) {
+          const keyFilter = Object.entries(keyParams).flatMap(([k, v], i) =>
+            (i > 0 ? ["and"] : []).concat([{ ref: [k] }, "=", { val: v }])
+          )
+          checkWhere = [...keyFilter, "and", ...where]
+        }
+        const exists = await SELECT.one.from(req.target).where(checkWhere)
+        if (!exists) continue
+      }
+      const entities = Array.isArray(results) ? results : [results]
+      for (const entity of entities) {
+        const notification = await buildNotificationFromEntity(n, entity)
+        try {
+          await notifications.notify(notification)
+        } catch (err) {
+          const LOG = cds.log("notifications")
+          LOG._error && LOG.error("Failed to send notification for entity", n.type, err)
+        }
+      }
+    }
   })
 })
 

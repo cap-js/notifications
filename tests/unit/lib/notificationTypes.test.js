@@ -345,6 +345,18 @@ describe("Managing of Notification Types", () => {
     })
 
     describe("Creating Types", () => {
+      test("Throws before any I/O when template has no title fields", async () => {
+        const emptyType = {
+          NotificationTypeKey: "EmptyType",
+          NotificationTypeVersion: "1",
+          Templates: [{ Language: "en", TemplateLanguage: "mustache" }]
+        }
+        await expect(notificationTypes.createNotificationType(emptyType)).rejects.toThrow(
+          "At least one of TemplateSensitive, TemplatePublic, or TemplateGrouped must be provided"
+        )
+        expect(httpClient.executeHttpRequest).not.toHaveBeenCalled()
+      })
+
       test("Create Default and all new types when none exist in Work Zone", () => {
         httpClient.executeHttpRequest.mockReturnValue(emptyResponseBody)
 

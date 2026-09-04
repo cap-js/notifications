@@ -2,6 +2,7 @@ const cds = require("@sap/cds")
 const { join } = require("path")
 const { messages } = require("../../lib/utils")
 const { notificationTypesFromModel } = require("../../lib/compile")
+const { createNotificationType } = require("../../lib/notificationTypes")
 
 const usesRestService = ["hybrid", "production"].includes(process.env.CDS_ENV)
 
@@ -254,6 +255,17 @@ describe("Notifications Integration", () => {
         "Event 'OversizedEvent' has elements exceeding the maximum key length of 128 characters"
       )
     })
+
+    test("Throws clear error when deploying a notification type with empty templates", async () => {
+      const emptyType = {
+        NotificationTypeKey: "EmptyType",
+        NotificationTypeVersion: "1",
+        Templates: [{ Language: "en", TemplateLanguage: "mustache" }]
+      }
+      await expect(createNotificationType(emptyType)).rejects.toThrow(
+        "At least one of TemplateSensitive, TemplatePublic, or TemplateGrouped must be provided in the @notification annotation."
+      )
+    })
   })
 
   test("Batch of typed notifications logs each one to console", async () => {
@@ -334,7 +346,7 @@ describe("Notifications Integration", () => {
       alert._handlers.before.splice(beforeHandlers)
     })
 
-    test("is called before a notification is sent and receives msg.event and msg.data", async () => {
+    test("Is called before a notification is sent and receives msg.event and msg.data", async () => {
       let capturedEvent, capturedData
       alert.before("*", msg => {
         capturedEvent = msg.event
@@ -353,7 +365,7 @@ describe("Notifications Integration", () => {
       })
     })
 
-    test("can suppress a notification by throwing", async () => {
+    test("Can suppress a notification by throwing", async () => {
       alert.before("*", () => {
         throw new cds.error("Recipient not eligible")
       })
