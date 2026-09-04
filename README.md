@@ -451,7 +451,7 @@ service CatalogService {
 | Property     | Required | Description                                                                                      |
 | ------------ | -------- | ------------------------------------------------------------------------------------------------ |
 | `type`       | yes      | The name for this notification type (e.g. 'BookOrdered'). The plugin registers it automatically. |
-| `on`         | yes      | Array of CDS events to listen on: `'READ'`, `'CREATE'`, `'UPDATE'`, `'DELETE'`                   |
+| `on`         | yes      | Array of CDS events to listen on: `'READ'`, `'CREATE'`, `'UPDATE'`                               |
 | `recipients` | yes      | Field reference (e.g. `$self.createdBy`) or literal recipient identifier                         |
 | `where`      | no       | Filter expression: only entities matching this condition fire a notification                     |
 | `priority`   | no       | `#Low`, `#Neutral`, `#Medium`, or `#High`                                                        |

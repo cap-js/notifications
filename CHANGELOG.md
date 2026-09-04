@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 
-- Support for adding `@notification` annotations directly onto entities.
+- Support for adding `@notifications` annotations directly onto entities.
 
 ## Version 1.0.0 - 2026-08-07
 
