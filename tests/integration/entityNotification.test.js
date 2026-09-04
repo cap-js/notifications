@@ -79,6 +79,23 @@ describe("Entity @notifications", () => {
         alert._handlers.before.splice(alert._handlers.before.indexOf(handler), 1)
       }
     })
+
+    test("Collection READ only fires notifications for entities matching the where clause", async () => {
+      const captured = []
+      const handler = msg => captured.push(msg.data)
+      alert.before("*", handler)
+
+      try {
+        await GET("/odata/v4/catalog-test/Books")
+        const titles = captured.map(n => n.Properties?.find(p => p.Key === "title")?.Value)
+        expect(titles).toContain("Wuthering Heights")
+        expect(titles).not.toContain("The Raven")
+        expect(titles).not.toContain("Eleonora")
+        expect(titles).not.toContain("Catweazle")
+      } finally {
+        alert._handlers.before.splice(alert._handlers.before.indexOf(handler), 1)
+      }
+    })
   })
 
   describe("READ event with explicit parameters", () => {
