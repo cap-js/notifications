@@ -29,17 +29,20 @@ The plugin registers itself as a CDS service named `notifications`. Application 
 ## Two Ways to Trigger a Notification
 
 ### 1. `@notification` on a CDS event
+
 ```cds
 event OrderPlaced @(notification, notification.title: 'Order {orderId} placed') {
   orderId : String;
   recipients : array of String;
 }
 ```
+
 - Intercepted by `service.on("*")` in `cds-plugin.js`
 - The `recipients` field is **always required** and **auto-injected** into the event definition at model-load time if not declared (`cds-plugin.js` lines 7–14) — this is a strict runtime contract, not optional
 - Key elements (annotated `key`) go into `TargetParameters`; everything else goes into `Properties`
 
 ### 2. `@notifications` on a CDS entity
+
 ```cds
 entity Orders @(notifications: [{
   type: 'OrderShipped', on: ['UPDATE'],
@@ -47,6 +50,7 @@ entity Orders @(notifications: [{
   where: { xpr: [...] }
 }]) { ... }
 ```
+
 - Intercepted by `service.after("*")` in `cds-plugin.js`
 - When a `where` clause is present, the plugin runs an additional `SELECT.one` against the database per entity per notification hook to verify the condition — the database evaluates the CDS expression, which is simpler than re-implementing expression logic in JS. This is an extra DB round-trip; accepted tradeoff because large bulk operations triggering entity notifications are uncommon.
 - Added in v1.1.0 (September 2026)
@@ -59,10 +63,10 @@ It is also possible to define notification types via a hand-authored `srv/notifi
 
 ## Transport Backends
 
-| Mode | Class | When active |
-|---|---|---|
-| `notify-to-console` | `srv/notifyToConsole.js` | `[development]` (default) |
-| `notify-to-rest` | `srv/notifyToRest.js` | `[hybrid]` and `[production]` |
+| Mode                | Class                    | When active                   |
+| ------------------- | ------------------------ | ----------------------------- |
+| `notify-to-console` | `srv/notifyToConsole.js` | `[development]` (default)     |
+| `notify-to-rest`    | `srv/notifyToRest.js`    | `[hybrid]` and `[production]` |
 
 The active backend is wired in `package.json` under `cds.requires` — no code changes needed to switch.
 
@@ -70,22 +74,23 @@ The active backend is wired in `package.json` under `cds.requires` — no code c
 
 ## Key Configuration Options (`cds.requires.notifications`)
 
-| Option | Default | Notes |
-|---|---|---|
-| `kind` | `notify-to-console` in dev | Set to `notify-to-rest` for production |
-| `destination` | `"SAP_Notifications"` | **Required name for WorkZone channel** — ANS enforces this; plugin throws at startup if a different name is used with `DeliveryChannels: [{ Type: "WEB" }]` |
-| `prefix` | `"$app-name"` | Prepended to all `NotificationTypeKey` values. `$app-name` reads from `package.json`. Cached after first call — module-level variable in `lib/utils.js` |
-| `authenticationIdentifier` | `"auto"` | Per-recipient: UUID → `GlobalUserId`, anything else → `RecipientId`. Override with `"UserUUID"` or `"RecipientId"` |
-| `outbox` | `true` | Notifications are queued and sent asynchronously. `await notify()` resolves when queued, not when delivered |
-| `channels` | `["workzone"]` | Default delivery channels for all notification types |
-| `types` | — | Path to a `notification-types.json` file for hand-authored types (deprecated — see above) |
-| `enabled` | `true` | Set to `false` to disable the entire plugin |
+| Option                     | Default                    | Notes                                                                                                                                                       |
+| -------------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `kind`                     | `notify-to-console` in dev | Set to `notify-to-rest` for production                                                                                                                      |
+| `destination`              | `"SAP_Notifications"`      | **Required name for WorkZone channel** — ANS enforces this; plugin throws at startup if a different name is used with `DeliveryChannels: [{ Type: "WEB" }]` |
+| `prefix`                   | `"$app-name"`              | Prepended to all `NotificationTypeKey` values. `$app-name` reads from `package.json`. Cached after first call — module-level variable in `lib/utils.js`     |
+| `authenticationIdentifier` | `"auto"`                   | Per-recipient: UUID → `GlobalUserId`, anything else → `RecipientId`. Override with `"UserUUID"` or `"RecipientId"`                                          |
+| `outbox`                   | `true`                     | Notifications are queued and sent asynchronously. `await notify()` resolves when queued, not when delivered                                                 |
+| `channels`                 | `["workzone"]`             | Default delivery channels for all notification types                                                                                                        |
+| `types`                    | —                          | Path to a `notification-types.json` file for hand-authored types (deprecated — see above)                                                                   |
+| `enabled`                  | `true`                     | Set to `false` to disable the entire plugin                                                                                                                 |
 
 ---
 
 ## Startup Sync (production/hybrid only)
 
 On `cds.once("served")`, when `kind === "notify-to-rest"`, the plugin calls `processNotificationTypes()` in `lib/notificationTypes.js`. This:
+
 1. Fetches all existing notification types from ANS
 2. Deletes types no longer in the local definition (scoped to this app's prefix only — other apps' types are skipped)
 3. Updates types whose templates, actions, or delivery channels changed
@@ -99,6 +104,7 @@ This runs sequentially at startup and is blocking. It's idempotent — safe to r
 ## Outbox & Error Handling
 
 With `outbox: true` (default), failed notifications are retried by the CAP outbox queue. The plugin marks errors as **unrecoverable** when ANS returns a 4xx response (except 429) — `srv/notifyToRest.js` lines 42–45:
+
 - `error.unrecoverable = true` tells the CAP outbox to not retry
 - If `maxAttempts` is configured: the task's attempt counter is immediately exhausted
 - If no `maxAttempts`: the task is deleted from the outbox immediately
@@ -130,11 +136,11 @@ Errors in the `service.on/after` notification hooks are caught and logged but ne
 
 ## Value Length Constraints
 
-| Field | Limit | Behavior when exceeded |
-|---|---|---|
-| `Properties[].Value` | 255 chars | **Throws** (event path); silently dropped (entity path) |
-| `TargetParameters[].Value` | 250 chars | Silently dropped |
-| Event element name (key length) | 128 chars | Caught at `cds build` time, throws |
+| Field                           | Limit     | Behavior when exceeded                                  |
+| ------------------------------- | --------- | ------------------------------------------------------- |
+| `Properties[].Value`            | 255 chars | **Throws** (event path); silently dropped (entity path) |
+| `TargetParameters[].Value`      | 250 chars | Silently dropped                                        |
+| Event element name (key length) | 128 chars | Caught at `cds build` time, throws                      |
 
 The asymmetry between event and entity paths for property value length is a known inconsistency — entity notifications silently filter long values in `lib/utils.js`, while event notifications throw via `applyValueLengthConstraints`.
 
@@ -142,14 +148,14 @@ The asymmetry between event and entity paths for property value length is a know
 
 ## Where to Look for What
 
-| Question | File |
-|---|---|
-| How notifications are triggered automatically | `cds-plugin.js` |
-| `notify()` / `emit()` API surface | `srv/service.js` |
-| Building the ANS payload from event/entity data | `lib/utils.js` |
-| Compiling CDS annotations → notification types | `lib/compile.js` |
-| Syncing types with ANS at startup | `lib/notificationTypes.js` |
-| `cds build` integration | `lib/build.js` |
-| Console output (dev mode) | `srv/notifyToConsole.js` |
-| HTTP transport (production) | `srv/notifyToRest.js` |
-| Integration test app | `tests/bookshop/` |
+| Question                                        | File                       |
+| ----------------------------------------------- | -------------------------- |
+| How notifications are triggered automatically   | `cds-plugin.js`            |
+| `notify()` / `emit()` API surface               | `srv/service.js`           |
+| Building the ANS payload from event/entity data | `lib/utils.js`             |
+| Compiling CDS annotations → notification types  | `lib/compile.js`           |
+| Syncing types with ANS at startup               | `lib/notificationTypes.js` |
+| `cds build` integration                         | `lib/build.js`             |
+| Console output (dev mode)                       | `srv/notifyToConsole.js`   |
+| HTTP transport (production)                     | `srv/notifyToRest.js`      |
+| Integration test app                            | `tests/bookshop/`          |
