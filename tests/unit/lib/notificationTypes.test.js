@@ -751,6 +751,34 @@ describe("Managing of Notification Types", () => {
       })
     })
 
+    test("Update type when Actions have same length but different contents", () => {
+      httpClient.executeHttpRequest.mockReturnValue(allExistingResponseBody)
+
+      const updated = structuredClone(notificationTypeWithAllProperties)
+      updated.Actions[0].ActionText = "Reject"
+
+      return notificationTypes
+        .processNotificationTypes([updated, structuredClone(notificationTypeWithoutVersion)])
+        .then(() => {
+          const [, updateCall] = httpClient.executeHttpRequest.mock.calls.map(c => c[1])
+          expect(updateCall.method).toBe("patch")
+        })
+    })
+
+    test("Update type when Templates have same length but different contents", () => {
+      httpClient.executeHttpRequest.mockReturnValue(allExistingResponseBody)
+
+      const updated = structuredClone(notificationTypeWithAllProperties)
+      updated.Templates[0].TemplateSensitive = "Completely Different Title"
+
+      return notificationTypes
+        .processNotificationTypes([updated, structuredClone(notificationTypeWithoutVersion)])
+        .then(() => {
+          const [, updateCall] = httpClient.executeHttpRequest.mock.calls.map(c => c[1])
+          expect(updateCall.method).toBe("patch")
+        })
+    })
+
     test("Deletes a type that is no longer in the local file", () => {
       httpClient.executeHttpRequest.mockReturnValue(allExistingResponseBody)
 
