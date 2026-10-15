@@ -15,6 +15,11 @@
     "@sap/cds": ">=8.0",
     "@sap/cds-dk": ">=8.0"
   },
+  "peerDependenciesMeta": {
+    "@sap/cds-dk": {
+      "optional": true
+    }
+  },
   "dependencies": {
     "@sap-cloud-sdk/connectivity": "^4.6.0",
     "@sap-cloud-sdk/http-client": "^4.6.0",
