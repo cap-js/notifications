@@ -92,7 +92,7 @@ runs:
 
     - name: Run integration tests
       shell: bash
-      run: CDS_REQUIRES_NOTIFICATIONS_PREFIX=cap-js-notifications-${{ github.run_id }}-$NODE_VERSION_HANA cds bind --exec -- npx jest --silent --testPathPatterns=tests/integration
+      run: CDS_REQUIRES_NOTIFICATIONS_PREFIX=ci-${{ github.run_number }}-$NODE_VERSION_HANA cds bind --exec -- npx jest --silent --testPathPatterns=tests/integration
 
     - name: Delete HDI Container Key
       if: ${{ always() }}
